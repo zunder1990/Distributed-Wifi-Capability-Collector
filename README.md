@@ -1,4 +1,4 @@
-# Distributed-Wifi-Capability-Collector-
+# Distributed-Wifi-Capability-Collector
 This project is designed to passively collect WIFI(802.11) management frames from inexpensive sensors distruted to see what features and specifications your WIFI clients support.
 
 The plan is to collect pcaps then analyze them extracting the relevant data on the sensor.  Then sending it to a central database.  
