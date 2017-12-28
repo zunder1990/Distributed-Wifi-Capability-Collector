@@ -22,7 +22,7 @@ monitor_disable = 'iw dev wlan1mon del; ifconfig wlan1 up'
 change_channel  = 'iw dev wlan1mon set channel %s'
 
 #one day this will be changed to support 5ghz and 2ghz with two lists. Right now this works with a single daul band device
-channels = [6, 36,]
+channels = [6, 48, 1, 11, 36, 40]
 
 #mysql support coming soon
 #mydb = MySQLdb.connect(host='localhost',
@@ -40,13 +40,15 @@ queue = multiprocessing.Queue()
 def start():
     logging.basicConfig(filename='dwcc.log', format='%(levelname)s:%(message)s', level=logging.INFO)
     os.system(monitor_enable)
-    stop_rotating = rotator(channels, change_channel)
-    try: sniffer(interface)
+    stop_rotating = rotator(channels, change_channel)	
+    stop_tshark = tshark()
+    try:sniffer(interface)
     except KeyboardInterrupt: sys.exit()
     finally:
         stop_rotating.set()
         os.system(monitor_disable)
-		
+	stop_tshark.set()
+
 #This will change the channels every 1 sec to scan all in the range. One day there will be support for more than one rotator to support 2.4ghz and 5ghz.		
 def rotator(channels, change_channel):
     def rotate(stop):
@@ -61,32 +63,32 @@ def rotator(channels, change_channel):
     multiprocessing.Process(target=rotate, args=[stop]).start()
     return stop
 
-#this is the caputre fuction Right now it just uses tcpdump and will get all packets in the air. one day this will be updated to only get mgt packets
-#This should close the pcap after 5 mins. This is not working
+#this is the caputre fuction, It will only caputre the mgt frames.
 def sniffer(interface):
-		while True:
-				os.system('tcpdump -i wlan1mon -w $(date "+%Y.%m.%d-%H.%M.%S").pcap')
-				#### Delay for 5 min ####
-				time.sleep(300)
-			
-   
- 
- #this needs to be tested. 
- 
-#def tshark()
- #This reads the pcaps, pull out the data, and places it into a csv
-#	os.system('tshark -r *.pcap -R "wlan.fc.type_subtype == 0x0" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
-#		-e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
-#		-e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
-#		-e wlan_mgt.powercap.max -e wlan_mgt.powercap.min -e wlan_mgt.rsn.capabilities.mfpc -e wlan_mgt.extcap.b31 -e wlan_mgt.extcap.b32 -e wlan_mgt.extcap.b46 \
-#		-e wlan_mgt.tag.number -e wlan_mgt.vht.capabilities.maxmpdulength -e wlan_mgt.vht.capabilities.supportedchanwidthset -e wlan_mgt.vht.capabilities.rxldpc \
-#		-e wlan_mgt.vht.capabilities.short80 -e wlan_mgt.vht.capabilities.short160 -e wlan_mgt.vht.capabilities.txstbc -e wlan_mgt.vht.capabilities.subeamformer \
-#		-e wlan_mgt.vht.capabilities.subeamformee -e wlan_mgt.vht.capabilities.beamformerants -e wlan_mgt.vht.capabilities.soundingdimensions -e wlan_mgt.vht.capabilities.mubeamformer \
-#		-e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -E separator=+' > test.csv)
+	subprocess.call('tcpdump -i wlan1mon  -G 600 -W 144 -e -s 256 type mgt -w .\incoming\trace-%Y-%M-%d_%H.%M.%S.pcap', shell=True)
+#the above will rotate the pcap every 10 mins and keeps 24 hours worth
 
+
+ #this needs to be tested.
+
+def tshark():
+ #This reads the pcaps, pull out the data, and places it into a csv
+	while True:
+		#for filename in os.listdir('./incoming'):
+#			print filename
+			subprocess.call('for filename in incoming/*.pcap; do tshark -r $filename -R "wlan.fc.type_subtype == 0x0" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
+-e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
+-e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
+-e wlan_mgt.powercap.max -e wlan_mgt.powercap.min -e wlan_mgt.rsn.capabilities.mfpc -e wlan_mgt.extcap.b31 -e wlan_mgt.extcap.b32 -e wlan_mgt.extcap.b46 \
+-e wlan_mgt.tag.number -e wlan_mgt.vht.capabilities.maxmpdulength -e wlan_mgt.vht.capabilities.supportedchanwidthset -e wlan_mgt.vht.capabilities.rxldpc \
+-e wlan_mgt.vht.capabilities.short80 -e wlan_mgt.vht.capabilities.short160 -e wlan_mgt.vht.capabilities.txstbc -e wlan_mgt.vht.capabilities.subeamformer \
+-e wlan_mgt.vht.capabilities.subeamformee -e wlan_mgt.vht.capabilities.beamformerants -e wlan_mgt.vht.capabilities.soundingdimensions -e wlan_mgt.vht.capabilities.mubeamformer \
+-e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -E separator=+ >> test.csv; mv $filename ./archive/$filename; done', shell=True)
+		#	os.rename("./incoming/ filename", "./archive/filename")
+	time.sleep(300)
 #this needs to be tested
 
-#def dbupdate
+#def dbupdate()
 #	cursor = mydb.cursor()
 #
 #	csv_data = csv.reader(file('test.csv'))
