@@ -40,7 +40,7 @@ queue = multiprocessing.Queue()
 def start():
 	logging.basicConfig(filename='dwcc.log', format='%(levelname)s:%(message)s', level=logging.INFO)
 	os.system(monitor_enable)
-	stop_rotating = rotator(channels, change_channel)	
+	stop_rotating = rotator(channels, change_channel)
 	stop_tsharking = tsharker()
 	dbupdate()
 	try:sniffer(interface)
@@ -87,7 +87,7 @@ def tsharker():
 				else:
 					print "No pcap found waiting 5 mins to rerun"
 					time.sleep(300)
-				
+
 			except KeyboardInterrupt: pass
 	stop = multiprocessing.Event()
 	multiprocessing.Process(target=tshark, args=[stop]).start()
@@ -104,14 +104,14 @@ def dbupdate():
 		print "there is a table named dwcc"
 	else:
 		print "there are no tables named dwcc, making it"
-		cursor.execute('CREATE TABLE dwcc (wlan.sa VARCHAR(50), wlan.bssid VARCHAR(50), radiotap.channel.freq VARCHAR(50), wlan_mgt.extcap.b19 VARCHAR(50), wlan.fc.protected VARCHAR(50), \
-wlan_radio.channel VARCHAR(50), wlan.fc.pwrmgt VARCHAR(50), wlan_mgt.fixed.capabilities.radio_measurement VARCHAR(50), wlan_mgt.ht.mcsset.txmaxss VARCHAR(50), \
-radiotap.channel.flags.ofdm VARCHAR(50), radiotap.channel.flags.5ghz VARCHAR(50), radiotap.channel.flags.2ghz VARCHAR(50), wlan_mgt.fixed.capabilities.spec_man VARCHAR(50), \
-wlan_mgt.powercap.max VARCHAR(50), wlan_mgt.powercap.min VARCHAR(50), wlan_mgt.rsn.capabilities.mfpc VARCHAR(50), wlan_mgt.extcap.b31 VARCHAR(50), wlan_mgt.extcap.b32 VARCHAR(50), wlan_mgt.extcap.b46 VARCHAR(50), \
-wlan_mgt.tag.number VARCHAR(50), wlan_mgt.vht.capabilities.maxmpdulength VARCHAR(50), wlan_mgt.vht.capabilities.supportedchanwidthset VARCHAR(50), wlan_mgt.vht.capabilities.rxldpc VARCHAR(50), \
-wlan_mgt.vht.capabilities.short80 VARCHAR(50), wlan_mgt.vht.capabilities.short160 VARCHAR(50), wlan_mgt.vht.capabilities.txstbc VARCHAR(50), wlan_mgt.vht.capabilities.subeamformer VARCHAR(50), \
-wlan_mgt.vht.capabilities.subeamformee VARCHAR(50), wlan_mgt.vht.capabilities.beamformerants VARCHAR(50), wlan_mgt.vht.capabilities.soundingdimensions VARCHAR(50), wlan_mgt.vht.capabilities.mubeamformer VARCHAR(50), \
-wlan_mgt.vht.capabilities.mubeamformee VARCHAR(50), wlan_mgt.tag.oui VARCHAR(50));)'
+		#cursor.execute('CREATE TABLE dwcc (wlan.sa VARCHAR(50), wlan.bssid VARCHAR(50), radiotap.channel.freq VARCHAR(50), wlan_mgt.extcap.b19 VARCHAR(50), wlan.fc.protected VARCHAR(50), \
+#wlan_radio.channel VARCHAR(50), wlan.fc.pwrmgt VARCHAR(50), wlan_mgt.fixed.capabilities.radio_measurement VARCHAR(50), wlan_mgt.ht.mcsset.txmaxss VARCHAR(50), \
+#radiotap.channel.flags.ofdm VARCHAR(50), radiotap.channel.flags.5ghz VARCHAR(50), radiotap.channel.flags.2ghz VARCHAR(50), wlan_mgt.fixed.capabilities.spec_man VARCHAR(50), \
+#wlan_mgt.powercap.max VARCHAR(50), wlan_mgt.powercap.min VARCHAR(50), wlan_mgt.rsn.capabilities.mfpc VARCHAR(50), wlan_mgt.extcap.b31 VARCHAR(50), wlan_mgt.extcap.b32 VARCHAR(50), wlan_mgt.extcap.b46 VARCHAR(50), \
+#wlan_mgt.tag.number VARCHAR(50), wlan_mgt.vht.capabilities.maxmpdulength VARCHAR(50), wlan_mgt.vht.capabilities.supportedchanwidthset VARCHAR(50), wlan_mgt.vht.capabilities.rxldpc VARCHAR(50), \
+#wlan_mgt.vht.capabilities.short80 VARCHAR(50), wlan_mgt.vht.capabilities.short160 VARCHAR(50), wlan_mgt.vht.capabilities.txstbc VARCHAR(50), wlan_mgt.vht.capabilities.subeamformer VARCHAR(50), \
+#wlan_mgt.vht.capabilities.subeamformee VARCHAR(50), wlan_mgt.vht.capabilities.beamformerants VARCHAR(50), wlan_mgt.vht.capabilities.soundingdimensions VARCHAR(50), wlan_mgt.vht.capabilities.mubeamformer VARCHAR(50), \
+#wlan_mgt.vht.capabilities.mubeamformee VARCHAR(50), wlan_mgt.tag.oui VARCHAR(50));')
 
 #	csv_data = csv.reader(file('test.csv'))
 #		for row in csv_data:
@@ -127,8 +127,10 @@ wlan_mgt.vht.capabilities.mubeamformee VARCHAR(50), wlan_mgt.tag.oui VARCHAR(50)
 #					'VALUES("%s", "%s", "%s")', 
 #					row)
 #	#close the connection to the database.
-	#	mydb.commit()
-	#	mydb.close()
+		mydb.commit()
+		mydb.close()
 #
 #	db.close()
+
+
 start()
