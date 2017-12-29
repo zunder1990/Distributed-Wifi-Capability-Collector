@@ -13,6 +13,8 @@ import pcapy
 import dpkt
 import socket
 import subprocess
+import csv
+import os.path
 
 # linux
 #one day there will be support for more than one interface
@@ -42,12 +44,13 @@ def start():
 	os.system(monitor_enable)
 	stop_rotating = rotator(channels, change_channel)
 	stop_tsharking = tsharker()
-	dbupdate()
+	stop_dbupdateing = dbupdater()
 	try:sniffer(interface)
 	except KeyboardInterrupt: sys.exit()
 	finally:
 		stop_rotating.set()
 		stop_tsharking.set()
+		stop_dbupdateing.set()
 		os.system(monitor_disable)
 
 #This will change the channels every 1 sec to scan all in the range. One day there will be support for more than one rotator to support 2.4ghz and 5ghz.		
@@ -66,7 +69,8 @@ def rotator(channels, change_channel):
 
 #this is the caputre fuction, It will only caputre the mgt frames.
 def sniffer(interface):
-	subprocess.call('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 256 type mgt -w ./incoming/trace-%Y-%M-%d_%H.%M.%S.pcap', shell=True)
+	subprocess.call('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w ./incoming/trace-%Y-%m-%d_%H.%M.%S.pcap', shell=True)
+	#This fuction does not stop right when you exit program
 #the above will rotate the pcap every 10 mins and keeps 24 hours worth
 def tsharker():
  #This reads the pcaps, pull out the data, and places it into a csv
@@ -83,10 +87,10 @@ def tsharker():
 -e wlan_mgt.tag.number -e wlan_mgt.vht.capabilities.maxmpdulength -e wlan_mgt.vht.capabilities.supportedchanwidthset -e wlan_mgt.vht.capabilities.rxldpc \
 -e wlan_mgt.vht.capabilities.short80 -e wlan_mgt.vht.capabilities.short160 -e wlan_mgt.vht.capabilities.txstbc -e wlan_mgt.vht.capabilities.subeamformer \
 -e wlan_mgt.vht.capabilities.subeamformee -e wlan_mgt.vht.capabilities.beamformerants -e wlan_mgt.vht.capabilities.soundingdimensions -e wlan_mgt.vht.capabilities.mubeamformer \
--e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -E separator=+ >> ../tmp/test.csv; mv $filename ../archive/; done', shell=True)
+-e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -E separator=+ >> ../tmp/dwcc.csv; mv $filename ../archive/; done', shell=True)
 				else:
 					print "No pcap found waiting 5 mins to rerun"
-					time.sleep(300)
+					time.sleep(300)#seconds
 
 			except KeyboardInterrupt: pass
 	stop = multiprocessing.Event()
@@ -94,17 +98,48 @@ def tsharker():
 	return stop
 #this below needs to be tested
 
-def dbupdate():
-	cursor = mydb.cursor()
-
-	stmt = "SHOW TABLES LIKE 'dwcc'"
-	cursor.execute(stmt)
-	result = cursor.fetchone()
-	if result:
-		print "there is a table named dwcc"
-	else:
-		print "there are no tables named dwcc, making it"
-		cursor.execute('USE dwcc; CREATE TABLE dwcc (id INT NOT NULL AUTO_INCREMENT, `wlan.sa` VARCHAR(50), `wlan.bssid` VARCHAR(50), `radiotap.channel.freq` VARCHAR(50), `wlan_mgt.extcap.b19` VARCHAR(50), `wlan.fc.protected` VARCHAR(50), \
+#This is the DB section
+def dbupdater():
+#checking for the table
+			cursor = mydb.cursor()
+			stmt = "SHOW TABLES LIKE 'dwcc'"
+			cursor.execute(stmt)
+			result = cursor.fetchone()
+			if result:
+			#If table is found thing start the loop to read csv into the table
+				print "there is a table named dwcc"
+				def dbupdate(stop):
+					while not stop.is_set():
+						try:
+							csvcheck = './tmp/dwcc.csv'
+							if os.path.isfile(csvcheck) and os.access(csvcheck, os.R_OK):
+								print "csv found"
+								csv_data = csv.reader(file('./tmp/dwcc.csv'), delimiter='+')
+								for row in csv_data:
+									cursor.execute('INSERT INTO dwcc(`wlan.sa`, `wlan.bssid`, `radiotap.channel.freq`, `wlan_mgt.extcap.b19`, `wlan.fc.protected`, \
+`wlan_radio.channel`, `wlan.fc.pwrmgt`, `wlan_mgt.fixed.capabilities.radio_measurement`, `wlan_mgt.ht.mcsset.txmaxss`, \
+`radiotap.channel.flags.ofdm`, `radiotap.channel.flags.5ghz`, `radiotap.channel.flags.2ghz`, `wlan_mgt.fixed.capabilities.spec_man`, \
+`wlan_mgt.powercap.max`, `wlan_mgt.powercap.min`, `wlan_mgt.rsn.capabilities.mfpc`, `wlan_mgt.extcap.b31`, `wlan_mgt.extcap.b32`, `wlan_mgt.extcap.b46`, \
+`wlan_mgt.tag.number`, `wlan_mgt.vht.capabilities.maxmpdulength`, `wlan_mgt.vht.capabilities.supportedchanwidthset`, `wlan_mgt.vht.capabilities.rxldpc`, \
+`wlan_mgt.vht.capabilities.short80`, `wlan_mgt.vht.capabilities.short160`, `wlan_mgt.vht.capabilities.txstbc`, `wlan_mgt.vht.capabilities.subeamformer`, \
+`wlan_mgt.vht.capabilities.subeamformee`, `wlan_mgt.vht.capabilities.beamformerants`, `wlan_mgt.vht.capabilities.soundingdimensions`, `wlan_mgt.vht.capabilities.mubeamformer`, \
+`wlan_mgt.vht.capabilities.mubeamformee`, `wlan_mgt.tag.oui`)' \
+'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', row)
+									mydb.commit()
+									
+								print "done with dbupdate waiting 4 mins for next run"
+								time.sleep(240)#seconds
+							else:
+								print"csv not found will retry in 4 mins"
+								time.sleep(240)#seconds
+						except KeyboardInterrupt: pass
+				stop = multiprocessing.Event()
+				multiprocessing.Process(target=dbupdate, args=[stop]).start()
+				return stop
+			else:
+			#if table is no found then make the table
+				print "there are no tables named dwcc, making it"
+				cursor.execute('USE dwcc; CREATE TABLE dwcc (id INT NOT NULL AUTO_INCREMENT, `wlan.sa` VARCHAR(50), `wlan.bssid` VARCHAR(50), `radiotap.channel.freq` VARCHAR(50), `wlan_mgt.extcap.b19` VARCHAR(50), `wlan.fc.protected` VARCHAR(50), \
 `wlan_radio.channel` VARCHAR(50), `wlan.fc.pwrmgt` VARCHAR(50), `wlan_mgt.fixed.capabilities.radio_measurement` VARCHAR(50), `wlan_mgt.ht.mcsset.txmaxss` VARCHAR(50), \
 `radiotap.channel.flags.ofdm` VARCHAR(50), `radiotap.channel.flags.5ghz` VARCHAR(50), `radiotap.channel.flags.2ghz` VARCHAR(50), `wlan_mgt.fixed.capabilities.spec_man` VARCHAR(50), \
 `wlan_mgt.powercap.max` VARCHAR(50), `wlan_mgt.powercap.min` VARCHAR(50), `wlan_mgt.rsn.capabilities.mfpc` VARCHAR(50), `wlan_mgt.extcap.b31` VARCHAR(50), `wlan_mgt.extcap.b32` VARCHAR(50), `wlan_mgt.extcap.b46` VARCHAR(50), \
@@ -113,19 +148,7 @@ def dbupdate():
 `wlan_mgt.vht.capabilities.subeamformee` VARCHAR(50), `wlan_mgt.vht.capabilities.beamformerants` VARCHAR(50), `wlan_mgt.vht.capabilities.soundingdimensions` VARCHAR(50), `wlan_mgt.vht.capabilities.mubeamformer` VARCHAR(50), \
 `wlan_mgt.vht.capabilities.mubeamformee` VARCHAR(50), `wlan_mgt.tag.oui` VARCHAR(50), PRIMARY KEY ( id ));')
 
-#	csv_data = csv.reader(file('test.csv'))
-#		for row in csv_data:
-#
-#			cursor.execute('INSERT INTO dwcc(wlan.sa, wlan.bssid, radiotap.channel.freq, wlan_mgt.extcap.b19, wlan.fc.protected, \
-#wlan_radio.channel, wlan.fc.pwrmgt, wlan_mgt.fixed.capabilities.radio_measurement, wlan_mgt.ht.mcsset.txmaxss, \
-#radiotap.channel.flags.ofdm, radiotap.channel.flags.5ghz, radiotap.channel.flags.2ghz, wlan_mgt.fixed.capabilities.spec_man, \
-#wlan_mgt.powercap.max, wlan_mgt.powercap.min, wlan_mgt.rsn.capabilities.mfpc, wlan_mgt.extcap.b31, wlan_mgt.extcap.b32, wlan_mgt.extcap.b46, \
-#wlan_mgt.tag.number, wlan_mgt.vht.capabilities.maxmpdulength, wlan_mgt.vht.capabilities.supportedchanwidthset, wlan_mgt.vht.capabilities.rxldpc, \
-#wlan_mgt.vht.capabilities.short80, wlan_mgt.vht.capabilities.short160, wlan_mgt.vht.capabilities.txstbc, wlan_mgt.vht.capabilities.subeamformer, \
-#wlan_mgt.vht.capabilities.subeamformee, wlan_mgt.vht.capabilities.beamformerants, wlan_mgt.vht.capabilities.soundingdimensions, wlan_mgt.vht.capabilities.mubeamformer, \
-#wlan_mgt.vht.capabilities.mubeamformee, wlan_mgt.tag.oui )' \
-#					'VALUES("%s", "%s", "%s")', 
-#					row)
+
 #	#close the connection to the database.
 	#	mydb.commit()
 	#	mydb.close()
