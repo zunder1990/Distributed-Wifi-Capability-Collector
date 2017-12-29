@@ -41,13 +41,13 @@ def start():
     logging.basicConfig(filename='dwcc.log', format='%(levelname)s:%(message)s', level=logging.INFO)
     os.system(monitor_enable)
     stop_rotating = rotator(channels, change_channel)	
-    stop_tshark = tshark()
+    stop_tsharking = tsharker()
     try:sniffer(interface)
     except KeyboardInterrupt: sys.exit()
     finally:
-        stop_rotating.set()
-        os.system(monitor_disable)
-	stop_tshark.set()
+		stop_rotating.set()
+		stop_tsharking.set()
+		os.system(monitor_disable)
 
 #This will change the channels every 1 sec to scan all in the range. One day there will be support for more than one rotator to support 2.4ghz and 5ghz.		
 def rotator(channels, change_channel):
@@ -67,28 +67,26 @@ def rotator(channels, change_channel):
 def sniffer(interface):
 	subprocess.call('tcpdump -i wlan1mon  -G 600 -W 144 -e -s 256 type mgt -w .\incoming\trace-%Y-%M-%d_%H.%M.%S.pcap', shell=True)
 #the above will rotate the pcap every 10 mins and keeps 24 hours worth
-
-
- #this needs to be tested.
-
-def tshark():
+def tsharker():
  #This reads the pcaps, pull out the data, and places it into a csv
 	while True:
-		#for filename in os.listdir('./incoming'):
-#			print filename
-			subprocess.call('for filename in incoming/*.pcap; do tshark -r $filename -R "wlan.fc.type_subtype == 0x0" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
+	#checks for pcap files in incoming
+		for fname in os.listdir('./incoming'):
+			if fname.endswith('.pcap'):
+				subprocess.call('cd ./incoming; for filename in *.pcap; do tshark -r $filename -R "wlan.fc.type_subtype == 0x0" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
 -e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
 -e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
 -e wlan_mgt.powercap.max -e wlan_mgt.powercap.min -e wlan_mgt.rsn.capabilities.mfpc -e wlan_mgt.extcap.b31 -e wlan_mgt.extcap.b32 -e wlan_mgt.extcap.b46 \
 -e wlan_mgt.tag.number -e wlan_mgt.vht.capabilities.maxmpdulength -e wlan_mgt.vht.capabilities.supportedchanwidthset -e wlan_mgt.vht.capabilities.rxldpc \
 -e wlan_mgt.vht.capabilities.short80 -e wlan_mgt.vht.capabilities.short160 -e wlan_mgt.vht.capabilities.txstbc -e wlan_mgt.vht.capabilities.subeamformer \
 -e wlan_mgt.vht.capabilities.subeamformee -e wlan_mgt.vht.capabilities.beamformerants -e wlan_mgt.vht.capabilities.soundingdimensions -e wlan_mgt.vht.capabilities.mubeamformer \
--e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -E separator=+ >> test.csv; mv $filename ./archive/$filename; done', shell=True)
-		#	os.rename("./incoming/ filename", "./archive/filename")
-	time.sleep(300)
+-e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -E separator=+ >> ../tmp/test.csv; mv $filename ../archive/; done', shell=True)
+		else:
+			print "No pcap found waiting 5 mins to rerun"
+			time.sleep(300)
 #this needs to be tested
 
-#def dbupdate()
+#def dbupdate():
 #	cursor = mydb.cursor()
 #
 #	csv_data = csv.reader(file('test.csv'))
