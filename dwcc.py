@@ -8,7 +8,7 @@ import time
 import datetime
 import multiprocessing
 import Queue
-#import MySQLdb
+import MySQLdb
 import pcapy
 import dpkt
 import socket
@@ -25,10 +25,10 @@ change_channel  = 'iw dev wlan1mon set channel %s'
 channels = [6, 48, 1, 11, 36, 40]
 
 #mysql support coming soon
-#mydb = MySQLdb.connect(host='localhost',
-#    user='dwcc',
-#    passwd='dwcc',
-#    db='dwcc')
+mydb = MySQLdb.connect(host='localhost',
+    user='dwcc',
+    passwd='dwcc',
+    db='dwcc')
 
 
 hostname = socket.gethostname()
@@ -42,6 +42,7 @@ def start():
 	os.system(monitor_enable)
 	stop_rotating = rotator(channels, change_channel)	
 	stop_tsharking = tsharker()
+	dbupdate()
 	try:sniffer(interface)
 	except KeyboardInterrupt: sys.exit()
 	finally:
@@ -93,13 +94,29 @@ def tsharker():
 	return stop
 #this below needs to be tested
 
-#def dbupdate():
-#	cursor = mydb.cursor()
-#
+def dbupdate():
+	cursor = mydb.cursor()
+
+	stmt = "SHOW TABLES LIKE 'dwcc'"
+	cursor.execute(stmt)
+	result = cursor.fetchone()
+	if result:
+		print "there is a table named dwcc"
+	else:
+		print "there are no tables named dwcc, making it"
+		cursor.execute('CREATE TABLE dwcc (wlan.sa VARCHAR(50), wlan.bssid VARCHAR(50), radiotap.channel.freq VARCHAR(50), wlan_mgt.extcap.b19 VARCHAR(50), wlan.fc.protected VARCHAR(50), \
+wlan_radio.channel VARCHAR(50), wlan.fc.pwrmgt VARCHAR(50), wlan_mgt.fixed.capabilities.radio_measurement VARCHAR(50), wlan_mgt.ht.mcsset.txmaxss VARCHAR(50), \
+radiotap.channel.flags.ofdm VARCHAR(50), radiotap.channel.flags.5ghz VARCHAR(50), radiotap.channel.flags.2ghz VARCHAR(50), wlan_mgt.fixed.capabilities.spec_man VARCHAR(50), \
+wlan_mgt.powercap.max VARCHAR(50), wlan_mgt.powercap.min VARCHAR(50), wlan_mgt.rsn.capabilities.mfpc VARCHAR(50), wlan_mgt.extcap.b31 VARCHAR(50), wlan_mgt.extcap.b32 VARCHAR(50), wlan_mgt.extcap.b46 VARCHAR(50), \
+wlan_mgt.tag.number VARCHAR(50), wlan_mgt.vht.capabilities.maxmpdulength VARCHAR(50), wlan_mgt.vht.capabilities.supportedchanwidthset VARCHAR(50), wlan_mgt.vht.capabilities.rxldpc VARCHAR(50), \
+wlan_mgt.vht.capabilities.short80 VARCHAR(50), wlan_mgt.vht.capabilities.short160 VARCHAR(50), wlan_mgt.vht.capabilities.txstbc VARCHAR(50), wlan_mgt.vht.capabilities.subeamformer VARCHAR(50), \
+wlan_mgt.vht.capabilities.subeamformee VARCHAR(50), wlan_mgt.vht.capabilities.beamformerants VARCHAR(50), wlan_mgt.vht.capabilities.soundingdimensions VARCHAR(50), wlan_mgt.vht.capabilities.mubeamformer VARCHAR(50), \
+wlan_mgt.vht.capabilities.mubeamformee VARCHAR(50), wlan_mgt.tag.oui VARCHAR(50));)'
+
 #	csv_data = csv.reader(file('test.csv'))
 #		for row in csv_data:
 #
-#			cursor.execute('INSERT INTO clients(wlan.sa, wlan.bssid, radiotap.channel.freq, wlan_mgt.extcap.b19, wlan.fc.protected, \
+#			cursor.execute('INSERT INTO dwcc(wlan.sa, wlan.bssid, radiotap.channel.freq, wlan_mgt.extcap.b19, wlan.fc.protected, \
 #wlan_radio.channel, wlan.fc.pwrmgt, wlan_mgt.fixed.capabilities.radio_measurement, wlan_mgt.ht.mcsset.txmaxss, \
 #radiotap.channel.flags.ofdm, radiotap.channel.flags.5ghz, radiotap.channel.flags.2ghz, wlan_mgt.fixed.capabilities.spec_man, \
 #wlan_mgt.powercap.max, wlan_mgt.powercap.min, wlan_mgt.rsn.capabilities.mfpc, wlan_mgt.extcap.b31, wlan_mgt.extcap.b32, wlan_mgt.extcap.b46, \
@@ -110,9 +127,8 @@ def tsharker():
 #					'VALUES("%s", "%s", "%s")', 
 #					row)
 #	#close the connection to the database.
-#	mydb.commit()
-#	cursor.close()
+	#	mydb.commit()
+	#	mydb.close()
 #
 #	db.close()
-
 start()
