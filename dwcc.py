@@ -38,13 +38,13 @@ queue = multiprocessing.Queue()
 
 #This is the main fuction
 def start():
-    logging.basicConfig(filename='dwcc.log', format='%(levelname)s:%(message)s', level=logging.INFO)
-    os.system(monitor_enable)
-    stop_rotating = rotator(channels, change_channel)	
-    stop_tsharking = tsharker()
-    try:sniffer(interface)
-    except KeyboardInterrupt: sys.exit()
-    finally:
+	logging.basicConfig(filename='dwcc.log', format='%(levelname)s:%(message)s', level=logging.INFO)
+	os.system(monitor_enable)
+	stop_rotating = rotator(channels, change_channel)	
+	stop_tsharking = tsharker()
+	try:sniffer(interface)
+	except KeyboardInterrupt: sys.exit()
+	finally:
 		stop_rotating.set()
 		stop_tsharking.set()
 		os.system(monitor_disable)
@@ -65,15 +65,17 @@ def rotator(channels, change_channel):
 
 #this is the caputre fuction, It will only caputre the mgt frames.
 def sniffer(interface):
-	subprocess.call('tcpdump -i wlan1mon  -G 600 -W 144 -e -s 256 type mgt -w .\incoming\trace-%Y-%M-%d_%H.%M.%S.pcap', shell=True)
+	subprocess.call('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 256 type mgt -w ./incoming/trace-%Y-%M-%d_%H.%M.%S.pcap', shell=True)
 #the above will rotate the pcap every 10 mins and keeps 24 hours worth
 def tsharker():
  #This reads the pcaps, pull out the data, and places it into a csv
-	while True:
+	def tshark(stop):
+		while not stop.is_set():
 	#checks for pcap files in incoming
-		for fname in os.listdir('./incoming'):
-			if fname.endswith('.pcap'):
-				subprocess.call('cd ./incoming; for filename in *.pcap; do tshark -r $filename -R "wlan.fc.type_subtype == 0x0" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
+			try:
+				for fname in os.listdir('./incoming'):
+					if fname.endswith('.pcap'):
+						subprocess.call('cd ./incoming; for filename in *.pcap; do tshark -r $filename -R "wlan.fc.type_subtype == 0x0" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
 -e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
 -e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
 -e wlan_mgt.powercap.max -e wlan_mgt.powercap.min -e wlan_mgt.rsn.capabilities.mfpc -e wlan_mgt.extcap.b31 -e wlan_mgt.extcap.b32 -e wlan_mgt.extcap.b46 \
@@ -81,10 +83,15 @@ def tsharker():
 -e wlan_mgt.vht.capabilities.short80 -e wlan_mgt.vht.capabilities.short160 -e wlan_mgt.vht.capabilities.txstbc -e wlan_mgt.vht.capabilities.subeamformer \
 -e wlan_mgt.vht.capabilities.subeamformee -e wlan_mgt.vht.capabilities.beamformerants -e wlan_mgt.vht.capabilities.soundingdimensions -e wlan_mgt.vht.capabilities.mubeamformer \
 -e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -E separator=+ >> ../tmp/test.csv; mv $filename ../archive/; done', shell=True)
-		else:
-			print "No pcap found waiting 5 mins to rerun"
-			time.sleep(300)
-#this needs to be tested
+				else:
+					print "No pcap found waiting 5 mins to rerun"
+					time.sleep(300)
+				
+			except KeyboardInterrupt: pass
+	stop = multiprocessing.Event()
+	multiprocessing.Process(target=tshark, args=[stop]).start()
+	return stop
+#this below needs to be tested
 
 #def dbupdate():
 #	cursor = mydb.cursor()
