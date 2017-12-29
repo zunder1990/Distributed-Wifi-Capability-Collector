@@ -23,8 +23,11 @@ monitor_enable  = 'ifconfig wlan1 down; iw dev wlan1 interface add wlan1mon type
 monitor_disable = 'iw dev wlan1mon del; ifconfig wlan1 up'
 change_channel  = 'iw dev wlan1mon set channel %s'
 
+<<<<<<< HEAD
 #one day this will be changed to support 5ghz and 2ghz with two lists. Right now this works with a single daul band device
 channels = [6, 48, 1, 11, 36, 40]
+=======
+>>>>>>> origin/master
 
 #mysql support coming soon
 mydb = MySQLdb.connect(host='localhost',
@@ -38,7 +41,7 @@ hostname = socket.gethostname()
 queue = multiprocessing.Queue()
 
 
-#This is the main fuction
+#This is the main function
 def start():
 	logging.basicConfig(filename='dwcc.log', format='%(levelname)s:%(message)s', level=logging.INFO)
 	os.system(monitor_enable)
@@ -67,6 +70,7 @@ def rotator(channels, change_channel):
     multiprocessing.Process(target=rotate, args=[stop]).start()
     return stop
 
+<<<<<<< HEAD
 #this is the caputre fuction, It will only caputre the mgt frames.
 def sniffer(interface):
 	subprocess.call('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w ./incoming/trace-%Y-%m-%d_%H.%M.%S.pcap', shell=True)
@@ -149,11 +153,11 @@ def dbupdater():
 `wlan_mgt.vht.capabilities.mubeamformee` VARCHAR(50), `wlan_mgt.tag.oui` VARCHAR(50), PRIMARY KEY ( id ));')
 
 
-#	#close the connection to the database.
-	#	mydb.commit()
-	#	mydb.close()
-#
-#	db.close()
+=======
+
+>>>>>>> origin/master
+
 
 
 start()
+
