@@ -21,7 +21,7 @@ monitor_enable  = 'ifconfig wlan1 down; iw dev wlan1 interface add wlan1mon type
 monitor_disable = 'iw dev wlan1mon del; ifconfig wlan1 up'
 change_channel  = 'iw dev wlan1mon set channel %s'
 
-#one day this will be changed to support 5ghz and 2ghz with two lists. Right now this works with a single daul band device
+#one day this will be changed to support 5ghz and 2ghz with two lists. Right now this works with a single dual band device
 channels = [6, 36,]
 
 #mysql support coming soon
@@ -36,7 +36,7 @@ hostname = socket.gethostname()
 queue = multiprocessing.Queue()
 
 
-#This is the main fuction
+#This is the main function
 def start():
     logging.basicConfig(filename='dwcc.log', format='%(levelname)s:%(message)s', level=logging.INFO)
     os.system(monitor_enable)
@@ -61,7 +61,7 @@ def rotator(channels, change_channel):
     multiprocessing.Process(target=rotate, args=[stop]).start()
     return stop
 
-#this is the caputre fuction Right now it just uses tcpdump and will get all packets in the air. one day this will be updated to only get mgt packets
+#this is the capture function Right now it just uses tcpdump and will get all packets in the air. one day this will be updated to only get mgt packets
 #This should close the pcap after 5 mins. This is not working
 def sniffer(interface):
 		while True:
@@ -74,7 +74,7 @@ def sniffer(interface):
  #this needs to be tested. 
  
 #def tshark()
- #This reads the pcaps, pull out the data, and places it into a csv
+ #This reads the pcaps, pull out the data, and places it into a csv (list with comma seperation)
 #	os.system('tshark -r *.pcap -R "wlan.fc.type_subtype == 0x0" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
 #		-e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
 #		-e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
@@ -109,3 +109,4 @@ def sniffer(interface):
 #	db.close()
 
 start()
+
