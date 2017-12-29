@@ -126,7 +126,7 @@ def dbupdater():
 `wlan_mgt.vht.capabilities.mubeamformee`, `wlan_mgt.tag.oui`)' \
 'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', row)
 									mydb.commit()
-									
+								os.remove('./tmp/dwcc.csv')	
 								print "done with dbupdate waiting 4 mins for next run"
 								time.sleep(240)#seconds
 							else:
