@@ -23,11 +23,8 @@ monitor_enable  = 'ifconfig wlan1 down; iw dev wlan1 interface add wlan1mon type
 monitor_disable = 'iw dev wlan1mon del; ifconfig wlan1 up'
 change_channel  = 'iw dev wlan1mon set channel %s'
 
-<<<<<<< HEAD
 #one day this will be changed to support 5ghz and 2ghz with two lists. Right now this works with a single daul band device
 channels = [6, 48, 1, 11, 36, 40]
-=======
->>>>>>> origin/master
 
 #mysql support coming soon
 mydb = MySQLdb.connect(host='localhost',
@@ -55,7 +52,6 @@ def start():
 		stop_tsharking.set()
 		stop_dbupdateing.set()
 		os.system(monitor_disable)
-
 #This will change the channels every 1 sec to scan all in the range. One day there will be support for more than one rotator to support 2.4ghz and 5ghz.		
 def rotator(channels, change_channel):
     def rotate(stop):
@@ -69,8 +65,6 @@ def rotator(channels, change_channel):
     stop = multiprocessing.Event()
     multiprocessing.Process(target=rotate, args=[stop]).start()
     return stop
-
-<<<<<<< HEAD
 #this is the caputre fuction, It will only caputre the mgt frames.
 def sniffer(interface):
 	subprocess.call('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w ./incoming/trace-%Y-%m-%d_%H.%M.%S.pcap', shell=True)
@@ -100,8 +94,6 @@ def tsharker():
 	stop = multiprocessing.Event()
 	multiprocessing.Process(target=tshark, args=[stop]).start()
 	return stop
-#this below needs to be tested
-
 #This is the DB section
 def dbupdater():
 #checking for the table
@@ -151,13 +143,4 @@ def dbupdater():
 `wlan_mgt.vht.capabilities.short80` VARCHAR(50), `wlan_mgt.vht.capabilities.short160` VARCHAR(50), `wlan_mgt.vht.capabilities.txstbc` VARCHAR(50), `wlan_mgt.vht.capabilities.subeamformer` VARCHAR(50), \
 `wlan_mgt.vht.capabilities.subeamformee` VARCHAR(50), `wlan_mgt.vht.capabilities.beamformerants` VARCHAR(50), `wlan_mgt.vht.capabilities.soundingdimensions` VARCHAR(50), `wlan_mgt.vht.capabilities.mubeamformer` VARCHAR(50), \
 `wlan_mgt.vht.capabilities.mubeamformee` VARCHAR(50), `wlan_mgt.tag.oui` VARCHAR(50), PRIMARY KEY ( id ));')
-
-
-=======
-
->>>>>>> origin/master
-
-
-
 start()
-
