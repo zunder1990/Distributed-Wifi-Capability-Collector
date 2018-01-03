@@ -24,29 +24,25 @@ def start():
 			dbupdater()
 			dedup()
 			rowcount()
-#			b19support()
+			b19support()
 #			mergecap()
 			time.sleep(300)#seconds
 		except KeyboardInterrupt: sys.exit()
 
 def dedup():
-	stmt = """DELETE FROM dwccincoming  WHERE id IN (SELECT * FROM (SELECT id FROM dwccincoming GROUP BY wlansa HAVING (COUNT(*) > 1)) AS A);"""
-	cursor.execute(stmt)
+	cursor.execute('DELETE FROM dwccincoming WHERE ID NOT IN (SELECT min(ID) FROM dwccincoming GROUP BY wlansa);')
 	conn.commit()
 	print "finish dedup"
 #Right now dedup only seems to remove one line per loop. I work on this later
 def rowcount():
-	#stmt = "SELECT COUNT(*)FROM dwccincoming;"
 	cursor.execute('SELECT COUNT(*)FROM dwccincoming;')
 	numberofclient=cursor.fetchone()[0]
 	print "Total number of clients found in the database = ", numberofclient 
 #working on this
-#def b19support():
-#	cursor = mydb.cursor()
-#	stmt = "SELECT COUNT(*) FROM dwcc WHERE `wlan_mgt.extcap.b19` = 1;"
-#	cursor.execute(stmt)
-#	b19supportcount=cursor.fetchone()[0]
-#	print "Total number of clients found to support BSS Transition aka 802.11r aka FT = ", b19supportcount
+def b19support():
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb19 = 1;')
+	b19supportcount=cursor.fetchone()[0]
+	print "Total number of clients found to support BSS Transition aka 802.11r aka FT = ", b19supportcount
 
 #def mergecap():
 #	subprocess.call('mergecap -w /nfs/$HOSTNAME/bigpcap.pcap /nfs/$HOSTNAME/archive/*.pcap', shell=True)
