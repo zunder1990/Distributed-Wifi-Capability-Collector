@@ -12,6 +12,7 @@ import os.path
 incomingpath = '/data/incoming/' #This is the path where new pcaps will be placed
 archivepath = '/data/archive/' #This is the path where pcaps what already have been checked will be placed
 tmppath = '/data/tmp/' #this is the path for a tmp folder for dwcc to use
+DB_FILE = 'dwcc.db'
 def start():
 #	dedup()
 #	rowcount()
@@ -20,6 +21,7 @@ def start():
 #	tsharker()
 #	dbupdater()
 	dbmaker()
+	dbupdater()
 	
 def dedup():
 	cursor = mydb.cursor()
@@ -71,16 +73,46 @@ def tsharker():
 	multiprocessing.Process(target=tshark, args=[stop]).start()
 	return stop
 
+def dbupdater():
+	conn = sqlite3.connect(DB_FILE)
+	cursor = conn.cursor()
+	def dbupdate(stop):
+		while not stop.is_set():
+			try:
+				csvfile = '/data/tmp/dwcc.csv'
+				if os.path.isfile(csvfile) and os.access(csvfile, os.R_OK):
+					print "csv found"
+					csv_data = csv.reader(file(csvfile), delimiter='+')
+					for row in csv_data:
+						conn.execute('INSERT INTO dwccincoming(wlansa, wlanbssid, radiotapchannelfreq, wlanmgtextcapb19, wlanfcprotected, \
+wlanradiochannel, wlanfcpwrmgt, wlanmgtfixedcapabilitiesradiomeasurement, wlanmgthtmcssettxmaxss, \
+radiotapchannelflagsofdm, radiotapchannelflags5ghz, radiotapchannelflags2ghz, wlanmgtfixedcapabilitiesspecman, \
+wlanmgtpowercapmax, wlanmgtpowercapmin, wlanmgtrsncapabilitiesmfpc, wlanmgtextcapb31, wlanmgtextcapb32, wlanmgtextcapb46, \
+wlanmgttagnumber, wlanmgtvhtcapabilitiesmaxmpdulength, wlanmgtvhtcapabilitiessupportedchanwidthset, wlanmgtvhtcapabilitiesrxldpc, \
+wlanmgtvhtcapabilitiesshort80, wlanmgtvhtcapabilitiesshort160, wlanmgtvhtcapabilitiestxstbc, wlanmgtvhtcapabilitiessubeamformer, \
+wlanmgtvhtcapabilitiessubeamformee, wlanmgtvhtcapabilitiesbeamformerants, wlanmgtvhtcapabilitiessoundingdimensions, wlanmgtvhtcapabilitiesmubeamformer, \
+wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui)' \
+'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
+					conn.commit()
+					conn.close()
+					print "done with dbupdate waiting 4 mins for next run"
+					time.sleep(240)#seconds
+				else:
+					print"csv not found will retry in 4 mins"
+					print csvfile
+					time.sleep(240)#seconds
+			except KeyboardInterrupt: pass
+	stop = multiprocessing.Event()
+	multiprocessing.Process(target=dbupdate, args=[stop]).start()
+	return stop
+
 def dbmaker():
-	DB_FILE = 'dwcc.db'
 	newfile = False
 	if not os.path.exists(DB_FILE): 
 		print "creating .db"
 		newfile = True
-
 	conn = sqlite3.connect(DB_FILE)
 	cursor = conn.cursor()
-
 	if newfile == True:
 		conn.execute('''CREATE TABLE dwccincoming
        (ID INTEGER PRIMARY KEY autoincrement NOT NULL,
@@ -96,7 +128,7 @@ def dbmaker():
 	   radiotapchannelflagsofdm char(50),
 	   radiotapchannelflags5ghz char(50),
 	   radiotapchannelflags2ghz char(50),
-	   wlanmgtfixedcapabilitiesspec_man char(50),
+	   wlanmgtfixedcapabilitiesspecman char(50),
 	   wlanmgtpowercapmax char(50),
 	   wlanmgtpowercapmin char(50),
 	   wlanmgtrsncapabilitiesmfpc char(50),
@@ -154,7 +186,8 @@ def dbmaker():
 	   wlanmgttagoui char(50),
 	   clientvendor char(50),
 	   clientwifichipvendor char(50));''')
-
+	conn.commit()
+	conn.close()
 
 start()
 
