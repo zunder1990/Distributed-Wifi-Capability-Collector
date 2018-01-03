@@ -13,30 +13,31 @@ incomingpath = '/data/incoming/' #This is the path where new pcaps will be place
 archivepath = '/data/archive/' #This is the path where pcaps what already have been checked will be placed
 tmppath = '/data/tmp/' #this is the path for a tmp folder for dwcc to use
 DB_FILE = 'dwcc.db'
+
+conn = sqlite3.connect(DB_FILE)
+cursor = conn.cursor()
 def start():
 	dbmaker()
 	while True:
 		try:
 			tsharker()
 			dbupdater()
-#			dedup()
-#			rowcount()
+			dedup()
+			rowcount()
 #			b19support()
 #			mergecap()
 			time.sleep(300)#seconds
 		except KeyboardInterrupt: sys.exit()
 
 def dedup():
-	cursor = mydb.cursor()
-	stmt = """USE dwcc; DELETE FROM dwccincoming  WHERE id IN (SELECT * FROM (SELECT id FROM dwcc GROUP BY wlansa HAVING (COUNT(*) > 1)) AS A);"""
+	stmt = """DELETE FROM dwccincoming  WHERE id IN (SELECT * FROM (SELECT id FROM dwccincoming GROUP BY wlansa HAVING (COUNT(*) > 1)) AS A);"""
 	cursor.execute(stmt)
-	mydb.commit()
-	mydb.close()
-
+	conn.commit()
+	print "finish dedup"
+#Right now dedup only seems to remove one line per loop. I work on this later
 def rowcount():
-	cursor = mydb.cursor()
-	stmt = """SELECT COUNT(*)FROM dwccincoming;"""
-	cursor.execute(stmt)
+	#stmt = "SELECT COUNT(*)FROM dwccincoming;"
+	cursor.execute('SELECT COUNT(*)FROM dwccincoming;')
 	numberofclient=cursor.fetchone()[0]
 	print "Total number of clients found in the database = ", numberofclient 
 #working on this
@@ -69,8 +70,7 @@ def tsharker():
 			print "No pcap found waiting 5 mins to rerun"
 
 def dbupdater():
-	conn = sqlite3.connect(DB_FILE)
-	cursor = conn.cursor()
+	
 	csvfile = '/data/tmp/dwcc.csv'
 	if os.path.isfile(csvfile) and os.access(csvfile, os.R_OK):
 		print "csv found added to db"
@@ -86,7 +86,6 @@ wlanmgtvhtcapabilitiessubeamformee, wlanmgtvhtcapabilitiesbeamformerants, wlanmg
 wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui)' \
 'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
 		conn.commit()
-		conn.close()
 		os.remove(csvfile)
 		print "done with dbupdate waiting for next run"
 	else:
