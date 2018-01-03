@@ -14,25 +14,28 @@ archivepath = '/data/archive/' #This is the path where pcaps what already have b
 tmppath = '/data/tmp/' #this is the path for a tmp folder for dwcc to use
 DB_FILE = 'dwcc.db'
 def start():
-#	dedup()
-#	rowcount()
-#	b19support()
-#	mergecap()
-#	tsharker()
-#	dbupdater()
 	dbmaker()
-	dbupdater()
-	
+	while True:
+		try:
+			tsharker()
+			dbupdater()
+#			dedup()
+#			rowcount()
+#			b19support()
+#			mergecap()
+			time.sleep(300)#seconds
+		except KeyboardInterrupt: sys.exit()
+
 def dedup():
 	cursor = mydb.cursor()
-	stmt = """USE dwcc; DELETE FROM dwcc  WHERE id IN (SELECT * FROM (SELECT id FROM dwcc GROUP BY `wlan.sa` HAVING (COUNT(*) > 1)) AS A);"""
+	stmt = """USE dwcc; DELETE FROM dwccincoming  WHERE id IN (SELECT * FROM (SELECT id FROM dwcc GROUP BY wlansa HAVING (COUNT(*) > 1)) AS A);"""
 	cursor.execute(stmt)
 	mydb.commit()
 	mydb.close()
 
 def rowcount():
 	cursor = mydb.cursor()
-	stmt = """SELECT COUNT(*)FROM dwcc;"""
+	stmt = """SELECT COUNT(*)FROM dwccincoming;"""
 	cursor.execute(stmt)
 	numberofclient=cursor.fetchone()[0]
 	print "Total number of clients found in the database = ", numberofclient 
@@ -50,13 +53,10 @@ def rowcount():
 
 def tsharker():
  #This reads the pcaps, pull out the data, and places it into a csv
-	def tshark(stop):
-		while not stop.is_set():
 	#checks for pcap files in incoming
-			try:
-				for fname in os.listdir(incomingpath):
-					if fname.endswith('.pcap'):
-						subprocess.call('cd ' + incomingpath + '; for filename in *.pcap; do tshark -r $filename -R "wlan.fc.type_subtype == 0x0" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
+	for fname in os.listdir(incomingpath):
+		if fname.endswith('.pcap'):
+			subprocess.call('cd ' + incomingpath + '; for filename in *.pcap; do tshark -r $filename -R "wlan.fc.type_subtype == 0x0" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
 -e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
 -e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
 -e wlan_mgt.powercap.max -e wlan_mgt.powercap.min -e wlan_mgt.rsn.capabilities.mfpc -e wlan_mgt.extcap.b31 -e wlan_mgt.extcap.b32 -e wlan_mgt.extcap.b46 \
@@ -64,27 +64,19 @@ def tsharker():
 -e wlan_mgt.vht.capabilities.short80 -e wlan_mgt.vht.capabilities.short160 -e wlan_mgt.vht.capabilities.txstbc -e wlan_mgt.vht.capabilities.subeamformer \
 -e wlan_mgt.vht.capabilities.subeamformee -e wlan_mgt.vht.capabilities.beamformerants -e wlan_mgt.vht.capabilities.soundingdimensions -e wlan_mgt.vht.capabilities.mubeamformer \
 -e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -E separator=+ >> ' + tmppath + 'dwcc.csv; mv $filename ' + archivepath + '/; done', shell=True)
-				else:
-					print "No pcap found waiting 5 mins to rerun"
-					time.sleep(300)#seconds
-
-			except KeyboardInterrupt: pass
-	stop = multiprocessing.Event()
-	multiprocessing.Process(target=tshark, args=[stop]).start()
-	return stop
+			print "pcap found and tshark has ran"
+		else:
+			print "No pcap found waiting 5 mins to rerun"
 
 def dbupdater():
 	conn = sqlite3.connect(DB_FILE)
 	cursor = conn.cursor()
-	def dbupdate(stop):
-		while not stop.is_set():
-			try:
-				csvfile = '/data/tmp/dwcc.csv'
-				if os.path.isfile(csvfile) and os.access(csvfile, os.R_OK):
-					print "csv found"
-					csv_data = csv.reader(file(csvfile), delimiter='+')
-					for row in csv_data:
-						conn.execute('INSERT INTO dwccincoming(wlansa, wlanbssid, radiotapchannelfreq, wlanmgtextcapb19, wlanfcprotected, \
+	csvfile = '/data/tmp/dwcc.csv'
+	if os.path.isfile(csvfile) and os.access(csvfile, os.R_OK):
+		print "csv found added to db"
+		csv_data = csv.reader(file(csvfile), delimiter='+')
+		for row in csv_data:
+			conn.execute('INSERT INTO dwccincoming(wlansa, wlanbssid, radiotapchannelfreq, wlanmgtextcapb19, wlanfcprotected, \
 wlanradiochannel, wlanfcpwrmgt, wlanmgtfixedcapabilitiesradiomeasurement, wlanmgthtmcssettxmaxss, \
 radiotapchannelflagsofdm, radiotapchannelflags5ghz, radiotapchannelflags2ghz, wlanmgtfixedcapabilitiesspecman, \
 wlanmgtpowercapmax, wlanmgtpowercapmin, wlanmgtrsncapabilitiesmfpc, wlanmgtextcapb31, wlanmgtextcapb32, wlanmgtextcapb46, \
@@ -93,18 +85,12 @@ wlanmgtvhtcapabilitiesshort80, wlanmgtvhtcapabilitiesshort160, wlanmgtvhtcapabil
 wlanmgtvhtcapabilitiessubeamformee, wlanmgtvhtcapabilitiesbeamformerants, wlanmgtvhtcapabilitiessoundingdimensions, wlanmgtvhtcapabilitiesmubeamformer, \
 wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui)' \
 'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
-					conn.commit()
-					conn.close()
-					print "done with dbupdate waiting 4 mins for next run"
-					time.sleep(240)#seconds
-				else:
-					print"csv not found will retry in 4 mins"
-					print csvfile
-					time.sleep(240)#seconds
-			except KeyboardInterrupt: pass
-	stop = multiprocessing.Event()
-	multiprocessing.Process(target=dbupdate, args=[stop]).start()
-	return stop
+		conn.commit()
+		conn.close()
+		os.remove(csvfile)
+		print "done with dbupdate waiting for next run"
+	else:
+		print"csv not found will retry"
 
 def dbmaker():
 	newfile = False
