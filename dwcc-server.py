@@ -26,6 +26,7 @@ def start():
 			rowcount()
 			b19support()
 #			mergecap()
+			dbconverter()
 			time.sleep(300)#seconds
 		except KeyboardInterrupt: sys.exit()
 
@@ -33,7 +34,7 @@ def dedup():
 	cursor.execute('DELETE FROM dwccincoming WHERE ID NOT IN (SELECT min(ID) FROM dwccincoming GROUP BY wlansa);')
 	conn.commit()
 	print "finish dedup"
-#Right now dedup only seems to remove one line per loop. I work on this later
+
 def rowcount():
 	cursor.execute('SELECT COUNT(*)FROM dwccincoming;')
 	numberofclient=cursor.fetchone()[0]
@@ -42,11 +43,49 @@ def rowcount():
 def b19support():
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb19 = 1;')
 	b19supportcount=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesshort80 = 1;')
+	n80mhzsupportcount=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesshort160 = 1;')
+	n160mhzsupportcount=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE radiotapchannelflags5ghz = 1;')
+	n5ghzclientcount=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE radiotapchannelflags2ghz = 1;')
+	n2ghzclientcount=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtrsncapabilitiesmfpc = 1;')
+	n80211wsupport=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb31 = 1;')
+	n80211usupport=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb32 = 1;')
+	qosmapsupport=cursor.fetchone()[0]
 	print "Total number of clients found to support BSS Transition aka 802.11r aka FT = ", b19supportcount
+	print "Total number of clients found to support 80mhz channel in 5ghz = ", n80mhzsupportcount
+	print "Total number of clients found to support 160mhz channel in 5ghz = ", n160mhzsupportcount
+	print "Total number of 5 ghz clients found= ", n5ghzclientcount
+	print "Total number of 2 ghz clients found= ", n2ghzclientcount
+	print "Total number of clients that support 802.11w= ", n80211wsupport
+	print "Total number of clients that support interworking this is reated to 802.11u= ", n80211usupport
+	print "Total number of clients that support QOS map= ", qosmapsupport
+	
+
+
+
+
+def dbconverter():
+	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
+	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '0' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000000';")
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 0;')
+	soundingdimensions0=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 1;')
+	soundingdimensions1=cursor.fetchone()[0]
+	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
+	print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
+	conn.commit()
 
 #def mergecap():
 #	subprocess.call('mergecap -w /nfs/$HOSTNAME/bigpcap.pcap /nfs/$HOSTNAME/archive/*.pcap', shell=True)
 #	subprocess.call('rm -f /nfs/$HOSTNAME/archive/*.pcap', shell=True)
+
+#add support for https://github.com/coolbho3k/manuf
 
 def tsharker():
  #This reads the pcaps, pull out the data, and places it into a csv
