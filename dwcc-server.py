@@ -16,10 +16,12 @@ DB_FILE = 'dwcc.db'
 
 conn = sqlite3.connect(DB_FILE)
 cursor = conn.cursor()
+
 def start():
 	dbmaker()
 	while True:
 		try:
+			
 			tsharker()
 			dbupdater()
 			dedup()
@@ -92,14 +94,15 @@ def tsharker():
 	#checks for pcap files in incoming
 	for fname in os.listdir(incomingpath):
 		if fname.endswith('.pcap'):
-			subprocess.call('cd ' + incomingpath + '; for filename in *.pcap; do tshark -r $filename -R "wlan.fc.type_subtype == 0x0" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
+			subprocess.call('cd ' + incomingpath + '; for filename in *.pcap; do tshark -r $filename  -R "wlan.fc.type_subtype == 0x0 or wlan.fc.type_subtype == 0x8 or wlan.fc.type_subtype == 0x3" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
 -e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
 -e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
 -e wlan_mgt.powercap.max -e wlan_mgt.powercap.min -e wlan_mgt.rsn.capabilities.mfpc -e wlan_mgt.extcap.b31 -e wlan_mgt.extcap.b32 -e wlan_mgt.extcap.b46 \
 -e wlan_mgt.tag.number -e wlan_mgt.vht.capabilities.maxmpdulength -e wlan_mgt.vht.capabilities.supportedchanwidthset -e wlan_mgt.vht.capabilities.rxldpc \
 -e wlan_mgt.vht.capabilities.short80 -e wlan_mgt.vht.capabilities.short160 -e wlan_mgt.vht.capabilities.txstbc -e wlan_mgt.vht.capabilities.subeamformer \
 -e wlan_mgt.vht.capabilities.subeamformee -e wlan_mgt.vht.capabilities.beamformerants -e wlan_mgt.vht.capabilities.soundingdimensions -e wlan_mgt.vht.capabilities.mubeamformer \
--e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -E separator=+ >> ' + tmppath + 'dwcc.csv; mv $filename ' + archivepath + '/; done', shell=True)
+-e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -e wlan_mgt.fixed.capabilities.ess -e radiotap.antenna -e wlan_mgt.ssid -E separator=+ >> ' + tmppath + 'dwcc.csv; mv $filename ' + archivepath + '/; done', shell=True)
+#			subprocess.call("sed sed -i -e 's/ /-/g' " + tmppath + "dwcc.csv", shell=True)
 			print "pcap found and tshark has ran"
 		else:
 			print "No pcap found waiting 5 mins to rerun"
@@ -118,8 +121,8 @@ wlanmgtpowercapmax, wlanmgtpowercapmin, wlanmgtrsncapabilitiesmfpc, wlanmgtextca
 wlanmgttagnumber, wlanmgtvhtcapabilitiesmaxmpdulength, wlanmgtvhtcapabilitiessupportedchanwidthset, wlanmgtvhtcapabilitiesrxldpc, \
 wlanmgtvhtcapabilitiesshort80, wlanmgtvhtcapabilitiesshort160, wlanmgtvhtcapabilitiestxstbc, wlanmgtvhtcapabilitiessubeamformer, \
 wlanmgtvhtcapabilitiessubeamformee, wlanmgtvhtcapabilitiesbeamformerants, wlanmgtvhtcapabilitiessoundingdimensions, wlanmgtvhtcapabilitiesmubeamformer, \
-wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui)' \
-'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
+wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui,  wlanmgtfixedcapabilitiesess, radiotapantenna, wlanmgtssid)' \
+'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
 		conn.commit()
 		os.remove(csvfile)
 		print "done with dbupdate waiting for next run"
@@ -168,7 +171,10 @@ def dbmaker():
 	   wlanmgtvhtcapabilitiessoundingdimensions char(50),
 	   wlanmgtvhtcapabilitiesmubeamformer char(50),
 	   wlanmgtvhtcapabilitiesmubeamformee char(50),
-	   wlanmgttagoui char(50));''')
+	   wlanmgttagoui char(50),
+	   wlanmgtfixedcapabilitiesess char(50),
+	   radiotapantenna char(50), 
+	   wlanmgtssid char(100));''')
 		conn.execute('''CREATE TABLE dwccreporting
        (ID INTEGER PRIMARY KEY autoincrement NOT NULL,
        wlansa char(50),
