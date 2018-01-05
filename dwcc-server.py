@@ -9,17 +9,20 @@ import datetime
 import csv
 import os.path
 
-
+#This change the below to reflect your sysrem
 incomingpath = '/data/incoming/' #This is the path where new pcaps will be placed
 archivepath = '/data/archive/' #This is the path where pcaps what already have been checked will be placed
 tmppath = '/data/tmp/' #this is the path for a tmp folder for dwcc to use
 DB_FILE = 'dwcc.db'
+#you may change the path but please dont change the filename
 csvfile = '/data/tmp/dwcc.csv'
 
+#here is the setup info for the sqlite db
 conn = sqlite3.connect(DB_FILE)
 conn.text_factory = str
 cursor = conn.cursor()
 
+#this is the main fuction 
 def start():
 	preflightcheck()
 	dbmaker()
@@ -184,7 +187,3 @@ wlanmgtssid char(100));''')
 	conn.commit()
 
 start()
-
-#will be added at a later time
-#radiotap.antenna
-#wlan.ssid

@@ -25,8 +25,7 @@ channels = [6, 48, 1, 11, 36, 40]
 #info for sftp server
 sshhost = '192.168.1.144'  #can be hostname or ip
 sshuser = 'zach'           #make sure that key auth is working
-sshport = '22'
-sshportint = int(sshport)
+
 
 hostname = socket.gethostname()
 
@@ -38,15 +37,12 @@ def start():
 	logging.basicConfig(filename='dwcc.log', format='%(levelname)s:%(message)s', level=logging.INFO)
 	os.system(monitor_enable)
 	stop_rotating = rotator(channels, change_channel)
-#	stop_tsharking = tsharker()
-#	stop_dbupdateing = dbupdater()
-	upload()
+	stop_uploading = uploader()
 	try:sniffer(interface)
 	except KeyboardInterrupt: sys.exit()
 	finally:
 		stop_rotating.set()
-#		stop_tsharking.set()
-#		stop_dbupdateing.set()
+		stop_uploading.set()
 		os.system(monitor_disable)
 #This will change the channels every 1 sec to scan all in the range. One day there will be support for more than one rotator to support 2.4ghz and 5ghz.		
 def rotator(channels, change_channel):
@@ -65,18 +61,21 @@ def rotator(channels, change_channel):
 def sniffer(interface):
 	subprocess.call('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/trace-%Y-%m-%d_%H.%M.%S.pcap', shell=True)
 #the above will rotate the pcap every 10 mins and keeps 24 hours worth
-def upload():
-#	host_keys = paramiko.util.load_host_keys(os.path.expanduser('~/.ssh/known_hosts'))
-#	if sshhost in host_keys:
-#    		hostkeytype = host_keys[sshhost].keys()[0]
-#    		hostkey = host_keys[sshhost][hostkeytype]
-#	t = paramiko.Transport((sshhost, sshportint))
-#	t.connect(hostkey, sshuser)
-#	sftp = paramiko.SFTPClient.from_transport(t)
-#	sftp.put('/data/incoming/test.txt', '/data/incoming/test.txt')
-#	t.close()
-	with pysftp.Connection(host=sshhost, username=sshuser, private_key='~/.ssh/id_rsa') as sftp:
-		with sftp.cd('/data/incoming/'):             # temporarily chdir to public
-        		sftp.put('/data/incoming/test.txt')  # upload file to public/ on remote
-
+def uploader():
+    def upload(stop):
+        while not stop.is_set():
+            try:
+				for fname in os.listdir(incomingpath):
+					if fname.endswith('.pcap'):
+						with pysftp.Connection(host=sshhost, username=sshuser, private_key='~/.ssh/id_rsa') as sftp:
+							with sftp.cd('/data/incoming/'):             # temporarily chdir to public
+							sftp.put(fname)  # upload file to public/ on remote
+					time.sleep(300)#seconds
+				else:
+					print "no pcap found, will try again in 5 min"
+					time.sleep(300)#seconds
+			except KeyboardInterrupt: pass
+    stop = multiprocessing.Event()
+    multiprocessing.Process(target=upload, args=[stop]).start()
+    return stop
 start()
