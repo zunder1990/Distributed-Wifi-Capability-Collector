@@ -14,7 +14,7 @@ import os.path
 import pysftp
 
 #1 is enabled, 0 is disabled
-interface1enable = 1
+interface1enable = '1'
 interface1 = 'wlan1mon'
 monitor_enable1  = 'ifconfig wlan1 down; iw dev wlan1 interface add wlan1mon type monitor; ifconfig wlan1mon down; iw dev wlan1mon set type monitor; ifconfig wlan1mon up'
 monitor_disable1 = 'iw dev wlan1mon del; ifconfig wlan1 up'
@@ -23,7 +23,7 @@ channels1 = [6, 48, 1, 11, 36, 40] #use the linux command "iwlist channel" to ge
 
 #At this more than interface has not been tested
 #1 is enabled, 0 is disabled
-interface2enable = 0
+interface2enable = '0'
 interface2 = 'wlan1mon'
 monitor_enable2  = 'ifconfig wlan1 down; iw dev wlan1 interface add wlan1mon type monitor; ifconfig wlan1mon down; iw dev wlan1mon set type monitor; ifconfig wlan1mon up'
 monitor_disable2 = 'iw dev wlan1mon del; ifconfig wlan1 up'
@@ -32,7 +32,7 @@ channels2 = [6, 48, 1, 11, 36, 40] #use the linux command "iwlist channel" to ge
 
 #At this more than interface has not been tested
 #1 is enabled, 0 is disabled
-interface3enable = 0
+interface3enable = '0'
 interface3 = 'wlan1mon'
 monitor_enable3  = 'ifconfig wlan1 down; iw dev wlan1 interface add wlan1mon type monitor; ifconfig wlan1mon down; iw dev wlan1mon set type monitor; ifconfig wlan1mon up'
 monitor_disable3 = 'iw dev wlan1mon del; ifconfig wlan1 up'
@@ -41,7 +41,7 @@ channels3 = [6, 48, 1, 11, 36, 40] #use the linux command "iwlist channel" to ge
 
 #At this more than interface has not been tested
 #1 is enabled, 0 is disabled
-interface4enable = 0
+interface4enable = '0'
 interface4 = 'wlan1mon'
 monitor_enable4  = 'ifconfig wlan1 down; iw dev wlan1 interface add wlan1mon type monitor; ifconfig wlan1mon down; iw dev wlan1mon set type monitor; ifconfig wlan1mon up'
 monitor_disable4 = 'iw dev wlan1mon del; ifconfig wlan1 up'
@@ -70,7 +70,7 @@ def start():
 		os.system(monitor_enable1)
 	stop_rotating = rotator()
 	stop_uploading = uploader()
-	try:sniffer(interface)
+	try:sniffer()
 	except KeyboardInterrupt: sys.exit()
 	finally:
 		print "Please wait for everything to stop"
@@ -111,7 +111,7 @@ def rotator():
 	multiprocessing.Process(target=rotate, args=[stop]).start()
 	return stop
 #this is the caputre fuction, It will only caputre the mgt frames.
-def sniffer(interface):
+def sniffer():
 	if interface1enable == '1':
 		subprocess.call('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/trace-%Y-%m-%d_%H.%M.%S.pcap', shell=True)
 	if interface2enable == '1':
@@ -124,7 +124,7 @@ def sniffer(interface):
 def uploader():
 	def upload(stop):
 		while not stop.is_set():
-		try:
+			try:
 				for fname in os.listdir(incomingpath):
 					if fname.endswith('.pcap'):
 						with pysftp.Connection(host=sshhost, username=sshuser, private_key='~/.ssh/id_rsa') as sftp:
@@ -135,7 +135,7 @@ def uploader():
 				else:
 					print "no pcap found, will try again in 5 min"
 					time.sleep(300) #seconds
-		except KeyboardInterrupt: pass
+			except KeyboardInterrupt: pass
 	stop = multiprocessing.Event()
 	multiprocessing.Process(target=upload, args=[stop]).start()
 	return stop
