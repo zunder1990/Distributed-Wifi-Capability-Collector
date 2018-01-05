@@ -41,6 +41,8 @@ The following specifications and features are collected and in the future we wil
 
 Great details about some of the above can be found on http://chimera.labs.oreilly.com/books/1234000001739/ch03.html#management_frames
 
+Got ideas from https://github.com/Geovation/wifispy and https://github.com/roobixx/harbinger
+
 ## Hardware examples
 __Example 1:__
 * Wireless=Alfa AWUS051NH ($70)
