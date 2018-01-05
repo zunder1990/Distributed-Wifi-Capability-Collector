@@ -83,7 +83,7 @@ def start():
 		if interface3enable == '1':
 			os.system(monitor_disable3)
 		if interface4enable == '1':
-			os.system(monitor_disable4
+			os.system(monitor_disable4)
 #This will change the channels every 1 sec to scan all in the range. 
 def rotator():
 	def rotate(stop):
