@@ -30,7 +30,7 @@ sshuser = 'zach'           #make sure that key auth is working
 hostname = socket.gethostname()
 
 queue = multiprocessing.Queue()
-incomingpath = '/data/incoming' #This is the path where new pcaps will be placed
+incomingpath = '/data/incoming/' #This is the path where new pcaps will be placed
 
 #This is the main function
 def start():
@@ -59,22 +59,25 @@ def rotator(channels, change_channel):
     return stop
 #this is the caputre fuction, It will only caputre the mgt frames.
 def sniffer(interface):
-	subprocess.call('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/trace-%Y-%m-%d_%H.%M.%S.pcap', shell=True)
+	#subprocess.call('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/trace-%Y-%m-%d_%H.%M.%S.pcap', shell=True)
+	print "sniffer would have started"
+	time.sleep(100000)
 #the above will rotate the pcap every 10 mins and keeps 24 hours worth
 def uploader():
     def upload(stop):
         while not stop.is_set():
-            try:
+		try:
 				for fname in os.listdir(incomingpath):
 					if fname.endswith('.pcap'):
 						with pysftp.Connection(host=sshhost, username=sshuser, private_key='~/.ssh/id_rsa') as sftp:
-							with sftp.cd('/data/incoming/'):             # temporarily chdir to public
-							sftp.put(fname)  # upload file to public/ on remote
-					time.sleep(300)#seconds
+							with sftp.cd(incomingpath):
+								sftp.put(incomingpath +fname)
+					print "moved", fname
+					os.remove(incomingpath +fname)
 				else:
 					print "no pcap found, will try again in 5 min"
-					time.sleep(300)#seconds
-			except KeyboardInterrupt: pass
+					time.sleep(300) #seconds
+		except KeyboardInterrupt: pass
     stop = multiprocessing.Event()
     multiprocessing.Process(target=upload, args=[stop]).start()
     return stop
