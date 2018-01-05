@@ -8,8 +8,7 @@ import time
 import datetime
 import csv
 import os.path
-import plotly.plotly
-from plotly.graph_objs import *
+
 
 incomingpath = '/data/incoming/' #This is the path where new pcaps will be placed
 archivepath = '/data/archive/' #This is the path where pcaps what already have been checked will be placed
@@ -22,10 +21,10 @@ conn.text_factory = str
 cursor = conn.cursor()
 
 def start():
+	preflightcheck()
 	dbmaker()
 	while True:
 		try:
-			
 			tsharker()
 			dbupdater()
 			dedup()
@@ -35,6 +34,14 @@ def start():
 			dbconverter()
 			time.sleep(300)#seconds
 		except KeyboardInterrupt: sys.exit()
+
+def preflightcheck():
+	if not os.path.exists(incomingpath):
+		os.makedirs(incomingpath)
+	if not os.path.exists(archivepath):
+		os.makedirs(archivepath)		
+	if not os.path.exists(tmppath):
+		os.makedirs(tmppath)	
 
 def dedup():
 	cursor.execute('DELETE FROM dwccincoming WHERE ID NOT IN (SELECT min(ID) FROM dwccincoming GROUP BY wlansa);')
@@ -71,78 +78,6 @@ def charting():
 	print "Total number of clients that support 802.11w= ", n80211wsupport
 	print "Total number of clients that support interworking this is reated to 802.11u= ", n80211usupport
 	print "Total number of clients that support QOS map= ", qosmapsupport
-
-
-	fig = {
-    'data': [
-        {
-            'labels': ['5ghz clients','2ghz clients'],
-            'values': [n5ghzclientcount,n2ghzclientcount],
-            'type': 'pie',
-            'name': '2.4ghz vs 5ghz',
-            'marker': {'colors': ['rgb(56, 75, 126)',
-                                  'rgb(18, 36, 37)',
-                                  'rgb(34, 53, 101)',
-                                  'rgb(36, 55, 57)',
-                                  'rgb(6, 4, 4)']},
-            'domain': {'x': [0, .48],
-                       'y': [0, .49]},
-            'hoverinfo':'label+percent+name',
-            'textinfo':'none',
-			'showlegend': True
-        },
-        {
-            'labels': ['1st', '2nd', '3rd', '4th', '5th'],
-            'values': [28, 26, 21, 15, 10],
-            'marker': {'colors': ['rgb(177, 127, 38)',
-                                  'rgb(205, 152, 36)',
-                                  'rgb(99, 79, 37)',
-                                  'rgb(129, 180, 179)',
-                                  'rgb(124, 103, 37)']},
-            'type': 'pie',
-            'name': 'Sunflowers',
-            'domain': {'x': [.52, 1],
-                       'y': [0, .49]},
-            'hoverinfo':'label+percent+name',
-            'textinfo':'none'
-
-        },
-        {
-            'labels': ['1st', '2nd', '3rd', '4th', '5th'],
-            'values': [38, 19, 16, 14, 13],
-            'marker': {'colors': ['rgb(33, 75, 99)',
-                                  'rgb(79, 129, 102)',
-                                  'rgb(151, 179, 100)',
-                                  'rgb(175, 49, 35)',
-                                  'rgb(36, 73, 147)']},
-            'type': 'pie',
-            'name': 'Irises',
-            'domain': {'x': [0, .48],
-                       'y': [.51, 1]},
-            'hoverinfo':'label+percent+name',
-            'textinfo':'none'
-        },
-        {
-            'labels': ['1st', '2nd', '3rd', '4th', '5th'],
-            'values': [31, 24, 19, 18, 8],
-            'marker': {'colors': ['rgb(146, 123, 21)',
-                                  'rgb(177, 180, 34)',
-                                  'rgb(206, 206, 40)',
-                                  'rgb(175, 51, 21)',
-                                  'rgb(35, 36, 21)']},
-			'type': 'pie',
-			'name':'test',
-			'domain': {'x': [.52, 1],
-                       'y': [.51, 1]},
-            'hoverinfo':'label+percent+name',
-            'textinfo':'none'
-        }
-    ],
-    'layout': {'title': 'Van Gogh: 5 Most Prominent Colors Shown Proportionally'}
-	}
-
-	plotly.offline.plot(fig, filename='basic_pie_chart.html')
-
 
 
 def dbconverter():
@@ -204,90 +139,49 @@ wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui,  wlanmgtfixedcapabilitiesess,
 		print"csv not found will retry"
 
 def dbmaker():
-	newfile = False
-	if not os.path.exists(DB_FILE): 
-		print "creating .db"
-		newfile = True
+
 	conn = sqlite3.connect(DB_FILE)
 	cursor = conn.cursor()
-	if newfile == True:
-		conn.execute('''CREATE TABLE dwccincoming
-       (ID INTEGER PRIMARY KEY autoincrement NOT NULL,
-       wlansa char(50),
-       wlanbssid char(50),
-       radiotapchannelfreq char(50),
-       wlanmgtextcapb19 char(50),
-       wlanfcprotected char(50),
-       wlanradiochannel char(50),
-	   wlanfcpwrmgt char(50),
-	   wlanmgtfixedcapabilitiesradiomeasurement char(50),
-	   wlanmgthtmcssettxmaxss char(50),
-	   radiotapchannelflagsofdm char(50),
-	   radiotapchannelflags5ghz char(50),
-	   radiotapchannelflags2ghz char(50),
-	   wlanmgtfixedcapabilitiesspecman char(50),
-	   wlanmgtpowercapmax char(50),
-	   wlanmgtpowercapmin char(50),
-	   wlanmgtrsncapabilitiesmfpc char(50),
-	   wlanmgtextcapb31 char(50),
-	   wlanmgtextcapb32 char(50),
-	   wlanmgtextcapb46 char(50),
-	   wlanmgttagnumber char(50),
-	   wlanmgtvhtcapabilitiesmaxmpdulength char(50),
-	   wlanmgtvhtcapabilitiessupportedchanwidthset char(50),
-	   wlanmgtvhtcapabilitiesrxldpc char(50),
-	   wlanmgtvhtcapabilitiesshort80 char(50),
-	   wlanmgtvhtcapabilitiesshort160 char(50),
-	   wlanmgtvhtcapabilitiestxstbc char(50),
-	   wlanmgtvhtcapabilitiessubeamformer char(50),
-	   wlanmgtvhtcapabilitiessubeamformee char(50),
-	   wlanmgtvhtcapabilitiesbeamformerants char(50),
-	   wlanmgtvhtcapabilitiessoundingdimensions char(50),
-	   wlanmgtvhtcapabilitiesmubeamformer char(50),
-	   wlanmgtvhtcapabilitiesmubeamformee char(50),
-	   wlanmgttagoui char(50),
-	   wlanmgtfixedcapabilitiesess char(50),
-	   radiotapantenna char(50), 
-	   wlanmgtssid char(100));''')
-		conn.execute('''CREATE TABLE dwccreporting
-       (ID INTEGER PRIMARY KEY autoincrement NOT NULL,
-       wlansa char(50),
-       wlanbssid char(50),
-       radiotapchannelfreq char(50),
-       wlanmgtextcapb19 char(50),
-       wlanfcprotected char(50),
-       wlanradiochannel char(50),
-	   wlanfcpwrmgt char(50),
-	   wlanmgtfixedcapabilitiesradiomeasurement char(50),
-	   wlanmgthtmcssettxmaxss char(50),
-	   radiotapchannelflagsofdm char(50),
-	   radiotapchannelflags5ghz char(50),
-	   radiotapchannelflags2ghz char(50),
-	   wlanmgtfixedcapabilitiesspec_man char(50),
-	   wlanmgtpowercapmax char(50),
-	   wlanmgtpowercapmin char(50),
-	   wlanmgtrsncapabilitiesmfpc char(50),
-	   wlanmgtextcapb31 char(50),
-	   wlanmgtextcapb32 char(50),
-	   wlanmgtextcapb46 char(50),
-	   wlanmgttagnumber char(50),
-	   wlanmgtvhtcapabilitiesmaxmpdulength char(50),
-	   wlanmgtvhtcapabilitiessupportedchanwidthset char(50),
-	   wlanmgtvhtcapabilitiesrxldpc char(50),
-	   wlanmgtvhtcapabilitiesshort80 char(50),
-	   wlanmgtvhtcapabilitiesshort160 char(50),
-	   wlanmgtvhtcapabilitiestxstbc char(50),
-	   wlanmgtvhtcapabilitiessubeamformer char(50),
-	   wlanmgtvhtcapabilitiessubeamformee char(50),
-	   wlanmgtvhtcapabilitiesbeamformerants char(50),
-	   wlanmgtvhtcapabilitiessoundingdimensions char(50),
-	   wlanmgtvhtcapabilitiesmubeamformer char(50),
-	   wlanmgtvhtcapabilitiesmubeamformee char(50),
-	   wlanmgttagoui char(50),
-	   clientvendor char(50),
-	   clientwifichipvendor char(50));''')
+	cursor.execute('''CREATE TABLE if not exists dwccincoming
+(ID INTEGER PRIMARY KEY autoincrement NOT NULL,
+wlansa char(50),
+wlanbssid char(50),
+radiotapchannelfreq char(50),
+wlanmgtextcapb19 char(50),
+wlanfcprotected char(50),
+wlanradiochannel char(50),
+wlanfcpwrmgt char(50),
+wlanmgtfixedcapabilitiesradiomeasurement char(50),
+wlanmgthtmcssettxmaxss char(50),
+radiotapchannelflagsofdm char(50),
+radiotapchannelflags5ghz char(50),
+radiotapchannelflags2ghz char(50),
+wlanmgtfixedcapabilitiesspecman char(50),
+wlanmgtpowercapmax char(50),
+wlanmgtpowercapmin char(50),
+wlanmgtrsncapabilitiesmfpc char(50),
+wlanmgtextcapb31 char(50),
+wlanmgtextcapb32 char(50),
+wlanmgtextcapb46 char(50),
+wlanmgttagnumber char(50),
+wlanmgtvhtcapabilitiesmaxmpdulength char(50),
+wlanmgtvhtcapabilitiessupportedchanwidthset char(50),
+wlanmgtvhtcapabilitiesrxldpc char(50),
+wlanmgtvhtcapabilitiesshort80 char(50),
+wlanmgtvhtcapabilitiesshort160 char(50),
+wlanmgtvhtcapabilitiestxstbc char(50),
+wlanmgtvhtcapabilitiessubeamformer char(50),
+wlanmgtvhtcapabilitiessubeamformee char(50),
+wlanmgtvhtcapabilitiesbeamformerants char(50),
+wlanmgtvhtcapabilitiessoundingdimensions char(50),
+wlanmgtvhtcapabilitiesmubeamformer char(50),
+wlanmgtvhtcapabilitiesmubeamformee char(50),
+wlanmgttagoui char(50),
+wlanmgtfixedcapabilitiesess char(50),
+radiotapantenna char(50), 
+wlanmgtssid char(100));''')
+
 	conn.commit()
-	conn.close()
 
 start()
 
