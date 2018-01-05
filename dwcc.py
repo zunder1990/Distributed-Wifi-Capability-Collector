@@ -8,15 +8,11 @@ import time
 import datetime
 import multiprocessing
 import Queue
-import MySQLdb
-import pcapy
-import dpkt
 import socket
 import subprocess
-import csv
 import os.path
+import pysftp
 
-# linux
 #one day there will be support for more than one interface
 interface = 'wlan1mon'
 monitor_enable  = 'ifconfig wlan1 down; iw dev wlan1 interface add wlan1mon type monitor; ifconfig wlan1mon down; iw dev wlan1mon set type monitor; ifconfig wlan1mon up'
@@ -26,8 +22,11 @@ change_channel  = 'iw dev wlan1mon set channel %s'
 #one day this will be changed to support 5ghz and 2ghz with two lists. Right now this works with a single daul band device
 channels = [6, 48, 1, 11, 36, 40]
 
-
-
+#info for sftp server
+sshhost = '192.168.1.144'  #can be hostname or ip
+sshuser = 'zach'           #make sure that key auth is working
+sshport = '22'
+sshportint = int(sshport)
 
 hostname = socket.gethostname()
 
@@ -41,6 +40,7 @@ def start():
 	stop_rotating = rotator(channels, change_channel)
 #	stop_tsharking = tsharker()
 #	stop_dbupdateing = dbupdater()
+	upload()
 	try:sniffer(interface)
 	except KeyboardInterrupt: sys.exit()
 	finally:
@@ -65,5 +65,18 @@ def rotator(channels, change_channel):
 def sniffer(interface):
 	subprocess.call('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/trace-%Y-%m-%d_%H.%M.%S.pcap', shell=True)
 #the above will rotate the pcap every 10 mins and keeps 24 hours worth
+def upload():
+#	host_keys = paramiko.util.load_host_keys(os.path.expanduser('~/.ssh/known_hosts'))
+#	if sshhost in host_keys:
+#    		hostkeytype = host_keys[sshhost].keys()[0]
+#    		hostkey = host_keys[sshhost][hostkeytype]
+#	t = paramiko.Transport((sshhost, sshportint))
+#	t.connect(hostkey, sshuser)
+#	sftp = paramiko.SFTPClient.from_transport(t)
+#	sftp.put('/data/incoming/test.txt', '/data/incoming/test.txt')
+#	t.close()
+	with pysftp.Connection(host=sshhost, username=sshuser, private_key='~/.ssh/id_rsa') as sftp:
+		with sftp.cd('/data/incoming/'):             # temporarily chdir to public
+        		sftp.put('/data/incoming/test.txt')  # upload file to public/ on remote
 
 start()
