@@ -59,9 +59,7 @@ def rotator(channels, change_channel):
     return stop
 #this is the caputre fuction, It will only caputre the mgt frames.
 def sniffer(interface):
-	#subprocess.call('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/trace-%Y-%m-%d_%H.%M.%S.pcap', shell=True)
-	print "sniffer would have started"
-	time.sleep(100000)
+	subprocess.call('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/trace-%Y-%m-%d_%H.%M.%S.pcap', shell=True)
 #the above will rotate the pcap every 10 mins and keeps 24 hours worth
 def uploader():
     def upload(stop):
