@@ -84,12 +84,12 @@ def start():
 			os.system(monitor_disable3)
 		if interface4enable == '1':
 			os.system(monitor_disable4
-#This will change the channels every 1 sec to scan all in the range. One day there will be support for more than one rotator to support 2.4ghz and 5ghz.		
+#This will change the channels every 1 sec to scan all in the range. 
 def rotator():
-    def rotate(stop):
-        while not stop.is_set():
-            try:
-                if interface1enable == '1': #This loop is for interface 1
+	def rotate(stop):
+		while not stop.is_set():
+			try:
+				if interface1enable == '1': #This loop is for interface 1
 					channel1 = str(random.choice(channels1))
 					logging.info('Changing to channel ' + channel1)
 					os.system(change_channel1 % channel1)
@@ -106,10 +106,10 @@ def rotator():
 					logging.info('Changing to channel ' + channel4)
 					os.system(change_channel4 % channel4)
 				time.sleep(1) # seconds
-            except KeyboardInterrupt: pass
-    stop = multiprocessing.Event()
-    multiprocessing.Process(target=rotate, args=[stop]).start()
-    return stop
+			except KeyboardInterrupt: pass
+	stop = multiprocessing.Event()
+	multiprocessing.Process(target=rotate, args=[stop]).start()
+	return stop
 #this is the caputre fuction, It will only caputre the mgt frames.
 def sniffer(interface):
 	if interface1enable == '1':
@@ -122,8 +122,8 @@ def sniffer(interface):
 		print "interface4 sniffer would have ran"
 #the above will rotate the pcap every 10 mins and keeps 24 hours worth
 def uploader():
-    def upload(stop):
-        while not stop.is_set():
+	def upload(stop):
+		while not stop.is_set():
 		try:
 				for fname in os.listdir(incomingpath):
 					if fname.endswith('.pcap'):
@@ -136,7 +136,7 @@ def uploader():
 					print "no pcap found, will try again in 5 min"
 					time.sleep(300) #seconds
 		except KeyboardInterrupt: pass
-    stop = multiprocessing.Event()
-    multiprocessing.Process(target=upload, args=[stop]).start()
-    return stop
+	stop = multiprocessing.Event()
+	multiprocessing.Process(target=upload, args=[stop]).start()
+	return stop
 start()
