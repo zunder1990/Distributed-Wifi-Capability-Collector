@@ -8,13 +8,17 @@ import time
 import datetime
 import csv
 import os.path
+import plotly.plotly
+from plotly.graph_objs import *
 
 incomingpath = '/data/incoming/' #This is the path where new pcaps will be placed
 archivepath = '/data/archive/' #This is the path where pcaps what already have been checked will be placed
 tmppath = '/data/tmp/' #this is the path for a tmp folder for dwcc to use
 DB_FILE = 'dwcc.db'
+csvfile = '/data/tmp/dwcc.csv'
 
 conn = sqlite3.connect(DB_FILE)
+conn.text_factory = str
 cursor = conn.cursor()
 
 def start():
@@ -26,7 +30,7 @@ def start():
 			dbupdater()
 			dedup()
 			rowcount()
-			b19support()
+			charting()
 #			mergecap()
 			dbconverter()
 			time.sleep(300)#seconds
@@ -42,7 +46,7 @@ def rowcount():
 	numberofclient=cursor.fetchone()[0]
 	print "Total number of clients found in the database = ", numberofclient 
 #working on this
-def b19support():
+def charting():
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb19 = 1;')
 	b19supportcount=cursor.fetchone()[0]
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesshort80 = 1;')
@@ -67,8 +71,77 @@ def b19support():
 	print "Total number of clients that support 802.11w= ", n80211wsupport
 	print "Total number of clients that support interworking this is reated to 802.11u= ", n80211usupport
 	print "Total number of clients that support QOS map= ", qosmapsupport
-	
 
+
+	fig = {
+    'data': [
+        {
+            'labels': ['5ghz clients','2ghz clients'],
+            'values': [n5ghzclientcount,n2ghzclientcount],
+            'type': 'pie',
+            'name': '2.4ghz vs 5ghz',
+            'marker': {'colors': ['rgb(56, 75, 126)',
+                                  'rgb(18, 36, 37)',
+                                  'rgb(34, 53, 101)',
+                                  'rgb(36, 55, 57)',
+                                  'rgb(6, 4, 4)']},
+            'domain': {'x': [0, .48],
+                       'y': [0, .49]},
+            'hoverinfo':'label+percent+name',
+            'textinfo':'none',
+			'showlegend': True
+        },
+        {
+            'labels': ['1st', '2nd', '3rd', '4th', '5th'],
+            'values': [28, 26, 21, 15, 10],
+            'marker': {'colors': ['rgb(177, 127, 38)',
+                                  'rgb(205, 152, 36)',
+                                  'rgb(99, 79, 37)',
+                                  'rgb(129, 180, 179)',
+                                  'rgb(124, 103, 37)']},
+            'type': 'pie',
+            'name': 'Sunflowers',
+            'domain': {'x': [.52, 1],
+                       'y': [0, .49]},
+            'hoverinfo':'label+percent+name',
+            'textinfo':'none'
+
+        },
+        {
+            'labels': ['1st', '2nd', '3rd', '4th', '5th'],
+            'values': [38, 19, 16, 14, 13],
+            'marker': {'colors': ['rgb(33, 75, 99)',
+                                  'rgb(79, 129, 102)',
+                                  'rgb(151, 179, 100)',
+                                  'rgb(175, 49, 35)',
+                                  'rgb(36, 73, 147)']},
+            'type': 'pie',
+            'name': 'Irises',
+            'domain': {'x': [0, .48],
+                       'y': [.51, 1]},
+            'hoverinfo':'label+percent+name',
+            'textinfo':'none'
+        },
+        {
+            'labels': ['1st', '2nd', '3rd', '4th', '5th'],
+            'values': [31, 24, 19, 18, 8],
+            'marker': {'colors': ['rgb(146, 123, 21)',
+                                  'rgb(177, 180, 34)',
+                                  'rgb(206, 206, 40)',
+                                  'rgb(175, 51, 21)',
+                                  'rgb(35, 36, 21)']},
+			'type': 'pie',
+			'name':'test',
+			'domain': {'x': [.52, 1],
+                       'y': [.51, 1]},
+            'hoverinfo':'label+percent+name',
+            'textinfo':'none'
+        }
+    ],
+    'layout': {'title': 'Van Gogh: 5 Most Prominent Colors Shown Proportionally'}
+	}
+
+	plotly.offline.plot(fig, filename='basic_pie_chart.html')
 
 
 
@@ -94,19 +167,20 @@ def tsharker():
 	#checks for pcap files in incoming
 	for fname in os.listdir(incomingpath):
 		if fname.endswith('.pcap'):
-			subprocess.call('cd ' + incomingpath + '; for filename in *.pcap; do tshark -r $filename  -R "wlan.fc.type_subtype == 0x0 or wlan.fc.type_subtype == 0x8 or wlan.fc.type_subtype == 0x3" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
+			subprocess.call('cd ' + incomingpath + '; for filename in *.pcap; do tshark -r $filename  -R "wlan.fc.type_subtype == 0x0 or wlan.fc.type_subtype == 0x3" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
 -e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
 -e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
 -e wlan_mgt.powercap.max -e wlan_mgt.powercap.min -e wlan_mgt.rsn.capabilities.mfpc -e wlan_mgt.extcap.b31 -e wlan_mgt.extcap.b32 -e wlan_mgt.extcap.b46 \
 -e wlan_mgt.tag.number -e wlan_mgt.vht.capabilities.maxmpdulength -e wlan_mgt.vht.capabilities.supportedchanwidthset -e wlan_mgt.vht.capabilities.rxldpc \
 -e wlan_mgt.vht.capabilities.short80 -e wlan_mgt.vht.capabilities.short160 -e wlan_mgt.vht.capabilities.txstbc -e wlan_mgt.vht.capabilities.subeamformer \
 -e wlan_mgt.vht.capabilities.subeamformee -e wlan_mgt.vht.capabilities.beamformerants -e wlan_mgt.vht.capabilities.soundingdimensions -e wlan_mgt.vht.capabilities.mubeamformer \
--e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -e wlan_mgt.fixed.capabilities.ess -e radiotap.antenna -e wlan_mgt.ssid -E separator=+ >> ' + tmppath + 'dwcc.csv; mv $filename ' + archivepath + '/; done', shell=True)
-#			subprocess.call("sed sed -i -e 's/ /-/g' " + tmppath + "dwcc.csv", shell=True)
+-e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -e wlan_mgt.fixed.capabilities.ess -e radiotap.antenna -E separator=+ >> ' + tmppath + 'dwcc.csv && mv $filename ' + archivepath + '/; done', shell=True)
+			#subprocess.call("""sed -i -e 's/ /-/g' -e 's/[<>"^()]//g' /data/tmp/dwcc.csv""", shell=True)
 			print "pcap found and tshark has ran"
 		else:
 			print "No pcap found waiting 5 mins to rerun"
 
+			
 def dbupdater():
 	
 	csvfile = '/data/tmp/dwcc.csv'
@@ -121,8 +195,8 @@ wlanmgtpowercapmax, wlanmgtpowercapmin, wlanmgtrsncapabilitiesmfpc, wlanmgtextca
 wlanmgttagnumber, wlanmgtvhtcapabilitiesmaxmpdulength, wlanmgtvhtcapabilitiessupportedchanwidthset, wlanmgtvhtcapabilitiesrxldpc, \
 wlanmgtvhtcapabilitiesshort80, wlanmgtvhtcapabilitiesshort160, wlanmgtvhtcapabilitiestxstbc, wlanmgtvhtcapabilitiessubeamformer, \
 wlanmgtvhtcapabilitiessubeamformee, wlanmgtvhtcapabilitiesbeamformerants, wlanmgtvhtcapabilitiessoundingdimensions, wlanmgtvhtcapabilitiesmubeamformer, \
-wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui,  wlanmgtfixedcapabilitiesess, radiotapantenna, wlanmgtssid)' \
-'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
+wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui,  wlanmgtfixedcapabilitiesess, radiotapantenna)' \
+'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
 		conn.commit()
 		os.remove(csvfile)
 		print "done with dbupdate waiting for next run"
