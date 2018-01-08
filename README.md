@@ -60,3 +60,6 @@ This hareware needs to be tested. I have a kit coming for testing
 * POE splitter = $7.59 https://www.aliexpress.com/item/DSLRKIT-Active-PoE-Splitter-48V-to-5V-5-2V-2-4A-USB-TYPE-A-Female-802/32819476796.html
 * Cost = $74.13
  
+ ## Misc
+ Used to pull the packets for one MAC
+ tshark -r bigpcap.pcap -R "wlan.sa == xx:xx:xx:xx:xx:xx" -2 -w temp.pcap
