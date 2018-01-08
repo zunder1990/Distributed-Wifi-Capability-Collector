@@ -77,6 +77,10 @@ def charting():
 	qosmapsupport=cursor.fetchone()[0]
 	cursor.execute('SELECT wlansaconverted, count(wlansaconverted) FROM dwccincoming GROUP BY wlansaconverted ORDER BY count(wlansaconverted) DESC;')
 	devicemaker=cursor.fetchall()
+	cursor.execute('SELECT wlanradiochannel, count(wlanradiochannel) FROM dwccincoming GROUP BY wlanradiochannel ORDER BY count(wlanradiochannel) DESC;')
+	channelgroup=cursor.fetchall()
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb46 = 1;')
+	wnmsupport=cursor.fetchone()[0]
 	print "Total number of clients found to support BSS Transition aka 802.11r aka FT = ", b19supportcount
 	print "Total number of clients found to support 80mhz channel in 5ghz = ", n80mhzsupportcount
 	print "Total number of clients found to support 160mhz channel in 5ghz = ", n160mhzsupportcount
@@ -85,17 +89,23 @@ def charting():
 	print "Total number of clients that support 802.11w= ", n80211wsupport
 	print "Total number of clients that support interworking this is reated to 802.11u= ", n80211usupport
 	print "Total number of clients that support QOS map= ", qosmapsupport
+	print "Total number of clients that support wnm notification= ", wnmsupport
 	print devicemaker
+	print channelgroup
 
 def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '0' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000000';")
+	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '3' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000002';")
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 0;')
 	soundingdimensions0=cursor.fetchone()[0]
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 1;')
 	soundingdimensions1=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 3;')
+	soundingdimensions3=cursor.fetchone()[0]
 	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
 	print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
+	print "Total number of clients found to support Sounding Dimensions of 3 = ", soundingdimensions3
 	conn.commit()
 
 #def mergecap():
