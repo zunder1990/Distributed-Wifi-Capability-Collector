@@ -8,6 +8,7 @@ import time
 import datetime
 import csv
 import os.path
+from manuf import manuf
 
 #This change the below to reflect your sysrem
 incomingpath = '/data/incoming/' #This is the path where new pcaps will be placed
@@ -33,8 +34,9 @@ def start():
 			dedup()
 			rowcount()
 			charting()
-#			mergecap()
+##			mergecap()
 			dbconverter()
+			macaddressconverter()
 			time.sleep(300)#seconds
 		except KeyboardInterrupt: sys.exit()
 
@@ -120,7 +122,22 @@ def tsharker():
 						print "pcap found and tshark has ran"
 					else:
 						print "No pcap found waiting 5 mins to rerun"
-
+						
+						
+						
+						
+def macaddressconverter():
+	p = manuf.MacParser(update=True)
+	cursor.execute("SELECT wlansa from dwccincoming WHERE wlansaconverted IS NULL OR wlansaconverted = '' limit 1;")
+	mactochange=cursor.fetchone()[0]
+	changedmac = p.get_manuf(mactochange)
+	changedmacstr = str(changedmac)
+	mactochangestr = str(mactochange)
+	cursor.execute("UPDATE dwccincoming SET wlansaconverted = "+ `changedmacstr` +" WHERE wlansa  = "+ `mactochangestr` +"   ;")
+	print changedmac
+	print mactochange
+	conn.commit()
+						
 def dbupdater():
 	
 	csvfile = '/data/tmp/dwcc.csv'
@@ -184,7 +201,8 @@ wlanmgtvhtcapabilitiesmubeamformee char(50),
 wlanmgttagoui char(50),
 wlanmgtfixedcapabilitiesess char(50),
 radiotapantenna char(50), 
-wlanmgtssid char(100));''')
+wlanmgtssid char(100),
+wlansaconverted char(200));''')
 
 	conn.commit()
 
