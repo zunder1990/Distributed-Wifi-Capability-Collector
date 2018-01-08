@@ -8,6 +8,7 @@ import time
 import datetime
 import csv
 import os.path
+from manuf import manuf
 
 #This change the below to reflect your sysrem
 incomingpath = '/data/incoming/' #This is the path where new pcaps will be placed
@@ -33,8 +34,9 @@ def start():
 			dedup()
 			rowcount()
 			charting()
-#			mergecap()
+##			mergecap()
 			dbconverter()
+			macaddressconverter()
 			time.sleep(300)#seconds
 		except KeyboardInterrupt: sys.exit()
 
@@ -73,6 +75,8 @@ def charting():
 	n80211usupport=cursor.fetchone()[0]
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb32 = 1;')
 	qosmapsupport=cursor.fetchone()[0]
+	cursor.execute('SELECT wlansaconverted, count(wlansaconverted) FROM dwccincoming GROUP BY wlansaconverted ORDER BY count(wlansaconverted) DESC;')
+	devicemaker=cursor.fetchall()
 	print "Total number of clients found to support BSS Transition aka 802.11r aka FT = ", b19supportcount
 	print "Total number of clients found to support 80mhz channel in 5ghz = ", n80mhzsupportcount
 	print "Total number of clients found to support 160mhz channel in 5ghz = ", n160mhzsupportcount
@@ -81,7 +85,7 @@ def charting():
 	print "Total number of clients that support 802.11w= ", n80211wsupport
 	print "Total number of clients that support interworking this is reated to 802.11u= ", n80211usupport
 	print "Total number of clients that support QOS map= ", qosmapsupport
-
+	print devicemaker
 
 def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
@@ -120,7 +124,26 @@ def tsharker():
 						print "pcap found and tshark has ran"
 					else:
 						print "No pcap found waiting 5 mins to rerun"
-
+						
+						
+						
+						
+def macaddressconverter():
+	p = manuf.MacParser(update=True)
+	cursor.execute("SELECT wlansa from dwccincoming WHERE wlansaconverted IS NULL OR wlansaconverted = '' limit 1;")
+	mactochange=cursor.fetchone()
+	if mactochange is None:
+		print "all MAC matched to vendors"
+	else:
+		changedmac = p.get_manuf(mactochange)
+		changedmacstr = str(changedmac)
+		mactochangestr = str(mactochange)
+		cursor.execute("UPDATE dwccincoming SET wlansaconverted = "+ `changedmacstr` +" WHERE wlansa  = "+ `mactochangestr` +"   ;")
+#		print changedmac
+#		print mactochange
+		conn.commit()
+		macaddressconverter()
+						
 def dbupdater():
 	
 	csvfile = '/data/tmp/dwcc.csv'
@@ -184,7 +207,8 @@ wlanmgtvhtcapabilitiesmubeamformee char(50),
 wlanmgttagoui char(50),
 wlanmgtfixedcapabilitiesess char(50),
 radiotapantenna char(50), 
-wlanmgtssid char(100));''')
+wlanmgtssid char(100),
+wlansaconverted char(200));''')
 
 	conn.commit()
 
