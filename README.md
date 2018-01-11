@@ -62,4 +62,8 @@ This hareware needs to be tested. I have a kit coming for testing
  
  ## Misc
  Used to pull the packets for one MAC
- tshark -r bigpcap.pcap -R "wlan.sa == xx:xx:xx:xx:xx:xx" -2 -w temp.pcap
+ * tshark -r bigpcap.pcap -R "wlan.sa == xx:xx:xx:xx:xx:xx" -2 -w temp.pcap
+ 
+ * iw reg get 
+ * iw reg set US
+ 
