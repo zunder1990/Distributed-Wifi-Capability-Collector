@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sys
 import os
 import logging
@@ -9,6 +10,7 @@ import datetime
 import csv
 import os.path
 from manuf import manuf
+import string
 
 #This change the below to reflect your sysrem
 incomingpath = '/data/incoming/' #This is the path where new pcaps will be placed
@@ -97,6 +99,7 @@ def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '0' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000000';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '3' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000002';")
+	cursor.execute("UPDATE dwccincoming SET wlansaconverted = 'vendornotfound' WHERE wlansaconverted  = 'None';")
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 0;')
 	soundingdimensions0=cursor.fetchone()[0]
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 1;')
@@ -121,7 +124,7 @@ def tsharker():
 	for fname in os.listdir(incomingpath):
 					if fname.endswith('.pcap'):
 						pcapfile = incomingpath +fname
-						subprocess.call('tshark -r ' + pcapfile + '  -R "wlan.fc.type_subtype == 0x0 or wlan.fc.type_subtype == 0x3" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
+						subprocess.call('tshark -r ' + pcapfile + '  -R "wlan.fc.type_subtype == 0x0 or wlan.fc.type_subtype == 0x2 or wlan.fc.type_subtype == 0x4" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
 -e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
 -e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
 -e wlan_mgt.powercap.max -e wlan_mgt.powercap.min -e wlan_mgt.rsn.capabilities.mfpc -e wlan_mgt.extcap.b31 -e wlan_mgt.extcap.b32 -e wlan_mgt.extcap.b46 \
@@ -140,11 +143,14 @@ def tsharker():
 						
 def macaddressconverter():
 	p = manuf.MacParser(update=True)
-	cursor.execute("SELECT wlansa from dwccincoming WHERE wlansaconverted IS NULL OR wlansaconverted = '' limit 1;")
-	mactochange=cursor.fetchone()
+	cursor.execute("""SELECT wlansa from dwccincoming WHERE wlansaconverted IS NULL OR wlansaconverted = '' limit 1;""")
+	mactochange = cursor.fetchone()
+	
+	print "The mac that will be changed", mactochange
 	if mactochange is None:
 		print "all MAC matched to vendors"
 	else:
+		mactochange = ''.join(c for c in mactochange if c not in string.punctuation)
 		changedmac = p.get_manuf(mactochange)
 		changedmacstr = str(changedmac)
 		mactochangestr = str(mactochange)
