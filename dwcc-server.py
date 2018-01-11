@@ -25,6 +25,8 @@ conn = sqlite3.connect(DB_FILE)
 conn.text_factory = str
 cursor = conn.cursor()
 
+
+
 #this is the main fuction 
 def start():
 	preflightcheck()
@@ -35,9 +37,9 @@ def start():
 			dbupdater()
 			dedup()
 			rowcount()
+			dbconverter()
 			charting()
 ##			mergecap()
-			dbconverter()
 			macaddressconverter()
 			time.sleep(300)#seconds
 		except KeyboardInterrupt: sys.exit()
@@ -50,6 +52,7 @@ def preflightcheck():
 	if not os.path.exists(tmppath):
 		os.makedirs(tmppath)	
 
+#this will take a look at the mac address of the trasmitter and 
 def dedup():
 	cursor.execute('DELETE FROM dwccincoming WHERE ID NOT IN (SELECT min(ID) FROM dwccincoming GROUP BY wlansa);')
 	conn.commit()
@@ -83,6 +86,23 @@ def charting():
 	channelgroup=cursor.fetchall()
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb46 = 1;')
 	wnmsupport=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 0;')
+	soundingdimensions0=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 1;')
+	soundingdimensions1=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 3;')
+	soundingdimensions3=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesmubeamformee = 1;')
+	wlanmgtvhtcapabilitiesmubeamformee=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesmubeamformer = 1;')
+	wlanmgtvhtcapabilitiesmubeamformer=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessubeamformee = 1;')
+	wlanmgtvhtcapabilitiessubeamformee=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessubeamformer = 1;')
+	wlanmgtvhtcapabilitiessubeamformer=cursor.fetchone()[0]
+	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
+	print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
+	print "Total number of clients found to support Sounding Dimensions of 3 = ", soundingdimensions3
 	print "Total number of clients found to support BSS Transition aka 802.11r aka FT = ", b19supportcount
 	print "Total number of clients found to support 80mhz channel in 5ghz = ", n80mhzsupportcount
 	print "Total number of clients found to support 160mhz channel in 5ghz = ", n160mhzsupportcount
@@ -92,6 +112,10 @@ def charting():
 	print "Total number of clients that support interworking this is reated to 802.11u= ", n80211usupport
 	print "Total number of clients that support QOS map= ", qosmapsupport
 	print "Total number of clients that support wnm notification= ", wnmsupport
+	print "Total number of clients that support can recive frames from mu-mino AP= ", wlanmgtvhtcapabilitiesmubeamformee
+	print "Total number of clients that support can send frames from mu-mino AP= ", wlanmgtvhtcapabilitiesmubeamformer
+	print "Total number of clients that support can recive frames from single user beamforming AP= ", wlanmgtvhtcapabilitiessubeamformee
+	print "Total number of clients that support can send frames from single user beamforming AP= ", wlanmgtvhtcapabilitiessubeamformer
 	print devicemaker
 	print channelgroup
 
@@ -100,22 +124,12 @@ def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '0' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000000';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '3' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000002';")
 	cursor.execute("UPDATE dwccincoming SET wlansaconverted = 'vendornotfound' WHERE wlansaconverted  = 'None';")
-	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 0;')
-	soundingdimensions0=cursor.fetchone()[0]
-	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 1;')
-	soundingdimensions1=cursor.fetchone()[0]
-	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 3;')
-	soundingdimensions3=cursor.fetchone()[0]
-	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
-	print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
-	print "Total number of clients found to support Sounding Dimensions of 3 = ", soundingdimensions3
 	conn.commit()
 
 #def mergecap():
 #	subprocess.call('mergecap -w /nfs/$HOSTNAME/bigpcap.pcap /nfs/$HOSTNAME/archive/*.pcap', shell=True)
 #	subprocess.call('rm -f /nfs/$HOSTNAME/archive/*.pcap', shell=True)
 
-#add support for https://github.com/coolbho3k/manuf
 
 def tsharker():
  #This reads the pcaps, pull out the data, and places it into a csv
@@ -124,7 +138,7 @@ def tsharker():
 	for fname in os.listdir(incomingpath):
 					if fname.endswith('.pcap'):
 						pcapfile = incomingpath +fname
-						subprocess.call('tshark -r ' + pcapfile + '  -R "wlan.fc.type_subtype == 0x0 or wlan.fc.type_subtype == 0x2 or wlan.fc.type_subtype == 0x4" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
+						subprocess.call('tshark -r ' + pcapfile + '  -R "wlan.fc.type_subtype == 0x0 or wlan.fc.type_subtype == 0x2" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
 -e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
 -e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
 -e wlan_mgt.powercap.max -e wlan_mgt.powercap.min -e wlan_mgt.rsn.capabilities.mfpc -e wlan_mgt.extcap.b31 -e wlan_mgt.extcap.b32 -e wlan_mgt.extcap.b46 \
@@ -133,14 +147,12 @@ def tsharker():
 -e wlan_mgt.vht.capabilities.subeamformee -e wlan_mgt.vht.capabilities.beamformerants -e wlan_mgt.vht.capabilities.soundingdimensions -e wlan_mgt.vht.capabilities.mubeamformer \
 -e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -e wlan_mgt.fixed.capabilities.ess -e radiotap.antenna -E separator=+ >> ' + tmppath + 'dwcc.csv', shell=True)
 			#subprocess.call("""sed -i -e 's/ /-/g' -e 's/[<>"^()]//g' /data/tmp/dwcc.csv""", shell=True)
+						#this below will move the pcap into the archive folder
 						os.rename(incomingpath +fname, archivepath +fname)
 						print "pcap found and tshark has ran"
 					else:
 						print "No pcap found waiting 5 mins to rerun"
-						
-						
-						
-						
+
 def macaddressconverter():
 	p = manuf.MacParser(update=True)
 	cursor.execute("""SELECT wlansa from dwccincoming WHERE wlansaconverted IS NULL OR wlansaconverted = '' limit 1;""")
@@ -150,19 +162,24 @@ def macaddressconverter():
 	if mactochange is None:
 		print "all MAC matched to vendors"
 	else:
+		#This below will remove the punctuation for the VAR
 		mactochange = ''.join(c for c in mactochange if c not in string.punctuation)
 		changedmac = p.get_manuf(mactochange)
 		changedmacstr = str(changedmac)
 		mactochangestr = str(mactochange)
+		#This below will write the mac vendor back to the database
 		cursor.execute("UPDATE dwccincoming SET wlansaconverted = "+ `changedmacstr` +" WHERE wlansa  = "+ `mactochangestr` +"   ;")
-#		print changedmac
-#		print mactochange
+#				print changedmac
+#				print mactochange
 		conn.commit()
 		macaddressconverter()
-						
+#			cursor.execute("""SELECT COUNT(wlansa) from dwccincoming WHERE wlansaconverted IS NULL OR wlansaconverted = ''""")
+#			nullrowleft = cursor.fetchone()[0]
+#			print "Total rows left to be converted = ", nullrowleft
+#This will take the CSV and place it into the db
 def dbupdater():
-	
 	csvfile = '/data/tmp/dwcc.csv'
+	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
 	if os.path.isfile(csvfile) and os.access(csvfile, os.R_OK):
 		print "csv found added to db"
 		csv_data = csv.reader(file(csvfile), delimiter='+')
@@ -177,11 +194,13 @@ wlanmgtvhtcapabilitiessubeamformee, wlanmgtvhtcapabilitiesbeamformerants, wlanmg
 wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui,  wlanmgtfixedcapabilitiesess, radiotapantenna)' \
 'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
 		conn.commit()
+#This will remove the file after it is added to the db
 		os.remove(csvfile)
 		print "done with dbupdate waiting for next run"
 	else:
 		print"csv not found will retry"
 
+#This check for the database and if it is not found, it will make it.
 def dbmaker():
 
 	conn = sqlite3.connect(DB_FILE)
