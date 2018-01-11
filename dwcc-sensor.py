@@ -32,7 +32,7 @@ interface1 = 'wlan1mon'
 monitor_enable1  = 'ifconfig wlan1 down; iw dev wlan1 interface add wlan1mon type monitor; ifconfig wlan1mon down; iw dev wlan1mon set type monitor; ifconfig wlan1mon up'
 monitor_disable1 = 'iw dev wlan1mon del; ifconfig wlan1 up'
 change_channel1  = 'iw dev wlan1mon set channel %s'
-channels1 = [6, 48, 1, 11, 36, 40] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
+channels1 = [6, 48, 1, 11, 36, 40, 7] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 
 #At this more than interface has not been tested
 #1 is enabled, 0 is disabled
@@ -73,13 +73,13 @@ def start():
 		os.system(monitor_enable3)
 		print "starting wlan3"
 	stop_rotating = rotator()
-#	stop_uploading = uploader()
+	stop_uploading = uploader()
 	try:sniffer()
 	except KeyboardInterrupt: sys.exit()
 	finally:
 		print "Please wait for everything to stop"
 		stop_rotating.set()
-#		stop_uploading.set()
+		stop_uploading.set()
 		if interface1enable == '1':
 			os.system(monitor_disable1)
 		if interface2enable == '1':
@@ -111,7 +111,6 @@ def rotator():
 #this is the caputre fuction, It will only caputre the mgt frames.
 def sniffer():
 	print "sniffer started"
-
 	commands = [
     'tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/wlan1-%Y-%m-%d_%H.%M.%S.pcap;',
     'tcpdump -i wlan2mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/wlan2-%Y-%m-%d_%H.%M.%S.pcap;',
@@ -125,31 +124,6 @@ def sniffer():
 # wait for completion
 	for p in processes: p.wait()
 
-
-#	def sniffing(stop):
-#		while not stop.is_set():
-#			try:
-#				if interface1enable == '1':
-#					pone = Popen('tcpdump -i wlan0mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/wlan0-%Y-%m-%d_%H.%M.%S.pcap')
-#				if interface2enable == '1':
-#					ptwo = Popen('tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/wlan1-%Y-%m-%d_%H.%M.%S.pcap')
-#					print "tcpdump on wlan1mon would have started"
-#				if interface3enable == '1':
-#					pthree = Popen('tcpdump -i wlan2mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/wlan2-%Y-%m-%d_%H.%M.%S.pcap')
-#					print "tcpdump on wlan2mon would have started"
-#				if interface4enable == '1':
-#				subprocess.Popen('tcpdump -i wlan4mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/wlan4-%Y-%m-%d_%H.%M.%S.pcap', shell=True).wait()
-#				print "tcpdump on wlan4mon would have started"
-#				return pone, ptwo, pthree
-#			except KeyboardInterrupt: pass
-#	stop = multiprocessing.Event()
-#	multiprocessing.Process(target=sniffing, args=[stop]).start()
-#	pone.terminate()
-#	ptwo.terminate()
-#	pthree.terminate()
-#	p4.terminate()
-#	return stop
-	
 #the above will rotate the pcap every 10 mins and keeps 24 hours worth
 def uploader():
 	def upload(stop):
