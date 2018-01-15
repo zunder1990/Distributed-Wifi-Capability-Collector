@@ -61,9 +61,13 @@ hostname = socket.gethostname()
 queue = multiprocessing.Queue()
 incomingpath = '/data/incoming/' #This is the path where new pcaps will be placed
 
+
 #This is the main function
 def start():
 	logging.basicConfig(filename='dwcc.log', format='%(levelname)s:%(message)s', level=logging.INFO)
+	if iamapi == '1':
+		gpinsetup()
+	networkcheck()
 	if interface1enable == '1':
 		os.system(monitor_enable1)
 		print "starting wlan1"
@@ -73,8 +77,7 @@ def start():
 	if interface3enable == '1':
 		os.system(monitor_enable3)
 		print "starting wlan3"
-	if iamapi == '1':
-		gpinsetup()
+
 	stop_rotating = rotator()
 #	stop_uploading = uploader()
 	try:sniffer()
@@ -83,6 +86,7 @@ def start():
 		print "Please wait for everything to stop"
 		if iamapi == '1':
 			GPIO.output(6,GPIO.LOW)
+			GPIO.output(13,GPIO.LOW)
 		stop_rotating.set()
 #		stop_uploading.set()
 		if interface1enable == '1':
@@ -95,6 +99,19 @@ def gpinsetup():
 #settings up things for the led
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setwarnings(False)
+
+def networkcheck():
+	response = os.system("ping -c 1 google.com")
+	if response == 0:
+		print('network is up!')
+		GPIO.setup(13,GPIO.OUT)
+		print "port 13 LED on"
+		GPIO.output(13,GPIO.HIGH)
+	else:
+		print('network is down!')
+		print "port 13 LED off"
+		GPIO.output(13,GPIO.LOW)
+	
 #This will change the channels every 1 sec to scan all in the range. 
 def rotator():
 	def rotate(stop):
