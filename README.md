@@ -60,6 +60,16 @@ This hareware needs to be tested. I have a kit coming for testing
 * POE splitter = $7.59 https://www.aliexpress.com/item/DSLRKIT-Active-PoE-Splitter-48V-to-5V-5-2V-2-4A-USB-TYPE-A-Female-802/32819476796.html
 * Cost = $74.13
  
+## Status LEDs
+The follwing LEDs have been tested with Raspberry Pi 3. To use the status LEDs you must make sure that the VAR "iamapi" is set to 1
+* Gpin 6 is on when sniffer is running
+* Gpin 13 is on when the sensor can ping google.com
+* Pin 1 will come on when the device boots
+
+## Wiring LEDs on PI
+This will be updated at a later time.
+
+
  ## Misc
  Used to pull the packets for one MAC
  * tshark -r bigpcap.pcap -R "wlan.sa == xx:xx:xx:xx:xx:xx" -2 -w temp.pcap
@@ -67,3 +77,4 @@ This hareware needs to be tested. I have a kit coming for testing
  * iw reg get 
  * iw reg set US
  
+
