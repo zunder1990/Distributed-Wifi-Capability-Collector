@@ -112,9 +112,9 @@ def rotator():
 def sniffer():
 	print "sniffer started"
 	commands = [
-    'tcpdump -i wlan1mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/wlan1-%Y-%m-%d_%H.%M.%S.pcap;',
-    'tcpdump -i wlan2mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/wlan2-%Y-%m-%d_%H.%M.%S.pcap;',
-    'tcpdump -i wlan0mon -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w /data/incoming/wlan0-%Y-%m-%d_%H.%M.%S.pcap;',
+    'tcpdump -i '+ interface1 +' -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w '+incomingpath +''+ hostname +'-'+ interface1 +'-%Y-%m-%d_%H.%M.%S.pcap;',
+    'tcpdump -i '+ interface2 +' -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w '+incomingpath +''+ hostname +'-'+ interface2 +'-%Y-%m-%d_%H.%M.%S.pcap;',
+    'tcpdump -i '+ interface3 +' -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w '+incomingpath +''+ hostname +'-'+ interface3 +'-%Y-%m-%d_%H.%M.%S.pcap;',
 ]
 
 
