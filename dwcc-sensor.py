@@ -13,6 +13,7 @@ import subprocess
 import os.path
 import pysftp
 from subprocess import Popen
+import RPi.GPIO as GPIO
 
 
 #1 is enabled, 0 is disabled
@@ -22,8 +23,6 @@ monitor_enable3  = 'ifconfig wlan0 down; iw dev wlan0 interface add wlan0mon typ
 monitor_disable3 = 'iw dev wlan0mon del; ifconfig wlan0 up'
 change_channel3  = 'iw dev wlan0mon set channel %s'
 channels3 = [6, 48, 1, 11, 36, 40, 44, 10 ] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
-
-
 
 #At this more than interface has not been tested
 #1 is enabled, 0 is disabled
@@ -55,6 +54,8 @@ channels2 = [6, 48, 1, 11, 36, 40] #use the linux command "iwlist channel" to ge
 sshhost = '192.168.1.144'  #can be hostname or ip
 sshuser = 'zach'           #make sure that key auth is working
 
+iamapi = '1' # set this to one if this hardware is a raspberrypi and you want to enable the status LEDs
+
 hostname = socket.gethostname()
 
 queue = multiprocessing.Queue()
@@ -72,20 +73,28 @@ def start():
 	if interface3enable == '1':
 		os.system(monitor_enable3)
 		print "starting wlan3"
+	if iamapi == '1':
+		gpinsetup()
 	stop_rotating = rotator()
-	stop_uploading = uploader()
+#	stop_uploading = uploader()
 	try:sniffer()
 	except KeyboardInterrupt: sys.exit()
 	finally:
 		print "Please wait for everything to stop"
+		if iamapi == '1':
+			GPIO.output(6,GPIO.LOW)
 		stop_rotating.set()
-		stop_uploading.set()
+#		stop_uploading.set()
 		if interface1enable == '1':
 			os.system(monitor_disable1)
 		if interface2enable == '1':
 			os.system(monitor_disable2)
 		if interface3enable == '1':
 			os.system(monitor_disable3)
+def gpinsetup():
+#settings up things for the led
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setwarnings(False)
 #This will change the channels every 1 sec to scan all in the range. 
 def rotator():
 	def rotate(stop):
@@ -111,17 +120,19 @@ def rotator():
 #this is the caputre fuction, It will only caputre the mgt frames.
 def sniffer():
 	print "sniffer started"
+	if iamapi == '1':
+		print "port 6 led on"
+		GPIO.setup(6,GPIO.OUT)
+		GPIO.output(6,GPIO.HIGH)
 	commands = [
     'tcpdump -i '+ interface1 +' -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w '+incomingpath +''+ hostname +'-'+ interface1 +'-%Y-%m-%d_%H.%M.%S.pcap;',
     'tcpdump -i '+ interface2 +' -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w '+incomingpath +''+ hostname +'-'+ interface2 +'-%Y-%m-%d_%H.%M.%S.pcap;',
     'tcpdump -i '+ interface3 +' -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w '+incomingpath +''+ hostname +'-'+ interface3 +'-%Y-%m-%d_%H.%M.%S.pcap;',
 ]
-
-
 # run in parallel
 	processes = [Popen(cmd, shell=True) for cmd in commands]
-# do other things here..
-# wait for completion
+
+	# wait for completion
 	for p in processes: p.wait()
 
 #the above will rotate the pcap every 10 mins and keeps 24 hours worth
