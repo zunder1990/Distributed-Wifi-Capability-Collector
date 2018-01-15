@@ -59,10 +59,10 @@ This hareware needs to be tested. I have a kit coming for testing
 * Cost = $74.13
  
 ## Status LEDs
-The follwing LEDs have been tested with Raspberry Pi 3
+The follwing LEDs have been tested with Raspberry Pi 3. To use the status LEDs you must make sure that the VAR "iamapi" is set to 1
 * Gpin 6 is on when sniffer is running
 * Gpin 13 is on when the sensor can ping google.com
 * Pin 1 will come on when the device boots
-To use the status LEDs you must make sure that the VAR "iamapi" is set to 1
+
 
 
