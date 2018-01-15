@@ -79,7 +79,7 @@ def start():
 		print "starting wlan3"
 
 	stop_rotating = rotator()
-#	stop_uploading = uploader()
+	stop_uploading = uploader()
 	try:sniffer()
 	except KeyboardInterrupt: sys.exit()
 	finally:
@@ -88,7 +88,7 @@ def start():
 			GPIO.output(6,GPIO.LOW)
 			GPIO.output(13,GPIO.LOW)
 		stop_rotating.set()
-#		stop_uploading.set()
+		stop_uploading.set()
 		if interface1enable == '1':
 			os.system(monitor_disable1)
 		if interface2enable == '1':
