@@ -64,5 +64,6 @@ The follwing LEDs have been tested with Raspberry Pi 3. To use the status LEDs y
 * Gpin 13 is on when the sensor can ping google.com
 * Pin 1 will come on when the device boots
 
-
+## Wiring LEDs on PI
+This will be updated at a later time.
 
