@@ -39,3 +39,5 @@ The following specifications and features are collected and in the future we wil
 |wlanmgtfixedcapabilitiesess||no||
 |radiotapantenna||no||
 |wlanmgtssid||no||
+
+Great details about some of the above can be found on http://chimera.labs.oreilly.com/books/1234000001739/ch03.html#management_frames
