@@ -1,5 +1,7 @@
 ## Supported collected info
 The following specifications and features are collected and in the future we will include reports displaying the results of the collection.
+
+
 |	Wireshark option name 	|	Description	|	Reporting Support	|Notes	|
 |-----------------------	|-------------	|-------------------	|-------	|
 |	wlan_mgt.vht.capabilities.short80	|	 short Guard Interval 80 Mhz channel support	| yes	|	|
