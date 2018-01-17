@@ -39,5 +39,60 @@ The following specifications and features are collected and in the future we wil
 |wlanmgtfixedcapabilitiesess||no||
 |radiotapantenna||no||
 |wlanmgtssid||no||
+|wlan.extcap.b4||no||
+|wlan.extcap.b3|this is 802.11p|no||  
+|wlan.extcap.b2|this is realted to 802.11y|no|| 
+|wlan.extcap.b1|this is On-demand beacon realted to 802.11p|no|| 
+|wlan.extcap.b6||no||
+|wlan.extcap.b8||no||
+|wlan.extcap.b9||no||
+|wlan.extcap.b10||no||
+|wlan.extcap.b11||no||
+|wlan.extcap.b12||no||
+|wlan.extcap.b13||no||
+|wlan.extcap.b14||no||
+|wlan.extcap.b15||no||
+|wlan.extcap.b16||no||
+|wlan.extcap.b17||no||
+|wlan.extcap.b18||no||
+|wlan.extcap.b20||no||
+|wlan.extcap.b21||no||
+|wlan.extcap.b22||no||
+|wlan.extcap.b23||no||
+|wlan.extcap.b24||no||
+|wlan.extcap.b25||no||
+|wlan.extcap.b26||no||
+|wlan.extcap.b27||no||
+|wlan.extcap.b28||no||
+|wlan.extcap.b29||no||
+|wlan.extcap.b30||no||
+|wlan.extcap.b33||no||
+|wlan.extcap.b34||no||
+|wlan.extcap.b35||no||
+|wlan.extcap.b36||no||
+|wlan.extcap.b37||no||
+|wlan.extcap.b38||no||
+|wlan.extcap.b39||no||
+|wlan.extcap.b40||no||
+|wlan.extcap.serv_int_granularity||no||
+|wlan.extcap.b44||no||
+|wlan.extcap.b45||no||
+|wlan.extcap.b46||no||
+|wlan.extcap.b47||no||
+|wlan.extcap.b48||no||
+|wlan.extcap.b61||no||
+|wlan.extcap.b62||no||
+|wlan.extcap.b63||no||
+|wlan.vht.capabilities.rxstbc|realted to Spatial Stream Supported |no|| 
+|wlan.vht.mcsset.rxmcsmap.ss2 |realted to Spatial Stream Supported|no||
+|wlan.vht.mcsset.rxmcsmap.ss1 |realted to Spatial Stream Supported|no||
+|wlan.vht.mcsset.rxmcsmap.ss3 |realted to Spatial Stream Supported|no||
+|wlan.vht.mcsset.rxmcsmap.ss4 |realted to Spatial Stream Supported|no||
+|wlan.vht.mcsset.txmcsmap.ss1 |realted to Spatial Stream Supported|no||
+|wlan.vht.mcsset.txmcsmap.ss2 |realted to Spatial Stream Supported|no||
+|wlan.vht.mcsset.txmcsmap.ss1 |realted to Spatial Stream Supported|no||
+|wlan.vht.mcsset.txmcsmap.ss2 |realted to Spatial Stream Supported|no||
+|wlan.vht.mcsset.txmcsmap.ss3 |realted to Spatial Stream Supported|no||
+|wlan.vht.mcsset.txmcsmap.ss4 |realted to Spatial Stream Supported|no||
 
 Great details about some of the above can be found on http://chimera.labs.oreilly.com/books/1234000001739/ch03.html#management_frames

@@ -138,11 +138,11 @@ def charting():
 	print "Total number of clients that support can send frames from single user beamforming AP= ", wlanmgtvhtcapabilitiessubeamformer
 	print "device vendors =", devicemaker
 	print "The channel the client was found on = ", channelgroup
-	print "power max", wlanmgtpowercapmax
-	print "power min", wlanmgtpowercapmin
-	print "Total number of clients that support 802.11h/dfs channels. This will only show on 5ghz clients", wlanmgtfixedcapabilitiesspecman
-	print "Maximum MPDU Length in bytes", wlanmgtvhtcapabilitiesmaxmpdulength
-	print "Total number of clients that support 802.11k", wlanmgtfixedcapabilitiesradiomeasurement
+	print "power max = ", wlanmgtpowercapmax
+	print "power min = ", wlanmgtpowercapmin
+	print "Total number of clients that support 802.11h/dfs channels. This will only show on 5ghz clients = ", wlanmgtfixedcapabilitiesspecman
+	print "Maximum MPDU Length in bytes = "  , wlanmgtvhtcapabilitiesmaxmpdulength
+	print "Total number of clients that support 802.11k = ", wlanmgtfixedcapabilitiesradiomeasurement
 	print "total number of clients that support 160hmz contiguous only = ", wlanmgtvhtcapabilitiessupportedchanwidthset1
 	print "total number of clients that support 160hmz contiguous and 80+80 = ", wlanmgtvhtcapabilitiessupportedchanwidthset2
 	print "Total number of clients that can receive LDPC-encoded frames = ", wlanmgtvhtcapabilitiesrxldpc
@@ -173,14 +173,22 @@ def tsharker():
 	for fname in os.listdir(incomingpath):
 					if fname.endswith('.pcap'):
 						pcapfile = incomingpath +fname
-						subprocess.call('tshark -r ' + pcapfile + '  -R "wlan.fc.type_subtype == 0x0 or wlan.fc.type_subtype == 0x2" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
+						subprocess.call('tshark -r ' + pcapfile + '   -R "wlan.fc.type_subtype == 0x0 or wlan.fc.type_subtype == 0x2" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
 -e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
 -e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
 -e wlan_mgt.powercap.max -e wlan_mgt.powercap.min -e wlan_mgt.rsn.capabilities.mfpc -e wlan_mgt.extcap.b31 -e wlan_mgt.extcap.b32 -e wlan_mgt.extcap.b46 \
 -e wlan_mgt.tag.number -e wlan_mgt.vht.capabilities.maxmpdulength -e wlan_mgt.vht.capabilities.supportedchanwidthset -e wlan_mgt.vht.capabilities.rxldpc \
 -e wlan_mgt.vht.capabilities.short80 -e wlan_mgt.vht.capabilities.short160 -e wlan_mgt.vht.capabilities.txstbc -e wlan_mgt.vht.capabilities.subeamformer \
 -e wlan_mgt.vht.capabilities.subeamformee -e wlan_mgt.vht.capabilities.beamformerants -e wlan_mgt.vht.capabilities.soundingdimensions -e wlan_mgt.vht.capabilities.mubeamformer \
--e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -e wlan_mgt.fixed.capabilities.ess -e radiotap.antenna -E separator=+ >> ' + tmppath + 'dwcc.csv', shell=True)
+-e wlan_mgt.vht.capabilities.mubeamformee -e wlan_mgt.tag.oui -e wlan_mgt.fixed.capabilities.ess -e radiotap.antenna \
+-e wlan_mgt.extcap.b4 -e wlan_mgt.extcap.b3 -e wlan_mgt.extcap.b2 -e wlan_mgt.extcap.b1 -e wlan_mgt.extcap.b6 -e wlan_mgt.extcap.b8 -e wlan_mgt.extcap.b9 -e wlan_mgt.extcap.b10 -e wlan_mgt.extcap.b11 \
+-e wlan_mgt.extcap.b12 -e wlan_mgt.extcap.b13 -e wlan_mgt.extcap.b14 -e wlan_mgt.extcap.b15 -e wlan_mgt.extcap.b16 -e wlan_mgt.extcap.b17 -e wlan_mgt.extcap.b18 -e wlan_mgt.extcap.b20 -e wlan_mgt.extcap.b21 \
+-e wlan_mgt.extcap.b22 -e wlan_mgt.extcap.b23 -e wlan_mgt.extcap.b24 -e wlan_mgt.extcap.b25 -e wlan_mgt.extcap.b26 -e wlan_mgt.extcap.b27 -e wlan_mgt.extcap.b28 -e wlan_mgt.extcap.b29 -e wlan_mgt.extcap.b30 \
+-e wlan_mgt.extcap.b33 -e wlan_mgt.extcap.b34 -e wlan_mgt.extcap.b35 -e wlan_mgt.extcap.b36 -e wlan_mgt.extcap.b37 -e wlan_mgt.extcap.b38 -e wlan_mgt.extcap.b39 -e wlan_mgt.extcap.b40 -e wlan_mgt.extcap.serv_int_granularity \
+-e wlan_mgt.extcap.b44 -e wlan_mgt.extcap.b45 -e wlan_mgt.extcap.b47 -e wlan_mgt.extcap.b48 -e wlan_mgt.extcap.b61 -e wlan_mgt.extcap.b62 -e wlan_mgt.extcap.b63 -e wlan_mgt.vht.capabilities.rxstbc \
+-e wlan_mgt.vht.mcsset.rxmcsmap.ss1 -e wlan_mgt.vht.mcsset.rxmcsmap.ss2 -e wlan_mgt.vht.mcsset.rxmcsmap.ss3 -e wlan_mgt.vht.mcsset.rxmcsmap.ss4 \
+-e wlan_mgt.vht.mcsset.txmcsmap.ss1 -e wlan_mgt.vht.mcsset.txmcsmap.ss2 -e wlan_mgt.vht.mcsset.txmcsmap.ss3 -e wlan_mgt.vht.mcsset.txmcsmap.ss4 \
+-E separator=+ >> ' + tmppath + 'dwcc.csv', shell=True)
 			#subprocess.call("""sed -i -e 's/ /-/g' -e 's/[<>"^()]//g' /data/tmp/dwcc.csv""", shell=True)
 						#this below will move the pcap into the archive folder
 						os.rename(incomingpath +fname, archivepath +fname)
@@ -204,13 +212,9 @@ def macaddressconverter():
 		mactochangestr = str(mactochange)
 		#This below will write the mac vendor back to the database
 		cursor.execute("UPDATE dwccincoming SET wlansaconverted = "+ `changedmacstr` +" WHERE wlansa  = "+ `mactochangestr` +"   ;")
-#				print changedmac
-#				print mactochange
 		conn.commit()
 		macaddressconverter()
-#			cursor.execute("""SELECT COUNT(wlansa) from dwccincoming WHERE wlansaconverted IS NULL OR wlansaconverted = ''""")
-#			nullrowleft = cursor.fetchone()[0]
-#			print "Total rows left to be converted = ", nullrowleft
+
 #This will take the CSV and place it into the db
 def dbupdater():
 	csvfile = '/data/tmp/dwcc.csv'
@@ -226,8 +230,14 @@ wlanmgtpowercapmax, wlanmgtpowercapmin, wlanmgtrsncapabilitiesmfpc, wlanmgtextca
 wlanmgttagnumber, wlanmgtvhtcapabilitiesmaxmpdulength, wlanmgtvhtcapabilitiessupportedchanwidthset, wlanmgtvhtcapabilitiesrxldpc, \
 wlanmgtvhtcapabilitiesshort80, wlanmgtvhtcapabilitiesshort160, wlanmgtvhtcapabilitiestxstbc, wlanmgtvhtcapabilitiessubeamformer, \
 wlanmgtvhtcapabilitiessubeamformee, wlanmgtvhtcapabilitiesbeamformerants, wlanmgtvhtcapabilitiessoundingdimensions, wlanmgtvhtcapabilitiesmubeamformer, \
-wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui,  wlanmgtfixedcapabilitiesess, radiotapantenna)' \
-'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
+wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui,  wlanmgtfixedcapabilitiesess, radiotapantenna, \
+wlanmgtextcapb4, wlanmgtextcapb3, wlanmgtextcapb2, wlanmgtextcapb1, wlanmgtextcapb6, wlanmgtextcapb8, wlanmgtextcapb9, wlanmgtextcapb10, wlanmgtextcapb11, wlanmgtextcapb12, \
+wlanmgtextcapb13, wlanmgtextcapb14, wlanmgtextcapb15, wlanmgtextcapb16, wlanmgtextcapb17, wlanmgtextcapb18, wlanmgtextcapb20, wlanmgtextcapb21, wlanmgtextcapb22, wlanmgtextcapb23, \
+wlanmgtextcapb24, wlanmgtextcapb25, wlanmgtextcapb26, wlanmgtextcapb27, wlanmgtextcapb28, wlanmgtextcapb29, wlanmgtextcapb30, wlanmgtextcapb33, wlanmgtextcapb34, wlanmgtextcapb35, \
+wlanmgtextcapb36, wlanmgtextcapb37, wlanmgtextcapb38, wlanmgtextcapb39, wlanmgtextcapb40, wlanmgtextcapservintgranularity, wlanmgtextcapb44, wlanmgtextcapb45, wlanmgtextcapb47, \
+wlanmgtextcapb48, wlanmgtextcapb61, wlanmgtextcapb62, wlanmgtextcapb63, wlanmgtvhtcapabilitiesrxstbc, wlanmgtvhtmcssetrxmcsmapss1, wlanmgtvhtmcssetrxmcsmapss2, wlanmgtvhtmcssetrxmcsmapss3, \
+wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsmapss2, wlanmgtvhtmcssettxmcsmapss3, wlanmgtvhtmcssettxmcsmapss4)' \
+'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
 		conn.commit()
 #This will remove the file after it is added to the db
 		os.remove(csvfile)
@@ -278,64 +288,61 @@ wlanmgttagoui char(50),
 wlanmgtfixedcapabilitiesess char(50),
 radiotapantenna char(50), 
 wlanmgtssid char(100),
-wlansaconverted char(200));''')
+wlansaconverted char(200),
+wlanmgtextcapb4 char(50), 
+wlanmgtextcapb3 char(50),
+wlanmgtextcapb2 char(50),
+wlanmgtextcapb1 char(50),
+wlanmgtextcapb6 char(50),
+wlanmgtextcapb8 char(50),
+wlanmgtextcapb9 char(50),
+wlanmgtextcapb10 char(50),
+wlanmgtextcapb11 char(50),
+wlanmgtextcapb12 char(50),
+wlanmgtextcapb13 char(50),
+wlanmgtextcapb14 char(50),
+wlanmgtextcapb15 char(50),
+wlanmgtextcapb16 char(50),
+wlanmgtextcapb17 char(50),
+wlanmgtextcapb18 char(50),
+wlanmgtextcapb20 char(50),
+wlanmgtextcapb21 char(50),
+wlanmgtextcapb22 char(50),
+wlanmgtextcapb23 char(50),
+wlanmgtextcapb24 char(50),
+wlanmgtextcapb25 char(50),
+wlanmgtextcapb26 char(50),
+wlanmgtextcapb27 char(50),
+wlanmgtextcapb28 char(50),
+wlanmgtextcapb29 char(50),
+wlanmgtextcapb30 char(50),
+wlanmgtextcapb33 char(50),
+wlanmgtextcapb34 char(50),
+wlanmgtextcapb35 char(50),
+wlanmgtextcapb36 char(50),
+wlanmgtextcapb37 char(50),
+wlanmgtextcapb38 char(50),
+wlanmgtextcapb39 char(50),
+wlanmgtextcapb40 char(50),
+wlanmgtextcapservintgranularity char(50),
+wlanmgtextcapb44 char(50),
+wlanmgtextcapb45 char(50),
+wlanmgtextcapb47 char(50),
+wlanmgtextcapb48 char(50),
+wlanmgtextcapb61 char(50),
+wlanmgtextcapb62 char(50),
+wlanmgtextcapb63 char(50),
+wlanmgtvhtcapabilitiesrxstbc char(50),
+wlanmgtvhtmcssetrxmcsmapss1 char(50),
+wlanmgtvhtmcssetrxmcsmapss2 char(50),
+wlanmgtvhtmcssetrxmcsmapss3 char(50),
+wlanmgtvhtmcssetrxmcsmapss4 char(50),
+wlanmgtvhtmcssettxmcsmapss1 char(50),
+wlanmgtvhtmcssettxmcsmapss2 char(50),
+wlanmgtvhtmcssettxmcsmapss3 char(50),
+wlanmgtvhtmcssettxmcsmapss4 char(50));''')
 
 	conn.commit()
 
 start()
 ## add support for 
-#wlan.extcap.b4 == 0
-#wlan.extcap.b3  this is 802.11p
-#wlan.extcap.b2 this is realted to 802.11y
-# wlan.extcap.b1 this is On-demand beacon realted to 802.11p
-# wlan.extcap.b6
-#wlan.extcap.b8 == 0
-#wlan.extcap.b9 == 0
-#wlan.extcap.b10 == 0
-#wlan.extcap.b11 == 0
-#wlan.extcap.b12 == 0
-#wlan.extcap.b13 == 0
-#wlan.extcap.b14 == 0
-#wlan.extcap.b15 == 0
-#wlan.extcap.b16 == 0
-#wlan.extcap.b17 == 0
-#wlan.extcap.b18 == 0
-#wlan.extcap.b20 == 0
-#wlan.extcap.b21 == 0
-#wlan.extcap.b22 == 0
-#wlan.extcap.b23 == 0
-#wlan.extcap.b24 == 0
-#wlan.extcap.b25 == 0
-#wlan.extcap.b26 == 0
-#wlan.extcap.b27 == 0
-#wlan.extcap.b28 == 0
-#wlan.extcap.b29 == 0
-#wlan.extcap.b30 == 0
-#wlan.extcap.b33 == 0
-#wlan.extcap.b34 == 0
-#wlan.extcap.b35 == 0
-#wlan.extcap.b36 == 0
-#wlan.extcap.b37 == 0
-#wlan.extcap.b38 == 0
-#wlan.extcap.b39 == 0
-#wlan.extcap.b40 == 0
-#wlan.extcap.serv_int_granularity
-#wlan.extcap.b44 == 0
-#wlan.extcap.b45 == 0
-#wlan.extcap.b46 == 0
-#wlan.extcap.b47 == 0
-#wlan.extcap.b48 
-#wlan.extcap.b61
-#wlan.extcap.b62
-#wlan.extcap.b63
-#wlan.vht.capabilities.rxstbc == 0x1 realted to Spatial Stream Supported 
-#wlan.vht.mcsset.rxmcsmap.ss2 realted to Spatial Stream Supported
-#wlan.vht.mcsset.rxmcsmap.ss1 realted to Spatial Stream Supported
-#wlan.vht.mcsset.rxmcsmap.ss3 realted to Spatial Stream Supported
-#wlan.vht.mcsset.rxmcsmap.ss4 realted to Spatial Stream Supported
-#wlan.vht.mcsset.txmcsmap.ss1 realted to Spatial Stream Supported
-#wlan.vht.mcsset.txmcsmap.ss2 realted to Spatial Stream Supported
-#wlan.vht.mcsset.txmcsmap.ss1 realted to Spatial Stream Supported
-#wlan.vht.mcsset.txmcsmap.ss2 realted to Spatial Stream Supported
-#wlan.vht.mcsset.txmcsmap.ss3 realted to Spatial Stream Supported
-#wlan.vht.mcsset.txmcsmap.ss4 realted to Spatial Stream Supported
