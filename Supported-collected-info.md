@@ -1,5 +1,4 @@
-80 Mhz channel support = wlan_mgt.vht.capabilities.short80 done
-160 Mhz channel support = wlan_mgt.vht.capabilities.short160 done
+
 802.11W = wlan.fc.protected(this one needs more fact checking)
 MAC address of the client = wlan.sa
 MAC address of the AP receiving the packet = wlan.bssid
@@ -15,7 +14,7 @@ radiotap.channel.flags.2ghz done
 wlan_mgt.fixed.capabilities.spec_man this is realted to 802.11h and dfs done
 wlan_mgt.powercap.max done
 wlan_mgt.powercap.min done
-wlan_mgt.rsn.capabilities.mfpc done
+ done
 wlan_mgt.extcap.b31 done
 wlan_mgt.extcap.b32 done
 wlan_mgt.extcap.b46 done
@@ -34,8 +33,9 @@ wlanmgtfixedcapabilitiesess
 radiotapantenna
 wlanmgtssid
 
-| Wireshark option name 	| Description 	| Reporting Support 	| Notes 	|   	|
-|-----------------------	|-------------	|-------------------	|-------	|---	|
-| wlan_mgt.vht.capabilities.short80  | 80 Mhz channel support           	| yes                	|      	|   	|
-|                       	|             	|                   	|       	|   	|
-|                       	|             	|                   	|       	|   	|
+|	Wireshark option name 	|	Description	|	Reporting Support	|Notes	|
+|-----------------------	|-------------	|-------------------	|-------	|
+|	wlan_mgt.vht.capabilities.short80	|	 short Guard Interval 80 Mhz channel support	| yes	|	|
+|	wlan_mgt.vht.capabilities.short160	|	short Guard Interval 80 Mhz channel support	|	yes	|	|
+|	wlan.fc.protected	|	|	no	|	|
+|	wlan_mgt.rsn.capabilities.mfpc	|	802.11W	|yes||
