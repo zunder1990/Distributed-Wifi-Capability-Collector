@@ -100,6 +100,16 @@ def charting():
 	wlanmgtvhtcapabilitiessubeamformee=cursor.fetchone()[0]
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessubeamformer = 1;')
 	wlanmgtvhtcapabilitiessubeamformer=cursor.fetchone()[0]
+	cursor.execute('SELECT wlanmgtpowercapmax, count(wlanmgtpowercapmax) FROM dwccincoming GROUP BY wlanmgtpowercapmax ORDER BY count(wlanmgtpowercapmax) DESC;')
+	wlanmgtpowercapmax=cursor.fetchall()
+	cursor.execute('SELECT wlanmgtpowercapmin, count(wlanmgtpowercapmin) FROM dwccincoming GROUP BY wlanmgtpowercapmin ORDER BY count(wlanmgtpowercapmin) DESC;')
+	wlanmgtpowercapmin=cursor.fetchall()
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtfixedcapabilitiesspecman = 1;')
+	wlanmgtfixedcapabilitiesspecman=cursor.fetchone()[0]
+	cursor.execute('SELECT wlanmgtvhtcapabilitiesmaxmpdulength, count(wlanmgtvhtcapabilitiesmaxmpdulength) FROM dwccincoming GROUP BY wlanmgtvhtcapabilitiesmaxmpdulength ORDER BY count(wlanmgtvhtcapabilitiesmaxmpdulength) DESC;')
+	wlanmgtvhtcapabilitiesmaxmpdulength=cursor.fetchall()
+	
+	wlanmgtvhtcapabilitiesmaxmpdulength
 	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
 	print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
 	print "Total number of clients found to support Sounding Dimensions of 3 = ", soundingdimensions3
@@ -118,12 +128,19 @@ def charting():
 	print "Total number of clients that support can send frames from single user beamforming AP= ", wlanmgtvhtcapabilitiessubeamformer
 	print devicemaker
 	print channelgroup
+	print "power max", wlanmgtpowercapmax
+	print "power min", wlanmgtpowercapmin
+	print "Total number of clients that support 802.11h/dfs channels. This will only show on 5ghz clients", wlanmgtfixedcapabilitiesspecman
+	print "Maximum MPDU Length in bytes", wlanmgtvhtcapabilitiesmaxmpdulength
 
 def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '0' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000000';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '3' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000002';")
 	cursor.execute("UPDATE dwccincoming SET wlansaconverted = 'vendornotfound' WHERE wlansaconverted  = 'None';")
+	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiesmaxmpdulength = '11454' WHERE wlanmgtvhtcapabilitiesmaxmpdulength  = '0x00000002';")
+	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiesmaxmpdulength = '7991' WHERE wlanmgtvhtcapabilitiesmaxmpdulength  = '0x00000001';")
+	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiesmaxmpdulength = '3895' WHERE wlanmgtvhtcapabilitiesmaxmpdulength  = '0x00000000';")
 	conn.commit()
 
 #def mergecap():
@@ -248,3 +265,59 @@ wlansaconverted char(200));''')
 	conn.commit()
 
 start()
+## add support for 
+#wlan.extcap.b4 == 0
+#wlan.extcap.b3  this is 802.11p
+#wlan.extcap.b2 this is realted to 802.11y
+# wlan.extcap.b1 this is On-demand beacon realted to 802.11p
+# wlan.extcap.b6
+#wlan.extcap.b8 == 0
+#wlan.extcap.b9 == 0
+#wlan.extcap.b10 == 0
+#wlan.extcap.b11 == 0
+#wlan.extcap.b12 == 0
+#wlan.extcap.b13 == 0
+#wlan.extcap.b14 == 0
+#wlan.extcap.b15 == 0
+#wlan.extcap.b16 == 0
+#wlan.extcap.b17 == 0
+#wlan.extcap.b18 == 0
+#wlan.extcap.b20 == 0
+#wlan.extcap.b21 == 0
+#wlan.extcap.b22 == 0
+#wlan.extcap.b23 == 0
+#wlan.extcap.b24 == 0
+#wlan.extcap.b25 == 0
+#wlan.extcap.b26 == 0
+#wlan.extcap.b27 == 0
+#wlan.extcap.b28 == 0
+#wlan.extcap.b29 == 0
+#wlan.extcap.b30 == 0
+#wlan.extcap.b33 == 0
+#wlan.extcap.b34 == 0
+#wlan.extcap.b35 == 0
+#wlan.extcap.b36 == 0
+#wlan.extcap.b37 == 0
+#wlan.extcap.b38 == 0
+#wlan.extcap.b39 == 0
+#wlan.extcap.b40 == 0
+#wlan.extcap.serv_int_granularity
+#wlan.extcap.b44 == 0
+#wlan.extcap.b45 == 0
+#wlan.extcap.b46 == 0
+#wlan.extcap.b47 == 0
+#wlan.extcap.b48 
+#wlan.extcap.b61
+#wlan.extcap.b62
+#wlan.extcap.b63
+#wlan.vht.capabilities.rxstbc == 0x1 realted to Spatial Stream Supported 
+#wlan.vht.mcsset.rxmcsmap.ss2 realted to Spatial Stream Supported
+#wlan.vht.mcsset.rxmcsmap.ss1 realted to Spatial Stream Supported
+#wlan.vht.mcsset.rxmcsmap.ss3 realted to Spatial Stream Supported
+#wlan.vht.mcsset.rxmcsmap.ss4 realted to Spatial Stream Supported
+#wlan.vht.mcsset.txmcsmap.ss1 realted to Spatial Stream Supported
+#wlan.vht.mcsset.txmcsmap.ss2 realted to Spatial Stream Supported
+#wlan.vht.mcsset.txmcsmap.ss1 realted to Spatial Stream Supported
+#wlan.vht.mcsset.txmcsmap.ss2 realted to Spatial Stream Supported
+#wlan.vht.mcsset.txmcsmap.ss3 realted to Spatial Stream Supported
+#wlan.vht.mcsset.txmcsmap.ss4 realted to Spatial Stream Supported
