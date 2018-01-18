@@ -16,7 +16,7 @@ The following specifications and features are collected and in the future we wil
 |wlan.fc.pwrmgt||no||
 |wlan_mgt.fixed.capabilities.radio_measurement|802.11k support|yes||
 |wlan_mgt.ht.mcsset.txmaxss||no||
-|radiotap.channel.flags.ofdm||no||
+|radiotap.channel.flags.ofdm|Orthogonal Frequency-Division Multiplexing OFDM|yes||
 |radiotap.channel.flags.5ghz| clients found on 5ghz|yes||
 |radiotap.channel.flags.2ghz| clients found on 2.4ghz|yes||
 |wlan_mgt.fixed.capabilities.spec_man|this is realted to 802.11h and dfs|yes||
@@ -39,16 +39,16 @@ The following specifications and features are collected and in the future we wil
 |wlanmgtfixedcapabilitiesess||no||
 |radiotapantenna||no||
 |wlanmgtssid||no||
-|wlan.extcap.b4||no||
-|wlan.extcap.b3|this is 802.11p|no||  
-|wlan.extcap.b2|this is realted to 802.11y|no|| 
-|wlan.extcap.b1|this is On-demand beacon realted to 802.11p|no|| 
-|wlan.extcap.b6||no||
-|wlan.extcap.b8||no||
-|wlan.extcap.b9||no||
+|wlan.extcap.b4|PSMP Capability related to power mgt |yes||
+|wlan.extcap.b3|WAVE indication this is 802.11p|yes||  
+|wlan.extcap.b2|Extended Channel Switching this is realted to 802.11y|yes|| 
+|wlan.extcap.b1|this is On-demand beacon realted to 802.11p|yes|| 
+|wlan.extcap.b6| Scheduled PSMP|yes||
+|wlan.extcap.b8|Diagnostic Report |yes|Section 10.23.2.1 of IEEE 802.11-2012|
+|wlan.extcap.b9|Multicast Diagnostics|yes||
 |wlan.extcap.b10||no||
-|wlan.extcap.b11||no||
-|wlan.extcap.b12||no||
+|wlan.extcap.b11|Flexible Multicast Service |no||
+|wlan.extcap.b12|Proxy ARP in 802.11-2012|no||
 |wlan.extcap.b13||no||
 |wlan.extcap.b14||no||
 |wlan.extcap.b15||no||

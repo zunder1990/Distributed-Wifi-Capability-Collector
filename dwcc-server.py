@@ -116,8 +116,23 @@ def charting():
 	wlanmgtvhtcapabilitiesrxldpc=cursor.fetchone()[0]
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiestxstbc = 1;')
 	wlanmgtvhtcapabilitiestxstbc=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb1 = 1;')
+	wlanmgtextcapb1=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb2 = 1;')
+	wlanmgtextcapb2=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb3 = 1;')
+	wlanmgtextcapb3=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb4 = 1;')
+	wlanmgtextcapb4=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb6 = 1;')
+	wlanmgtextcapb6=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb8 = 1;')
+	wlanmgtextcapb8=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb9 = 1;')
+	wlanmgtextcapb9=cursor.fetchone()[0]
 	
-	
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE radiotapchannelflagsofdm = 1;')
+	radiotapchannelflagsofdm=cursor.fetchone()[0]
 	cursor.execute('SELECT wlanmgtvhtcapabilitiesmaxmpdulength, count(wlanmgtvhtcapabilitiesmaxmpdulength) FROM dwccincoming GROUP BY wlanmgtvhtcapabilitiesmaxmpdulength ORDER BY count(wlanmgtvhtcapabilitiesmaxmpdulength) DESC;')
 	wlanmgtvhtcapabilitiesmaxmpdulength=cursor.fetchall()
 	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
@@ -147,7 +162,14 @@ def charting():
 	print "total number of clients that support 160hmz contiguous and 80+80 = ", wlanmgtvhtcapabilitiessupportedchanwidthset2
 	print "Total number of clients that can receive LDPC-encoded frames = ", wlanmgtvhtcapabilitiesrxldpc
 	print "Total number of clients that can Tansmission of STBC-coded frames = ", wlanmgtvhtcapabilitiestxstbc
-	
+	print "Total number for clients that support On-demand beacon realted to 802.11p = ", wlanmgtextcapb1
+	print "Total number for clients that support Extended Channel Switching  = ", wlanmgtextcapb2
+	print "Total number for clients that support WAVE indication this is 802.11p = ", wlanmgtextcapb3
+	print "Total number for clients that support PSMP Capability  = ", wlanmgtextcapb4
+	print "Total number for clients that support Scheduled PSMP = ", wlanmgtextcapb6
+	print "Total number for clients that support Diagnostic Report = ", wlanmgtextcapb8
+	print "Total number for clients that support Multicast Diagnostics = ", wlanmgtextcapb9
+	print "Total number for clients that support Orthogonal Frequency-Division Multiplexing OFDM = ", radiotapchannelflagsofdm
 def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '0' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000000';")
