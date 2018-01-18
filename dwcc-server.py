@@ -116,8 +116,66 @@ def charting():
 	wlanmgtvhtcapabilitiesrxldpc=cursor.fetchone()[0]
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiestxstbc = 1;')
 	wlanmgtvhtcapabilitiestxstbc=cursor.fetchone()[0]
-	
-	
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb1 = 1;')
+	wlanmgtextcapb1=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb2 = 1;')
+	wlanmgtextcapb2=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb3 = 1;')
+	wlanmgtextcapb3=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb4 = 1;')
+	wlanmgtextcapb4=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb6 = 1;')
+	wlanmgtextcapb6=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb8 = 1;')
+	wlanmgtextcapb8=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb9 = 1;')
+	wlanmgtextcapb9=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb10 = 1;')
+	wlanmgtextcapb10=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb11 = 1;')
+	wlanmgtextcapb11=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb12 = 1;')
+	wlanmgtextcapb12=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb13 = 1;')
+	wlanmgtextcapb13=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb14 = 1;')
+	wlanmgtextcapb14=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb15 = 1;')
+	wlanmgtextcapb15=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb16 = 1;')
+	wlanmgtextcapb16=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb17 = 1;')
+	wlanmgtextcapb17=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb18 = 1;')
+	wlanmgtextcapb18=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb20 = 1;')
+	wlanmgtextcapb20=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb21 = 1;')
+	wlanmgtextcapb21=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb22 = 1;')
+	wlanmgtextcapb22=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb23 = 1;')
+	wlanmgtextcapb23=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb24 = 1;')
+	wlanmgtextcapb24=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb25 = 1;')
+	wlanmgtextcapb25=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb26 = 1;')
+	wlanmgtextcapb26=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb27 = 1;')
+	wlanmgtextcapb27=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb28 = 1;')
+	wlanmgtextcapb28=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb29 = 1;')
+	wlanmgtextcapb29=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb30 = 1;')
+	wlanmgtextcapb30=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb33 = 1;')
+	wlanmgtextcapb33=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb34 = 1;')
+	wlanmgtextcapb34=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE radiotapchannelflagsofdm = 1;')
+	radiotapchannelflagsofdm=cursor.fetchone()[0]
 	cursor.execute('SELECT wlanmgtvhtcapabilitiesmaxmpdulength, count(wlanmgtvhtcapabilitiesmaxmpdulength) FROM dwccincoming GROUP BY wlanmgtvhtcapabilitiesmaxmpdulength ORDER BY count(wlanmgtvhtcapabilitiesmaxmpdulength) DESC;')
 	wlanmgtvhtcapabilitiesmaxmpdulength=cursor.fetchall()
 	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
@@ -147,7 +205,37 @@ def charting():
 	print "total number of clients that support 160hmz contiguous and 80+80 = ", wlanmgtvhtcapabilitiessupportedchanwidthset2
 	print "Total number of clients that can receive LDPC-encoded frames = ", wlanmgtvhtcapabilitiesrxldpc
 	print "Total number of clients that can Tansmission of STBC-coded frames = ", wlanmgtvhtcapabilitiestxstbc
-	
+	print "Total number for clients that support On-demand beacon realted to 802.11p = ", wlanmgtextcapb1
+	print "Total number for clients that support Extended Channel Switching  = ", wlanmgtextcapb2
+	print "Total number for clients that support WAVE indication this is 802.11p = ", wlanmgtextcapb3
+	print "Total number for clients that support PSMP Capability  = ", wlanmgtextcapb4
+	print "Total number for clients that support Scheduled PSMP = ", wlanmgtextcapb6
+	print "Total number for clients that support Diagnostic Report = ", wlanmgtextcapb8
+	print "Total number for clients that support Multicast Diagnostics = ", wlanmgtextcapb9
+	print "Total number for clients that support Orthogonal Frequency-Division Multiplexing OFDM = ", radiotapchannelflagsofdm
+	print "Total number for clients that support Location Tracking = ", wlanmgtextcapb10
+	print "Total number for clients that support Flexible Multicast Service = ", wlanmgtextcapb11
+	print "Total number for clients that support Proxy ARP in 802.11-2012 = ", wlanmgtextcapb12
+	print "Total number for clients that support Collocated Interference Reporting = ", wlanmgtextcapb13
+	print "Total number for clients that support Civic Location = ", wlanmgtextcapb14
+	print "Total number for clients that support Geospatial Location = ", wlanmgtextcapb15
+	print "Total number for clients that support TFS = ", wlanmgtextcapb16
+	print "Total number for clients that support WNM-Sleep Mode = ", wlanmgtextcapb17
+	print "Total number for clients that support TIM Broadcast = ", wlanmgtextcapb18
+	print "Total number for clients that support QoS Traffic Capability = ", wlanmgtextcapb20
+	print "Total number for clients that support AC Station Count = ", wlanmgtextcapb21
+	print "Total number for clients that support Multiple BSSID = ", wlanmgtextcapb22
+	print "Total number for clients that support Timing Measurement = ", wlanmgtextcapb23
+	print "Total number for clients that support Channel Usage = ", wlanmgtextcapb24
+	print "Total number for clients that support SSID List = ", wlanmgtextcapb25
+	print "Total number for clients that support DMS = ", wlanmgtextcapb26
+	print "Total number for clients that support UTC TSF Offset = ", wlanmgtextcapb27
+	print "Total number for clients that support Peer U-APSD Buffer STA Support = ", wlanmgtextcapb28
+	print "Total number for clients that support TDLS Peer PSM Support = ", wlanmgtextcapb29
+	print "Total number for clients that support TDLS channel switching = ", wlanmgtextcapb30
+	print "Total number for clients that support EBR = ", wlanmgtextcapb33
+	print "Total number for clients that support SSPN Interface = ", wlanmgtextcapb34
+
 def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '0' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000000';")
@@ -345,4 +433,4 @@ wlanmgtvhtmcssettxmcsmapss4 char(50));''')
 	conn.commit()
 
 start()
-## add support for 
+
