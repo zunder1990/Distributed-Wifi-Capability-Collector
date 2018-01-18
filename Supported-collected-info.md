@@ -46,28 +46,28 @@ The following specifications and features are collected and in the future we wil
 |wlan.extcap.b6| Scheduled PSMP|yes||
 |wlan.extcap.b8|Diagnostic Report |yes|Section 10.23.2.1 of IEEE 802.11-2012|
 |wlan.extcap.b9|Multicast Diagnostics|yes||
-|wlan.extcap.b10|Location Tracking|no||
-|wlan.extcap.b11|Flexible Multicast Service |no||
-|wlan.extcap.b12|Proxy ARP in 802.11-2012|no||
-|wlan.extcap.b13|Collocated Interference Reporting|no||
-|wlan.extcap.b14|Civic Location|no||
-|wlan.extcap.b15|Geospatial Location|no||
-|wlan.extcap.b16|TFS|no||
-|wlan.extcap.b17|WNM-Sleep Mode|no||
-|wlan.extcap.b18|TIM Broadcast|no||
-|wlan.extcap.b20|QoS Traffic Capability|no||
-|wlan.extcap.b21|AC Station Count|no||
-|wlan.extcap.b22|Multiple BSSID|no||
-|wlan.extcap.b23|Timing Measurement|no||
-|wlan.extcap.b24|Channel Usage|no||
-|wlan.extcap.b25|SSID List|no||
-|wlan.extcap.b26|DMS|no||
-|wlan.extcap.b27|UTC TSF Offset|no||
-|wlan.extcap.b28|Peer U-APSD Buffer STA Support|no||
-|wlan.extcap.b29|TDLS Peer PSM Support|no||
-|wlan.extcap.b30|TDLS channel switching|no||
-|wlan.extcap.b33|EBR|no||
-|wlan.extcap.b34|SSPN Interface|no||
+|wlan.extcap.b10|Location Tracking|yes||
+|wlan.extcap.b11|Flexible Multicast Service |yes||
+|wlan.extcap.b12|Proxy ARP in 802.11-2012|yes||
+|wlan.extcap.b13|Collocated Interference Reporting|yes||
+|wlan.extcap.b14|Civic Location|yes||
+|wlan.extcap.b15|Geospatial Location|yes||
+|wlan.extcap.b16|TFS|yes||
+|wlan.extcap.b17|WNM-Sleep Mode|yes||
+|wlan.extcap.b18|TIM Broadcast|yes||
+|wlan.extcap.b20|QoS Traffic Capability|yes||
+|wlan.extcap.b21|AC Station Count|yes||
+|wlan.extcap.b22|Multiple BSSID|yes||
+|wlan.extcap.b23|Timing Measurement|yes||
+|wlan.extcap.b24|Channel Usage|yes||
+|wlan.extcap.b25|SSID List|yes||
+|wlan.extcap.b26|DMS|yes||
+|wlan.extcap.b27|UTC TSF Offset|yes||
+|wlan.extcap.b28|Peer U-APSD Buffer STA Support|yes||
+|wlan.extcap.b29|TDLS Peer PSM Support|yes||
+|wlan.extcap.b30|TDLS channel switching|yes||
+|wlan.extcap.b33|EBR|yes||
+|wlan.extcap.b34|SSPN Interface|yes||
 |wlan.extcap.b35|Reserved|no||
 |wlan.extcap.b36|MSGCF Capability|no||
 |wlan.extcap.b37|TDLS support|no||
