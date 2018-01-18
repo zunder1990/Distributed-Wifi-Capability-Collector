@@ -4,42 +4,9 @@ This project is designed to passively collect WIFI(802.11) management frames fro
 The plan is to collect pcaps then analyze them extracting the relevant data on the sensor.  Then sending it to a central database.  
 
 ## Supported collected info
-The following specifications and features are collected and in the future we will include reports displaying the results of the collection.
-* 80 Mhz channel support = wlan_mgt.vht.capabilities.short80
-* 160 Mhz channel support = wlan_mgt.vht.capabilities.short160 
-* 802.11W = wlan.fc.protected(this one needs more fact checking)
-* MAC address of the client =  wlan.sa
-* MAC address of the AP receiving the packet =  wlan.bssid
-* frequency the client transmitted on =  radiotap.channel.freq
-* BSS Transition(aka 802.11r aka FT) = wlan_mgt.extcap.b19 
-*	Channel = wlan_radio.channel 
-* wlan.fc.pwrmgt
-* wlan_mgt.fixed.capabilities.radio_measurement 
-* wlan_mgt.ht.mcsset.txmaxss 
-* radiotap.channel.flags.ofdm 
-* radiotap.channel.flags.5ghz
-* radiotap.channel.flags.2ghz 
-* wlan_mgt.fixed.capabilities.spec_man
-* wlan_mgt.powercap.max 
-* wlan_mgt.powercap.min 
-* wlan_mgt.rsn.capabilities.mfpc 
-* wlan_mgt.extcap.b31
-* wlan_mgt.extcap.b32
-* wlan_mgt.extcap.b46
-* wlan_mgt.tag.number 
-* Maximum MPDU Length = wlan_mgt.vht.capabilities.maxmpdulength 
-* Supported Channel Width set = wlan_mgt.vht.capabilities.supportedchanwidthset
-* Receive LDPC-encoded frames = wlan_mgt.vht.capabilities.rxldpc 
-* Tansmission of STBC-coded frames = wlan_mgt.vht.capabilities.txstbc 
-* Support for client to receive from ap that is doing beamforming = wlan_mgt.vht.capabilities.subeamformer (this one needs more fact checking)
-* wlan_mgt.vht.capabilities.subeamformee (this one needs more fact checking)
-* wlan_mgt.vht.capabilities.beamformerants
-* wlan_mgt.vht.capabilities.soundingdimensions
-* wlan_mgt.vht.capabilities.mubeamformer
-* wlan_mgt.vht.capabilities.mubeamformee
-* wlan_mgt.tag.oui
+See Supported-collected-info.md page for list
 
-Great details about some of the above can be found on http://chimera.labs.oreilly.com/books/1234000001739/ch03.html#management_frames
+
 
 Got ideas from https://github.com/Geovation/wifispy and https://github.com/roobixx/harbinger
 
