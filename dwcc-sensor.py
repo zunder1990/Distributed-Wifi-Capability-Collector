@@ -67,7 +67,7 @@ def start():
 	logging.basicConfig(filename='dwcc.log', format='%(levelname)s:%(message)s', level=logging.INFO)
 	if iamapi == '1':
 		gpinsetup()
-	networkcheck()
+		stop_networkchecker = networkchecker()
 	if interface1enable == '1':
 		os.system(monitor_enable1)
 		print "starting wlan1"
@@ -77,7 +77,6 @@ def start():
 	if interface3enable == '1':
 		os.system(monitor_enable3)
 		print "starting wlan3"
-
 	stop_rotating = rotator()
 	stop_uploading = uploader()
 	try:sniffer()
@@ -85,6 +84,7 @@ def start():
 	finally:
 		print "Please wait for everything to stop"
 		if iamapi == '1':
+			stop_networkchecker.set()
 			GPIO.output(6,GPIO.LOW)
 			GPIO.output(13,GPIO.LOW)
 		stop_rotating.set()
@@ -99,19 +99,28 @@ def gpinsetup():
 #settings up things for the led
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setwarnings(False)
+	GPIO.setup(13,GPIO.OUT)
+	GPIO.setup(6,GPIO.OUT)
 
-def networkcheck():
-	response = os.system("ping -c 1 google.com")
-	if response == 0:
-		print('network is up!')
-		GPIO.setup(13,GPIO.OUT)
-		print "port 13 LED on"
-		GPIO.output(13,GPIO.HIGH)
-	else:
-		print('network is down!')
-		print "port 13 LED off"
-		GPIO.output(13,GPIO.LOW)
-	
+def networkchecker():
+	def networkcheck(stop):
+		while not stop.is_set():
+			try:
+				response = os.system("ping -c 2 google.com")
+				if response == 0:
+					print('network is up!')
+					print "port 13 LED on"
+					GPIO.output(13,GPIO.HIGH)
+				else:
+					print('network is down!')
+					print "port 13 LED off"
+					GPIO.output(13,GPIO.LOW)
+				print "retesting in 5 min"
+				time.sleep(300) # seconds
+			except KeyboardInterrupt: pass
+	stop = multiprocessing.Event()
+	multiprocessing.Process(target=networkcheck, args=[stop]).start()
+	return stop
 #This will change the channels every 1 sec to scan all in the range. 
 def rotator():
 	def rotate(stop):
@@ -139,7 +148,6 @@ def sniffer():
 	print "sniffer started"
 	if iamapi == '1':
 		print "port 6 led on"
-		GPIO.setup(6,GPIO.OUT)
 		GPIO.output(6,GPIO.HIGH)
 	commands = [
     'tcpdump -i '+ interface1 +' -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w '+incomingpath +''+ hostname +'-'+ interface1 +'-%Y-%m-%d_%H.%M.%S.pcap;',
