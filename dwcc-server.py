@@ -344,12 +344,9 @@ wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsm
 	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
 	if os.path.isfile(csvfileap) and os.access(csvfileap, os.R_OK):
 		print "ap csv found adding to db"
-		subprocess.call("""awk '!seen[$0]++' /data/tmp/dwcc-ap.csv >> /data/tmp/temp-dwcc-ap.csv""", shell=True)
-		subprocess.call("""sed -i -e 's/ /-/g' -e 's/[<>"^()@#&!$.,]//g' -e "s/'//g" -e '/^$/d' /data/tmp/temp-dwcc-ap.csv""", shell=True)
-		subprocess.call("""awk 'BEGIN{FS=OFS="+"} NF==4 {$0=$1 OFS $2 $3 OFS $4} {print}' /data/tmp/temp-dwcc-ap.csv >> temp2-dwcc-ap.csv """, shell=True)
+		subprocess.call("""cat /data/tmp/dwcc-ap.csv | awk '!seen[$0]++' | sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.,]//g' -e "s/'//g" -e '/^$/d' | awk 'BEGIN{FS=OFS="+"} NF==4 {$0=$1 OFS $2 $3 OFS $4} {print}' >> /data/tmp/temp-dwcc-ap.csv """, shell=True)
 		os.remove("/data/tmp/dwcc-ap.csv")
-		os.remove("/data/tmp/temp-dwcc-ap.csv")
-		os.rename("/data/tmp/temp2-dwcc-ap.csv", "/data/tmp/dwcc-ap.csv")
+		os.rename("/data/tmp/temp-dwcc-ap.csv", "/data/tmp/dwcc-ap.csv")
 		csv_dataap = csv.reader(file(csvfileap), delimiter='+')
 		for rowap in csv_dataap:
 			conn.execute('INSERT INTO dwccap (wlanradiochannel, wlanmgtssid, wlanbssid)' 'VALUES (?,?,?)', rowap)
