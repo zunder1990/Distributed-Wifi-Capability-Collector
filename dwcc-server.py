@@ -54,14 +54,18 @@ def preflightcheck():
 
 #this will take a look at the mac address of the trasmitter and 
 def dedup():
-	cursor.execute('DELETE FROM dwccincoming WHERE ID NOT IN (SELECT min(ID) FROM dwccincoming GROUP BY wlansa);')
+	cursor.execute('DELETE FROM dwccincoming WHERE ID NOT IN (SELECT min(ID) FROM dwccincoming GROUP BY wlansa, radiotapchannelflags2ghz, radiotapchannelflags2ghz);')
+	cursor.execute('DELETE FROM dwccap WHERE ID NOT IN (SELECT min(ID) FROM dwccap GROUP BY wlanbssid, wlanmgtssid);')
 	conn.commit()
 	print "finish dedup"
 
 def rowcount():
 	cursor.execute('SELECT COUNT(*)FROM dwccincoming;')
 	numberofclient=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*)FROM dwccap;')
+	numberofap=cursor.fetchone()[0]	
 	print "Total number of clients found in the database = ", numberofclient 
+	print "Total number of APs found in the database = ", numberofap 
 #working on this
 def charting():
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb19 = 1;')
@@ -178,8 +182,10 @@ def charting():
 	radiotapchannelflagsofdm=cursor.fetchone()[0]
 	cursor.execute('SELECT wlanmgtvhtcapabilitiesmaxmpdulength, count(wlanmgtvhtcapabilitiesmaxmpdulength) FROM dwccincoming GROUP BY wlanmgtvhtcapabilitiesmaxmpdulength ORDER BY count(wlanmgtvhtcapabilitiesmaxmpdulength) DESC;')
 	wlanmgtvhtcapabilitiesmaxmpdulength=cursor.fetchall()
-	cursor.execute('SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccincoming GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC;')
+	cursor.execute('SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccincoming GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 20;')
 	wlanmgtssid=cursor.fetchall()
+	cursor.execute('SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccap GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 20;')
+	wlanmgtssidap=cursor.fetchall()
 	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
 	print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
 	print "Total number of clients found to support Sounding Dimensions of 3 = ", soundingdimensions3
@@ -237,7 +243,8 @@ def charting():
 	print "Total number for clients that support TDLS channel switching = ", wlanmgtextcapb30
 	print "Total number for clients that support EBR = ", wlanmgtextcapb33
 	print "Total number for clients that support SSPN Interface = ", wlanmgtextcapb34
-	print "ssid that clients was trying to connect to = ", wlanmgtssid
+	print "ssid that clients was trying to connect to (top 20) = ", wlanmgtssid
+	print "APs per ssid found (top20) = ", wlanmgtssidap
 
 def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
