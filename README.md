@@ -19,13 +19,12 @@ __Example 1:__
 
 __Example 2:__
 This hareware needs to be tested. I have a kit coming for testing
-* CPU = Orange Pi PC $16.50 https://www.aliexpress.com/item/Orange-Pi-PC-set-1-Orange-Pi-PC-USB-to-DC-4-0MM-1-7MM-power/32451459094.html
-* Wireless = 3x RaLink RT3572 $26.67 https://www.aliexpress.com/item/RaLink-RT3572-2-4GHz-5-0GHz-300Mbps-WiFi-USB-Adapter-PCB-Module-Wireless-WiFi-Adapter-with/32815492744.html
-* SD card = 16GB $8.08 https://www.aliexpress.com/item/real-capacity-100-Sandisk-Micro-SD-card-Class10-8gb-16gb-32gb-64gb-128gb-80Mb-s-Original/32691928032.html
-* case = $13.83 https://www.aliexpress.com/item/Waterproof-Clear-Cover-Plastic-Electronic-Project-Box-265x185x125mm/32798563434.html
-* usb cables = $1.46(3 of them) https://www.aliexpress.com/item/USB-Female-to-Male-Extension-Cable-for-3pcs-lot-Short-USB-2-0-A-Female-To/32796757499.html
+* CPU = Raspberry Pi 3 $37.00 https://www.amazon.com/Raspberry-Pi-RASPBERRYPI3-MODB-1GB-Model-Motherboard/dp/B01CD5VC92/ref=sr_1_3?s=pc&ie=UTF8&qid=1516630839&sr=1-3&keywords=raspberry+pi+3
+* Wireless = 4x RaLink RT3572 $8.89 each or $35.56 total  https://www.aliexpress.com/item/RaLink-RT3572-2-4GHz-5-0GHz-300Mbps-WiFi-USB-Adapter-PCB-Module-Wireless-WiFi-Adapter-with/32815492744.html
+* SD card = 32GB $13.97 https://www.aliexpress.com/item/real-capacity-100-Sandisk-Micro-SD-card-Class10-8gb-16gb-32gb-64gb-128gb-80Mb-s-Original/32691928032.html
+* case = $15 https://www.ebay.com/itm/Black-Aluminum-Project-Box-Enclosure-Case-Electronic-DIY-203x144x68mm-Big/250826353904
 * POE splitter = $7.59 https://www.aliexpress.com/item/DSLRKIT-Active-PoE-Splitter-48V-to-5V-5-2V-2-4A-USB-TYPE-A-Female-802/32819476796.html
-* Cost = $74.13
+* Cost = $109.12
  
 ## Status LEDs
 The follwing LEDs have been tested with Raspberry Pi 3. To use the status LEDs you must make sure that the VAR "iamapi" is set to 1
