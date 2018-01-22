@@ -167,10 +167,14 @@ def uploader():
 			try:
 				for fname in os.listdir(incomingpath):
 					if fname.endswith('.pcap'):
-						with pysftp.Connection(host=sshhost, username=sshuser, private_key='~/.ssh/id_rsa') as sftp:
-							with sftp.cd(incomingpath):
-								sftp.put(incomingpath +fname)
-					print "moved", fname
+						try:
+							with pysftp.Connection(host=sshhost, username=sshuser, private_key='~/.ssh/id_rsa') as sftp:
+								with sftp.cd(incomingpath):
+									sftp.put(incomingpath +fname)
+							print "moved", fname 
+						except pysftp.SSHException: 
+							print "Unable to establish SSH connection will retry in 5 min"
+							time.sleep(300) #seconds
 					os.remove(incomingpath +fname)
 				else:
 					print "no pcap found, will try again in 5 min"
