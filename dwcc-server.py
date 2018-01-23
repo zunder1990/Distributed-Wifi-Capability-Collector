@@ -40,7 +40,8 @@ def start():
 			dbconverter()
 			charting()
 ##			mergecap()
-			macaddressconverter()
+			macaddressconverterclient()
+			macaddressconverterap()
 			time.sleep(300)#seconds
 		except KeyboardInterrupt: sys.exit()
 
@@ -186,6 +187,8 @@ def charting():
 	wlanmgtssid=cursor.fetchall()
 	cursor.execute('SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccap GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 20;')
 	wlanmgtssidap=cursor.fetchall()
+	cursor.execute('SELECT wlansaconverted, count(wlansaconverted) FROM dwccap GROUP BY wlansaconverted ORDER BY count(wlansaconverted) DESC limit 20;')
+	apmaker=cursor.fetchall()
 	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
 	print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
 	print "Total number of clients found to support Sounding Dimensions of 3 = ", soundingdimensions3
@@ -245,6 +248,7 @@ def charting():
 	print "Total number for clients that support SSPN Interface = ", wlanmgtextcapb34
 	print "ssid that clients was trying to connect to (top 20) = ", wlanmgtssid
 	print "APs per ssid found (top20) = ", wlanmgtssidap
+	print "AP vendors (top20) =", apmaker
 
 def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
@@ -257,6 +261,7 @@ def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessupportedchanwidthset = '0' WHERE wlanmgtvhtcapabilitiessupportedchanwidthset  = '0x00000000';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessupportedchanwidthset = '1' WHERE wlanmgtvhtcapabilitiessupportedchanwidthset  = '0x00000001';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessupportedchanwidthset = '2' WHERE wlanmgtvhtcapabilitiessupportedchanwidthset  = '0x00000002';")
+	cursor.execute("UPDATE dwccap SET wlansaconverted = 'vendornotfound' WHERE wlansaconverted  = 'None';")
 	conn.commit()
 
 #def mergecap():
@@ -295,7 +300,7 @@ def tsharker():
 					else:
 						print "No pcap found waiting 5 mins to rerun"
 
-def macaddressconverter():
+def macaddressconverterclient():
 	p = manuf.MacParser(update=True)
 	cursor.execute("""SELECT wlansa from dwccincoming WHERE wlansaconverted IS NULL OR wlansaconverted = '' limit 1;""")
 	mactochange = cursor.fetchone()
@@ -312,8 +317,31 @@ def macaddressconverter():
 		#This below will write the mac vendor back to the database
 		cursor.execute("UPDATE dwccincoming SET wlansaconverted = "+ `changedmacstr` +" WHERE wlansa  = "+ `mactochangestr` +"   ;")
 		conn.commit()
-		macaddressconverter()
-
+		macaddressconverterclient()
+def macaddressconverterap():
+	for i in range(50):
+		p = manuf.MacParser(update=True)
+		cursor.execute("""SELECT wlanbssid from dwccap WHERE wlansaconverted IS NULL OR wlansaconverted = '' limit 1;""")
+		mactochange = cursor.fetchone()
+	
+		print "The ap mac that will be changed", mactochange
+		if mactochange is None:
+			print "all ap MAC matched to vendors"
+		else:
+			#This below will remove the punctuation for the VAR
+			mactochange = ''.join(c for c in mactochange if c not in string.punctuation)
+			changedmac = p.get_manuf(mactochange)
+			changedmacstr = str(changedmac)
+			mactochangestr = str(mactochange)
+			#This below will write the mac vendor back to the database
+			cursor.execute("UPDATE dwccap SET wlansaconverted = "+ `changedmacstr` +" WHERE wlanbssid  = "+ `mactochangestr` +"   ;")
+#			macaddressconverterap()
+	conn.commit()
+	print "frinshed a round up to 50 AP mac"
+	
+		
+		
+		
 #This will take the CSV and place it into the db
 def dbupdater():
 	csvfileclient = '/data/tmp/dwcc-clients.csv'
@@ -464,7 +492,8 @@ wlanmgtvhtmcssettxmcsmapss4 char(50));''')
 (ID INTEGER PRIMARY KEY autoincrement NOT NULL,
 wlanbssid char(50),
 wlanradiochannel char(50),
-wlanmgtssid char(200));''')
+wlanmgtssid char(200),
+wlansaconverted char(200));''')
 
 	conn.commit()
 
