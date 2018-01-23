@@ -11,6 +11,7 @@ import csv
 import os.path
 from manuf import manuf
 import string
+import plotly
 
 #This change the below to reflect your sysrem
 incomingpath = '/data/incoming/' #This is the path where new pcaps will be placed
@@ -27,7 +28,7 @@ cursor = conn.cursor()
 
 
 
-#this is the main fuction 
+#this is the main fuction
 def start():
 	preflightcheck()
 	dbmaker()
@@ -49,11 +50,11 @@ def preflightcheck():
 	if not os.path.exists(incomingpath):
 		os.makedirs(incomingpath)
 	if not os.path.exists(archivepath):
-		os.makedirs(archivepath)		
+		os.makedirs(archivepath)
 	if not os.path.exists(tmppath):
-		os.makedirs(tmppath)	
+		os.makedirs(tmppath)
 
-#this will take a look at the mac address of the trasmitter and 
+#this will take a look at the mac address of the trasmitter and
 def dedup():
 	cursor.execute('DELETE FROM dwccincoming WHERE ID NOT IN (SELECT min(ID) FROM dwccincoming GROUP BY wlansa, radiotapchannelflags2ghz, radiotapchannelflags2ghz);')
 	cursor.execute('DELETE FROM dwccap WHERE ID NOT IN (SELECT min(ID) FROM dwccap GROUP BY wlanbssid, wlanmgtssid);')
@@ -64,9 +65,9 @@ def rowcount():
 	cursor.execute('SELECT COUNT(*)FROM dwccincoming;')
 	numberofclient=cursor.fetchone()[0]
 	cursor.execute('SELECT COUNT(*)FROM dwccap;')
-	numberofap=cursor.fetchone()[0]	
-	print "Total number of clients found in the database = ", numberofclient 
-	print "Total number of APs found in the database = ", numberofap 
+	numberofap=cursor.fetchone()[0]
+	print "Total number of clients found in the database = ", numberofclient
+	print "Total number of APs found in the database = ", numberofap
 #working on this
 def charting():
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb19 = 1;')
@@ -253,6 +254,17 @@ def charting():
 	print "AP vendors (top20) =", apmaker
 	print "The channel the APs was found on = ", channelgroupap
 
+	labels = []
+	values = []
+	for i in devicemaker:
+		labels.append(str(i[0]))
+		values.append(i[1])
+
+	trace = plotly.graph_objs.Pie(labels=labels, values=values)
+
+	# dumps results to html file and opens file with default system browser
+	plotly.offline.plot([trace], filename="mac_vendors.html")
+
 def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '0' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000000';")
@@ -275,7 +287,7 @@ def dbconverter():
 def tsharker():
  #This reads the pcaps, pull out the data, and places it into a csv
 	#checks for pcap files in incoming
-	
+
 	for fname in os.listdir(incomingpath):
 					if fname.endswith('.pcap'):
 						pcapfile = incomingpath +fname
@@ -307,7 +319,7 @@ def macaddressconverterclient():
 	p = manuf.MacParser(update=True)
 	cursor.execute("""SELECT wlansa from dwccincoming WHERE wlansaconverted IS NULL OR wlansaconverted = '' limit 1;""")
 	mactochange = cursor.fetchone()
-	
+
 	print "The mac that will be changed", mactochange
 	if mactochange is None:
 		print "all MAC matched to vendors"
@@ -377,7 +389,7 @@ wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsm
 		print "done with dbupdate for client waiting for next run"
 	else:
 		print"csv client not found will retry"
-		
+
 	csvfileap = '/data/tmp/dwcc-ap.csv'
 	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
 	if os.path.isfile(csvfileap) and os.access(csvfileap, os.R_OK):
@@ -394,7 +406,7 @@ wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsm
 		print "done with dbupdate for ap waiting for next run"
 	else:
 		print"csv ap not found will retry"
-		
+
 #This check for the database and if it is not found, it will make it.
 def dbmaker():
 	conn = sqlite3.connect(DB_FILE)
@@ -435,10 +447,10 @@ wlanmgtvhtcapabilitiesmubeamformer char(50),
 wlanmgtvhtcapabilitiesmubeamformee char(50),
 wlanmgttagoui char(50),
 wlanmgtfixedcapabilitiesess char(50),
-radiotapantenna char(50), 
+radiotapantenna char(50),
 wlanmgtssid char(200),
 wlansaconverted char(200),
-wlanmgtextcapb4 char(50), 
+wlanmgtextcapb4 char(50),
 wlanmgtextcapb3 char(50),
 wlanmgtextcapb2 char(50),
 wlanmgtextcapb1 char(50),
@@ -501,6 +513,3 @@ wlansaconverted char(200));''')
 	conn.commit()
 
 start()
-
-
-
