@@ -18,7 +18,7 @@ archivepath = '/data/archive/' #This is the path where pcaps what already have b
 tmppath = '/data/tmp/' #this is the path for a tmp folder for dwcc to use
 DB_FILE = 'dwcc.db'
 #you may change the path but please dont change the filename
-csvfile = '/data/tmp/dwcc.csv'
+csvfile = '/data/tmp/dwcc-clients.csv'
 
 #here is the setup info for the sqlite db
 conn = sqlite3.connect(DB_FILE)
@@ -54,14 +54,18 @@ def preflightcheck():
 
 #this will take a look at the mac address of the trasmitter and 
 def dedup():
-	cursor.execute('DELETE FROM dwccincoming WHERE ID NOT IN (SELECT min(ID) FROM dwccincoming GROUP BY wlansa);')
+	cursor.execute('DELETE FROM dwccincoming WHERE ID NOT IN (SELECT min(ID) FROM dwccincoming GROUP BY wlansa, radiotapchannelflags2ghz, radiotapchannelflags2ghz);')
+	cursor.execute('DELETE FROM dwccap WHERE ID NOT IN (SELECT min(ID) FROM dwccap GROUP BY wlanbssid, wlanmgtssid);')
 	conn.commit()
 	print "finish dedup"
 
 def rowcount():
 	cursor.execute('SELECT COUNT(*)FROM dwccincoming;')
 	numberofclient=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*)FROM dwccap;')
+	numberofap=cursor.fetchone()[0]	
 	print "Total number of clients found in the database = ", numberofclient 
+	print "Total number of APs found in the database = ", numberofap 
 #working on this
 def charting():
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb19 = 1;')
@@ -178,6 +182,10 @@ def charting():
 	radiotapchannelflagsofdm=cursor.fetchone()[0]
 	cursor.execute('SELECT wlanmgtvhtcapabilitiesmaxmpdulength, count(wlanmgtvhtcapabilitiesmaxmpdulength) FROM dwccincoming GROUP BY wlanmgtvhtcapabilitiesmaxmpdulength ORDER BY count(wlanmgtvhtcapabilitiesmaxmpdulength) DESC;')
 	wlanmgtvhtcapabilitiesmaxmpdulength=cursor.fetchall()
+	cursor.execute('SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccincoming GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 20;')
+	wlanmgtssid=cursor.fetchall()
+	cursor.execute('SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccap GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 20;')
+	wlanmgtssidap=cursor.fetchall()
 	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
 	print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
 	print "Total number of clients found to support Sounding Dimensions of 3 = ", soundingdimensions3
@@ -235,6 +243,8 @@ def charting():
 	print "Total number for clients that support TDLS channel switching = ", wlanmgtextcapb30
 	print "Total number for clients that support EBR = ", wlanmgtextcapb33
 	print "Total number for clients that support SSPN Interface = ", wlanmgtextcapb34
+	print "ssid that clients was trying to connect to (top 20) = ", wlanmgtssid
+	print "APs per ssid found (top20) = ", wlanmgtssidap
 
 def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
@@ -275,10 +285,11 @@ def tsharker():
 -e wlan_mgt.extcap.b33 -e wlan_mgt.extcap.b34 -e wlan_mgt.extcap.b35 -e wlan_mgt.extcap.b36 -e wlan_mgt.extcap.b37 -e wlan_mgt.extcap.b38 -e wlan_mgt.extcap.b39 -e wlan_mgt.extcap.b40 -e wlan_mgt.extcap.serv_int_granularity \
 -e wlan_mgt.extcap.b44 -e wlan_mgt.extcap.b45 -e wlan_mgt.extcap.b47 -e wlan_mgt.extcap.b48 -e wlan_mgt.extcap.b61 -e wlan_mgt.extcap.b62 -e wlan_mgt.extcap.b63 -e wlan_mgt.vht.capabilities.rxstbc \
 -e wlan_mgt.vht.mcsset.rxmcsmap.ss1 -e wlan_mgt.vht.mcsset.rxmcsmap.ss2 -e wlan_mgt.vht.mcsset.rxmcsmap.ss3 -e wlan_mgt.vht.mcsset.rxmcsmap.ss4 \
--e wlan_mgt.vht.mcsset.txmcsmap.ss1 -e wlan_mgt.vht.mcsset.txmcsmap.ss2 -e wlan_mgt.vht.mcsset.txmcsmap.ss3 -e wlan_mgt.vht.mcsset.txmcsmap.ss4 \
--E separator=+ >> ' + tmppath + 'dwcc.csv', shell=True)
-			#subprocess.call("""sed -i -e 's/ /-/g' -e 's/[<>"^()]//g' /data/tmp/dwcc.csv""", shell=True)
-						#this below will move the pcap into the archive folder
+-e wlan_mgt.vht.mcsset.txmcsmap.ss1 -e wlan_mgt.vht.mcsset.txmcsmap.ss2 -e wlan_mgt.vht.mcsset.txmcsmap.ss3 -e wlan_mgt.vht.mcsset.txmcsmap.ss4 -e wlan_mgt.ssid \
+-E separator=+ >> ' + tmppath + 'dwcc-clients.csv', shell=True)
+						subprocess.call('tshark -r ' + pcapfile + '   -R "wlan.fc.type_subtype == 0x8" -2 -T fields -e wlan_radio.channel -e wlan_mgt.ssid -e wlan.bssid -E separator=+ >> ' + tmppath + 'dwcc-ap.csv', shell=True)
+
+			#this below will move the pcap into the archive folder
 						os.rename(incomingpath +fname, archivepath +fname)
 						print "pcap found and tshark has ran"
 					else:
@@ -305,11 +316,14 @@ def macaddressconverter():
 
 #This will take the CSV and place it into the db
 def dbupdater():
-	csvfile = '/data/tmp/dwcc.csv'
-	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
-	if os.path.isfile(csvfile) and os.access(csvfile, os.R_OK):
-		print "csv found added to db"
-		csv_data = csv.reader(file(csvfile), delimiter='+')
+	csvfileclient = '/data/tmp/dwcc-clients.csv'
+#	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
+	if os.path.isfile(csvfileclient) and os.access(csvfileclient, os.R_OK):
+		print "csv found adding to db"
+		subprocess.call("""awk '!seen[$0]++' /data/tmp/dwcc-clients.csv >> /data/tmp/temp-dwcc-clients.csv""", shell=True)
+		os.remove("/data/tmp/dwcc-clients.csv")
+		os.rename("/data/tmp/temp-dwcc-clients.csv", "/data/tmp/dwcc-clients.csv")
+		csv_data = csv.reader(file(csvfileclient), delimiter='+')
 		for row in csv_data:
 			conn.execute('INSERT INTO dwccincoming(wlansa, wlanbssid, radiotapchannelfreq, wlanmgtextcapb19, wlanfcprotected, \
 wlanradiochannel, wlanfcpwrmgt, wlanmgtfixedcapabilitiesradiomeasurement, wlanmgthtmcssettxmaxss, \
@@ -324,18 +338,34 @@ wlanmgtextcapb13, wlanmgtextcapb14, wlanmgtextcapb15, wlanmgtextcapb16, wlanmgte
 wlanmgtextcapb24, wlanmgtextcapb25, wlanmgtextcapb26, wlanmgtextcapb27, wlanmgtextcapb28, wlanmgtextcapb29, wlanmgtextcapb30, wlanmgtextcapb33, wlanmgtextcapb34, wlanmgtextcapb35, \
 wlanmgtextcapb36, wlanmgtextcapb37, wlanmgtextcapb38, wlanmgtextcapb39, wlanmgtextcapb40, wlanmgtextcapservintgranularity, wlanmgtextcapb44, wlanmgtextcapb45, wlanmgtextcapb47, \
 wlanmgtextcapb48, wlanmgtextcapb61, wlanmgtextcapb62, wlanmgtextcapb63, wlanmgtvhtcapabilitiesrxstbc, wlanmgtvhtmcssetrxmcsmapss1, wlanmgtvhtmcssetrxmcsmapss2, wlanmgtvhtmcssetrxmcsmapss3, \
-wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsmapss2, wlanmgtvhtmcssettxmcsmapss3, wlanmgtvhtmcssettxmcsmapss4)' \
-'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
+wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsmapss2, wlanmgtvhtmcssettxmcsmapss3, wlanmgtvhtmcssettxmcsmapss4, wlanmgtssid)' \
+'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
 		conn.commit()
 #This will remove the file after it is added to the db
-		os.remove(csvfile)
-		print "done with dbupdate waiting for next run"
+		os.remove(csvfileclient)
+		print "done with dbupdate for client waiting for next run"
 	else:
-		print"csv not found will retry"
-
+		print"csv client not found will retry"
+		
+	csvfileap = '/data/tmp/dwcc-ap.csv'
+	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
+	if os.path.isfile(csvfileap) and os.access(csvfileap, os.R_OK):
+		print "ap csv found adding to db"
+		subprocess.call("""cat /data/tmp/dwcc-ap.csv | awk '!seen[$0]++' | sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.,]//g' -e "s/'//g" -e '/^$/d' | awk 'BEGIN{FS=OFS="+"} NF==4 {$0=$1 OFS $2 $3 OFS $4} {print}' >> /data/tmp/temp-dwcc-ap.csv """, shell=True)
+		os.remove("/data/tmp/dwcc-ap.csv")
+		os.rename("/data/tmp/temp-dwcc-ap.csv", "/data/tmp/dwcc-ap.csv")
+		csv_dataap = csv.reader(file(csvfileap), delimiter='+')
+		for rowap in csv_dataap:
+			conn.execute('INSERT INTO dwccap (wlanradiochannel, wlanmgtssid, wlanbssid)' 'VALUES (?,?,?)', rowap)
+		conn.commit()
+#This will remove the file after it is added to the db
+		os.remove(csvfileap)
+		print "done with dbupdate for ap waiting for next run"
+	else:
+		print"csv ap not found will retry"
+		
 #This check for the database and if it is not found, it will make it.
 def dbmaker():
-
 	conn = sqlite3.connect(DB_FILE)
 	cursor = conn.cursor()
 	cursor.execute('''CREATE TABLE if not exists dwccincoming
@@ -375,7 +405,7 @@ wlanmgtvhtcapabilitiesmubeamformee char(50),
 wlanmgttagoui char(50),
 wlanmgtfixedcapabilitiesess char(50),
 radiotapantenna char(50), 
-wlanmgtssid char(100),
+wlanmgtssid char(200),
 wlansaconverted char(200),
 wlanmgtextcapb4 char(50), 
 wlanmgtextcapb3 char(50),
@@ -430,7 +460,15 @@ wlanmgtvhtmcssettxmcsmapss2 char(50),
 wlanmgtvhtmcssettxmcsmapss3 char(50),
 wlanmgtvhtmcssettxmcsmapss4 char(50));''')
 
+	cursor.execute('''CREATE TABLE if not exists dwccap
+(ID INTEGER PRIMARY KEY autoincrement NOT NULL,
+wlanbssid char(50),
+wlanradiochannel char(50),
+wlanmgtssid char(200));''')
+
 	conn.commit()
 
 start()
+
+
 

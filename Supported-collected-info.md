@@ -38,7 +38,7 @@ The following specifications and features are collected and in the future we wil
 |wlan_mgt.tag.oui||no||
 |wlanmgtfixedcapabilitiesess||no||
 |radiotapantenna||no||
-|wlanmgtssid||no||
+|wlan_mgt.ssid||no||
 |wlan.extcap.b4|PSMP Capability related to power mgt |yes||
 |wlan.extcap.b3|WAVE indication this is 802.11p|yes||  
 |wlan.extcap.b2|Extended Channel Switching this is realted to 802.11y|yes|| 
@@ -70,9 +70,9 @@ The following specifications and features are collected and in the future we wil
 |wlan.extcap.b34|SSPN Interface|yes||
 |wlan.extcap.b35|Reserved|no||
 |wlan.extcap.b36|MSGCF Capability|no||
-|wlan.extcap.b37|TDLS support|no||
-|wlan.extcap.b38|TDLS Prohibited|no||
-|wlan.extcap.b39|TDLS Channel Switching Prohibited|no||
+|wlan.extcap.b37|TDLS support|no| this realted to 802.11z|
+|wlan.extcap.b38|TDLS Prohibited|no|this realted to 802.11z|
+|wlan.extcap.b39|TDLS Channel Switching Prohibited|no|this realted to 802.11z|
 |wlan.extcap.b40|Reject Unadmitted Frame|no||
 |wlan.extcap.serv_int_granularity|Service Interval Granularity|no||
 |wlan.extcap.b44|Identifier Location|no||
@@ -81,7 +81,7 @@ The following specifications and features are collected and in the future we wil
 |wlan.extcap.b47|QAB Capability|no||
 |wlan.extcap.b48|UTF-8 SSID|no||
 |wlan.extcap.b61|TDLS Wider Bandwidth|no||
-|wlan.extcap.b62|Operating Mode Notificationno||
+|wlan.extcap.b62|Operating Mode Notification|no||
 |wlan.extcap.b63|Max Number Of MSDUs In A-MSDU|no||
 |wlan.vht.capabilities.rxstbc|realted to Spatial Stream Supported |no|| 
 |wlan.vht.mcsset.rxmcsmap.ss2 |realted to Spatial Stream Supported|no||
