@@ -13,6 +13,10 @@ from manuf import manuf
 import string
 import plotly
 
+#import plotly.plotly as py
+#import plotly.graph_objs as go
+
+
 #This change the below to reflect your sysrem
 incomingpath = '/data/incoming/' #This is the path where new pcaps will be placed
 archivepath = '/data/archive/' #This is the path where pcaps what already have been checked will be placed
@@ -86,9 +90,9 @@ def charting():
 	n80211usupport=cursor.fetchone()[0]
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb32 = 1;')
 	qosmapsupport=cursor.fetchone()[0]
-	cursor.execute('SELECT wlansaconverted, count(wlansaconverted) FROM dwccincoming GROUP BY wlansaconverted ORDER BY count(wlansaconverted) DESC;')
+	cursor.execute('SELECT wlansaconverted, count(wlansaconverted) FROM dwccincoming GROUP BY wlansaconverted ORDER BY count(wlansaconverted) DESC limit 10;')
 	devicemaker=cursor.fetchall()
-	cursor.execute('SELECT wlanradiochannel, count(wlanradiochannel) FROM dwccincoming GROUP BY wlanradiochannel ORDER BY count(wlanradiochannel) DESC;')
+	cursor.execute('SELECT wlanradiochannel, count(wlanradiochannel) FROM dwccincoming GROUP BY wlanradiochannel ORDER BY count(wlanradiochannel) DESC limit 10;')
 	channelgroup=cursor.fetchall()
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb46 = 1;')
 	wnmsupport=cursor.fetchone()[0]
@@ -106,9 +110,9 @@ def charting():
 	wlanmgtvhtcapabilitiessubeamformee=cursor.fetchone()[0]
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessubeamformer = 1;')
 	wlanmgtvhtcapabilitiessubeamformer=cursor.fetchone()[0]
-	cursor.execute('SELECT wlanmgtpowercapmax, count(wlanmgtpowercapmax) FROM dwccincoming GROUP BY wlanmgtpowercapmax ORDER BY count(wlanmgtpowercapmax) DESC;')
+	cursor.execute('SELECT wlanmgtpowercapmax, count(wlanmgtpowercapmax) FROM dwccincoming GROUP BY wlanmgtpowercapmax ORDER BY count(wlanmgtpowercapmax);')
 	wlanmgtpowercapmax=cursor.fetchall()
-	cursor.execute('SELECT wlanmgtpowercapmin, count(wlanmgtpowercapmin) FROM dwccincoming GROUP BY wlanmgtpowercapmin ORDER BY count(wlanmgtpowercapmin) DESC;')
+	cursor.execute('SELECT wlanmgtpowercapmin, count(wlanmgtpowercapmin) FROM dwccincoming GROUP BY wlanmgtpowercapmin ORDER BY count(wlanmgtpowercapmin);')
 	wlanmgtpowercapmin=cursor.fetchall()
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtfixedcapabilitiesspecman = 1;')
 	wlanmgtfixedcapabilitiesspecman=cursor.fetchone()[0]
@@ -254,16 +258,66 @@ def charting():
 	print "AP vendors (top20) =", apmaker
 	print "The channel the APs was found on = ", channelgroupap
 
-	labels = []
-	values = []
-	for i in devicemaker:
-		labels.append(str(i[0]))
-		values.append(i[1])
+	labelschannelgroup = []
+	valueschannelgroup = []
+	for i in channelgroup:
+		labelschannelgroup.append(str(i[0]))
+		valueschannelgroup.append(i[1])
 
-	trace = plotly.graph_objs.Pie(labels=labels, values=values)
+	labelsdevicemaker = []
+	valuesdevicemaker = []
+	for i in devicemaker:
+		labelsdevicemaker.append(str(i[0]))
+		valuesdevicemaker.append(i[1])
+#	trace = plotly.graph_objs.Pie(labels=labels, values=values)
 
 	# dumps results to html file and opens file with default system browser
-	plotly.offline.plot([trace], filename="mac_vendors.html")
+#	plotly.offline.plot([trace], filename="mac_vendors.html")
+	fig = {
+  "data": [
+    {
+      "values": valuesdevicemaker,
+      "labels": labelsdevicemaker,
+      "domain": {"x": [0, .48]},
+      "hoverinfo":"label+percent",
+      "hole": .4,
+      "type": "pie"
+    },
+    {
+      "values": valueschannelgroup,
+      "labels": labelschannelgroup,
+      "textposition":"inside",
+      "domain": {"x": [.52, 1]},
+      "hoverinfo":"label+percent",
+      "hole": .4,
+      "type": "pie"
+    }],
+  "layout": {
+        "title":"Client info",
+		"showlegend": False,
+        "annotations": [
+            {
+                "font": {
+                    "size": 20
+                },
+                "showarrow": False,
+                "text": "MAC address Marker of client",
+                "x": 0.20,
+                "y": 0.5
+            },
+            {
+                "font": {
+                    "size": 20
+                },
+                "showarrow": False,
+                "text": "Channel",
+                "x": 0.8,
+                "y": 0.5
+            }
+        ]
+    }
+}
+	plotly.offline.plot(fig, filename='mac_vendors.html')
 
 def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
@@ -352,7 +406,7 @@ def macaddressconverterap():
 			cursor.execute("UPDATE dwccap SET wlansaconverted = "+ `changedmacstr` +" WHERE wlanbssid  = "+ `mactochangestr` +"   ;")
 #			macaddressconverterap()
 	conn.commit()
-	print "frinshed a round up to 50 AP mac"
+	print "finished a round up to 50 AP mac"
 	
 		
 		
