@@ -202,9 +202,7 @@ def charting():
 	print "Total number of clients found to support BSS Transition aka 802.11r aka FT = ", b19supportcount
 	print "Total number of clients found to support short Guard Interval 80mhz channel in 5ghz = ", ngi80mhzsupportcount
 	print "Total number of clients found to support short Guard Interval160mhz channel in 5ghz = ", ngi160mhzsupportcount
-	print "Total number of 5 ghz clients found= ", n5ghzclientcount
-	print "Total number of 2 ghz clients found= ", n2ghzclientcount
-	print "Total number of clients that support 802.11w= ", n80211wsupport
+	
 	print "Total number of clients that support interworking this is reated to 802.11u= ", n80211usupport
 	print "Total number of clients that support QOS map= ", qosmapsupport
 	print "Total number of clients that support wnm notification= ", wnmsupport
@@ -212,13 +210,11 @@ def charting():
 	print "Total number of clients that support can send frames from mu-mino AP= ", wlanmgtvhtcapabilitiesmubeamformer
 	print "Total number of clients that support can recive frames from single user beamforming AP= ", wlanmgtvhtcapabilitiessubeamformee
 	print "Total number of clients that support can send frames from single user beamforming AP= ", wlanmgtvhtcapabilitiessubeamformer
-	print "device vendors =", devicemaker
-	print "The channel the client was found on = ", channelgroup
 	print "power max = ", wlanmgtpowercapmax
 	print "power min = ", wlanmgtpowercapmin
 	print "Total number of clients that support 802.11h/dfs channels. This will only show on 5ghz clients = ", wlanmgtfixedcapabilitiesspecman
 	print "Maximum MPDU Length in bytes = "  , wlanmgtvhtcapabilitiesmaxmpdulength
-	print "Total number of clients that support 802.11k = ", wlanmgtfixedcapabilitiesradiomeasurement
+	
 	print "total number of clients that support 160hmz contiguous only = ", wlanmgtvhtcapabilitiessupportedchanwidthset1
 	print "total number of clients that support 160hmz contiguous and 80+80 = ", wlanmgtvhtcapabilitiessupportedchanwidthset2
 	print "Total number of clients that can receive LDPC-encoded frames = ", wlanmgtvhtcapabilitiesrxldpc
@@ -317,8 +313,42 @@ def charting():
         ]
     }
 }
-	plotly.offline.plot(fig, filename='mac_vendors.html')
-
+	clientchart = plotly.offline.plot(fig, include_plotlyjs=False, output_type='div')
+	print 
+	f = open('/var/www/html/display.html','w')
+	f.write("""
+<html>
+<head>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+<p>
+<table style="width: 100%">
+<tr>
+<th>Description</th>
+<th>Number of clients that support it</th>
+<th>Description</th>
+<th>Number of clients that support it</th>
+</tr>
+<tr>
+<th>5 ghz clients</th>
+<th>""" + str(n5ghzclientcount) + """</th>
+<th>2 ghz clients</th>
+<th>""" + str(n2ghzclientcount) + """</th>
+</tr>
+<tr>
+<th>802.11k</th>
+<th>""" + str(wlanmgtfixedcapabilitiesradiomeasurement) + """</th>
+<th>802.11w</th>
+<th>""" + str(n80211wsupport) + """</th>
+</tr>
+</table>
+</p>
+""" + str(clientchart) + """
+</body>
+</html>
+""")
+	f.close()
 def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '0' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000000';")
@@ -387,6 +417,9 @@ def macaddressconverterclient():
 		cursor.execute("UPDATE dwccincoming SET wlansaconverted = "+ `changedmacstr` +" WHERE wlansa  = "+ `mactochangestr` +"   ;")
 		conn.commit()
 		macaddressconverterclient()
+
+		
+		
 def macaddressconverterap():
 	for i in range(50):
 		p = manuf.MacParser(update=True)
@@ -396,6 +429,7 @@ def macaddressconverterap():
 		print "The ap mac that will be changed", mactochange
 		if mactochange is None:
 			print "all ap MAC matched to vendors"
+			return
 		else:
 			#This below will remove the punctuation for the VAR
 			mactochange = ''.join(c for c in mactochange if c not in string.punctuation)
