@@ -189,6 +189,8 @@ def charting():
 	wlanmgtssidap=cursor.fetchall()
 	cursor.execute('SELECT wlansaconverted, count(wlansaconverted) FROM dwccap GROUP BY wlansaconverted ORDER BY count(wlansaconverted) DESC limit 20;')
 	apmaker=cursor.fetchall()
+	cursor.execute('SELECT wlanradiochannel, count(wlanradiochannel) FROM dwccap GROUP BY wlanradiochannel ORDER BY count(wlanradiochannel) DESC;')
+	channelgroupap=cursor.fetchall()
 	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
 	print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
 	print "Total number of clients found to support Sounding Dimensions of 3 = ", soundingdimensions3
@@ -249,6 +251,7 @@ def charting():
 	print "ssid that clients was trying to connect to (top 20) = ", wlanmgtssid
 	print "APs per ssid found (top20) = ", wlanmgtssidap
 	print "AP vendors (top20) =", apmaker
+	print "The channel the APs was found on = ", channelgroupap
 
 def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
