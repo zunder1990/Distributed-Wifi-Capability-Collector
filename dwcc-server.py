@@ -41,7 +41,6 @@ def start():
 			tsharker()
 			dbupdater()
 			dedup()
-			rowcount()
 			dbconverter()
 			charting()
 ##			mergecap()
@@ -65,13 +64,6 @@ def dedup():
 	conn.commit()
 	print "finish dedup"
 
-def rowcount():
-	cursor.execute('SELECT COUNT(*)FROM dwccincoming;')
-	numberofclient=cursor.fetchone()[0]
-	cursor.execute('SELECT COUNT(*)FROM dwccap;')
-	numberofap=cursor.fetchone()[0]
-	print "Total number of clients found in the database = ", numberofclient
-	print "Total number of APs found in the database = ", numberofap
 #working on this
 def charting():
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb19 = 1;')
@@ -110,9 +102,9 @@ def charting():
 	wlanmgtvhtcapabilitiessubeamformee=cursor.fetchone()[0]
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessubeamformer = 1;')
 	wlanmgtvhtcapabilitiessubeamformer=cursor.fetchone()[0]
-	cursor.execute('SELECT wlanmgtpowercapmax, count(wlanmgtpowercapmax) FROM dwccincoming GROUP BY wlanmgtpowercapmax ORDER BY count(wlanmgtpowercapmax);')
+	cursor.execute('SELECT wlanmgtpowercapmax, count(wlanmgtpowercapmax) FROM dwccincoming GROUP BY wlanmgtpowercapmax ORDER BY count(wlanmgtpowercapmax) DESC limit 5;')
 	wlanmgtpowercapmax=cursor.fetchall()
-	cursor.execute('SELECT wlanmgtpowercapmin, count(wlanmgtpowercapmin) FROM dwccincoming GROUP BY wlanmgtpowercapmin ORDER BY count(wlanmgtpowercapmin);')
+	cursor.execute('SELECT wlanmgtpowercapmin, count(wlanmgtpowercapmin) FROM dwccincoming GROUP BY wlanmgtpowercapmin ORDER BY count(wlanmgtpowercapmin) DESC limit 5;')
 	wlanmgtpowercapmin=cursor.fetchall()
 	cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtfixedcapabilitiesspecman = 1;')
 	wlanmgtfixedcapabilitiesspecman=cursor.fetchone()[0]
@@ -188,7 +180,7 @@ def charting():
 	radiotapchannelflagsofdm=cursor.fetchone()[0]
 	cursor.execute('SELECT wlanmgtvhtcapabilitiesmaxmpdulength, count(wlanmgtvhtcapabilitiesmaxmpdulength) FROM dwccincoming GROUP BY wlanmgtvhtcapabilitiesmaxmpdulength ORDER BY count(wlanmgtvhtcapabilitiesmaxmpdulength) DESC;')
 	wlanmgtvhtcapabilitiesmaxmpdulength=cursor.fetchall()
-	cursor.execute('SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccincoming GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 20;')
+	cursor.execute('SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccincoming GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 15;')
 	wlanmgtssid=cursor.fetchall()
 	cursor.execute('SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccap GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 20;')
 	wlanmgtssidap=cursor.fetchall()
@@ -196,64 +188,41 @@ def charting():
 	apmaker=cursor.fetchall()
 	cursor.execute('SELECT wlanradiochannel, count(wlanradiochannel) FROM dwccap GROUP BY wlanradiochannel ORDER BY count(wlanradiochannel) DESC;')
 	channelgroupap=cursor.fetchall()
+	cursor.execute('SELECT COUNT(*)FROM dwccincoming;')
+	numberofclient=cursor.fetchone()[0]
+	cursor.execute('SELECT COUNT(*)FROM dwccap;')
+	numberofap=cursor.fetchone()[0]
 	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
 	print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
 	print "Total number of clients found to support Sounding Dimensions of 3 = ", soundingdimensions3
-	print "Total number of clients found to support BSS Transition aka 802.11r aka FT = ", b19supportcount
-	print "Total number of clients found to support short Guard Interval 80mhz channel in 5ghz = ", ngi80mhzsupportcount
-	print "Total number of clients found to support short Guard Interval160mhz channel in 5ghz = ", ngi160mhzsupportcount
-	
-	print "Total number of clients that support interworking this is reated to 802.11u= ", n80211usupport
-	print "Total number of clients that support QOS map= ", qosmapsupport
-	print "Total number of clients that support wnm notification= ", wnmsupport
-	print "Total number of clients that support can recive frames from mu-mino AP= ", wlanmgtvhtcapabilitiesmubeamformee
-	print "Total number of clients that support can send frames from mu-mino AP= ", wlanmgtvhtcapabilitiesmubeamformer
-	print "Total number of clients that support can recive frames from single user beamforming AP= ", wlanmgtvhtcapabilitiessubeamformee
-	print "Total number of clients that support can send frames from single user beamforming AP= ", wlanmgtvhtcapabilitiessubeamformer
 	print "power max = ", wlanmgtpowercapmax
 	print "power min = ", wlanmgtpowercapmin
-	print "Total number of clients that support 802.11h/dfs channels. This will only show on 5ghz clients = ", wlanmgtfixedcapabilitiesspecman
 	print "Maximum MPDU Length in bytes = "  , wlanmgtvhtcapabilitiesmaxmpdulength
-	
-	print "total number of clients that support 160hmz contiguous only = ", wlanmgtvhtcapabilitiessupportedchanwidthset1
-	print "total number of clients that support 160hmz contiguous and 80+80 = ", wlanmgtvhtcapabilitiessupportedchanwidthset2
-	print "Total number of clients that can receive LDPC-encoded frames = ", wlanmgtvhtcapabilitiesrxldpc
-	print "Total number of clients that can Tansmission of STBC-coded frames = ", wlanmgtvhtcapabilitiestxstbc
-	print "Total number for clients that support On-demand beacon realted to 802.11p = ", wlanmgtextcapb1
-	print "Total number for clients that support Extended Channel Switching  = ", wlanmgtextcapb2
-	print "Total number for clients that support WAVE indication this is 802.11p = ", wlanmgtextcapb3
-	print "Total number for clients that support PSMP Capability  = ", wlanmgtextcapb4
-	print "Total number for clients that support Scheduled PSMP = ", wlanmgtextcapb6
-	print "Total number for clients that support Diagnostic Report = ", wlanmgtextcapb8
-	print "Total number for clients that support Multicast Diagnostics = ", wlanmgtextcapb9
-	print "Total number for clients that support Orthogonal Frequency-Division Multiplexing OFDM = ", radiotapchannelflagsofdm
-	print "Total number for clients that support Location Tracking = ", wlanmgtextcapb10
-	print "Total number for clients that support Flexible Multicast Service = ", wlanmgtextcapb11
-	print "Total number for clients that support Proxy ARP in 802.11-2012 = ", wlanmgtextcapb12
-	print "Total number for clients that support Collocated Interference Reporting = ", wlanmgtextcapb13
-	print "Total number for clients that support Civic Location = ", wlanmgtextcapb14
-	print "Total number for clients that support Geospatial Location = ", wlanmgtextcapb15
-	print "Total number for clients that support TFS = ", wlanmgtextcapb16
-	print "Total number for clients that support WNM-Sleep Mode = ", wlanmgtextcapb17
-	print "Total number for clients that support TIM Broadcast = ", wlanmgtextcapb18
-	print "Total number for clients that support QoS Traffic Capability = ", wlanmgtextcapb20
-	print "Total number for clients that support AC Station Count = ", wlanmgtextcapb21
-	print "Total number for clients that support Multiple BSSID = ", wlanmgtextcapb22
-	print "Total number for clients that support Timing Measurement = ", wlanmgtextcapb23
-	print "Total number for clients that support Channel Usage = ", wlanmgtextcapb24
-	print "Total number for clients that support SSID List = ", wlanmgtextcapb25
-	print "Total number for clients that support DMS = ", wlanmgtextcapb26
-	print "Total number for clients that support UTC TSF Offset = ", wlanmgtextcapb27
-	print "Total number for clients that support Peer U-APSD Buffer STA Support = ", wlanmgtextcapb28
-	print "Total number for clients that support TDLS Peer PSM Support = ", wlanmgtextcapb29
-	print "Total number for clients that support TDLS channel switching = ", wlanmgtextcapb30
-	print "Total number for clients that support EBR = ", wlanmgtextcapb33
-	print "Total number for clients that support SSPN Interface = ", wlanmgtextcapb34
-	print "ssid that clients was trying to connect to (top 20) = ", wlanmgtssid
 	print "APs per ssid found (top20) = ", wlanmgtssidap
 	print "AP vendors (top20) =", apmaker
 	print "The channel the APs was found on = ", channelgroupap
 
+	labelswlanmgtpowercapmax = []
+	valueswlanmgtpowercapmax = []
+	for i in wlanmgtpowercapmax:
+		labelswlanmgtpowercapmax.append(str(i[0]))
+		valueswlanmgtpowercapmax.append(i[1])
+
+	
+	labelswlanmgtpowercapmin = []
+	valueswlanmgtpowercapmin = []
+	for i in wlanmgtpowercapmin:
+		labelswlanmgtpowercapmin.append(str(i[0]))
+		valueswlanmgtpowercapmin.append(i[1])
+
+	
+	labelswlanmgtvhtcapabilitiesmaxmpdulength = []
+	valueswlanmgtvhtcapabilitiesmaxmpdulength = []
+	for i in wlanmgtvhtcapabilitiesmaxmpdulength:
+		labelswlanmgtvhtcapabilitiesmaxmpdulength.append(str(i[0]))
+		valueswlanmgtvhtcapabilitiesmaxmpdulength.append(i[1])
+
+	
 	labelschannelgroup = []
 	valueschannelgroup = []
 	for i in channelgroup:
@@ -265,16 +234,21 @@ def charting():
 	for i in devicemaker:
 		labelsdevicemaker.append(str(i[0]))
 		valuesdevicemaker.append(i[1])
-#	trace = plotly.graph_objs.Pie(labels=labels, values=values)
+		
+	labelswlanmgtssid = []
+	valueswlanmgtssid = []
+	for i in wlanmgtssid:
+		labelswlanmgtssid.append(str(i[0]))
+		valueswlanmgtssid.append(i[1])
 
-	# dumps results to html file and opens file with default system browser
-#	plotly.offline.plot([trace], filename="mac_vendors.html")
 	fig = {
   "data": [
     {
       "values": valuesdevicemaker,
       "labels": labelsdevicemaker,
-      "domain": {"x": [0, .48]},
+      "domain":{'x': [0, .48],
+              'y': [0, .32]},
+      "textinfo": "value+percent",
       "hoverinfo":"label+percent",
       "hole": .4,
       "type": "pie"
@@ -283,11 +257,58 @@ def charting():
       "values": valueschannelgroup,
       "labels": labelschannelgroup,
       "textposition":"inside",
-      "domain": {"x": [.52, 1]},
+      "domain": {'x': [0, .48],
+             'y': [.33, .62]},
+      "textinfo": "value+percent",
+      "hoverinfo":"label+percent",
+      "hole": .4,
+      "type": "pie"
+    },
+	{
+      "values": valueswlanmgtssid,
+      "labels": labelswlanmgtssid,
+      "textposition":"inside",
+      "domain": {'x': [0, .48],
+               'y': [.63, 1]},
+      "textinfo": "value+percent",
+      "hoverinfo":"label+percent",
+      "hole": .4,
+      "type": "pie"
+    },
+	{
+      "values": valueswlanmgtpowercapmax,
+      "labels": labelswlanmgtpowercapmax,
+      "textposition":"inside",
+      "domain": {'x': [.52, 1],
+             'y': [0, .32]},
+      "textinfo": "value+percent",
+      "hoverinfo":"label+percent",
+      "hole": .4,
+      "type": "pie"
+    },
+	{
+      "values": valueswlanmgtpowercapmin,
+      "labels": labelswlanmgtpowercapmin,
+      "textposition":"inside",
+      "domain": {'x': [.52, 1],
+             'y': [.33, .62]},
+      "textinfo": "value+percent",
+      "hoverinfo":"label+percent",
+      "hole": .4,
+      "type": "pie"
+    },
+	{
+      "values": valueswlanmgtvhtcapabilitiesmaxmpdulength,
+      "labels": labelswlanmgtvhtcapabilitiesmaxmpdulength,
+      "textposition":"inside",
+      "domain": {'x': [.52, 1],
+             'y': [.63, 1]},
+      "textinfo": "value+percent",
       "hoverinfo":"label+percent",
       "hole": .4,
       "type": "pie"
     }],
+
   "layout": {
         "title":"Client info",
 		"showlegend": False,
@@ -297,9 +318,9 @@ def charting():
                     "size": 20
                 },
                 "showarrow": False,
-                "text": "MAC address Marker of client",
-                "x": 0.20,
-                "y": 0.5
+                "text": "MAC vendor client",
+                "x": -0.0007575757575757625,
+                "y": 0.13726993865030673
             },
             {
                 "font": {
@@ -307,8 +328,44 @@ def charting():
                 },
                 "showarrow": False,
                 "text": "Channel",
-                "x": 0.8,
-                "y": 0.5
+                "x": 0.06969696969696992,
+                "y": 0.4924846625766871
+            },
+            {
+                "font": {
+                    "size": 20
+                },
+                "showarrow": False,
+                "text": "SSID connected to (top15)",
+                "x": -0.04924242424242414,
+                "y": 0.8719325153374236
+            },
+			{
+                "font": {
+                    "size": 20
+                },
+                "showarrow": False,
+                "text": "power max (top5)",
+                "x": 0.9666666666666668,
+                "y": 0.12500000000000022
+            },
+			{
+                "font": {
+                    "size": 20
+                },
+                "showarrow": False,
+                "text": "power min (top5)",
+                "x": 0.9681818181818181,
+                "y": 0.48773006134969354
+            },
+			{
+                "font": {
+                    "size": 20
+                },
+                "showarrow": False,
+                "text": "Maximum MPDU Length in bytes",
+                "x": 1.0916666666666668,
+                "y": 0.8489263803680986
             }
         ]
     }
@@ -323,7 +380,8 @@ def charting():
 </head>
 <body>
 <p>
-<table style="width: 100%">
+<table>
+<caption>Client supported info</caption>
 <tr>
 <th>Description</th>
 <th>Number of clients that support it</th>
@@ -331,16 +389,195 @@ def charting():
 <th>Number of clients that support it</th>
 </tr>
 <tr>
-<th>5 ghz clients</th>
-<th>""" + str(n5ghzclientcount) + """</th>
-<th>2 ghz clients</th>
-<th>""" + str(n2ghzclientcount) + """</th>
+<td>5 ghz clients</td>
+<td>""" + str(n5ghzclientcount) + """</td>
+<td>2 ghz clients</td>
+<td>""" + str(n2ghzclientcount) + """</td>
 </tr>
 <tr>
-<th>802.11k</th>
-<th>""" + str(wlanmgtfixedcapabilitiesradiomeasurement) + """</th>
-<th>802.11w</th>
-<th>""" + str(n80211wsupport) + """</th>
+<td>802.11k</td>
+<td>""" + str(wlanmgtfixedcapabilitiesradiomeasurement) + """</td>
+<td>802.11w</td>
+<td>""" + str(n80211wsupport) + """</td>
+</tr>
+<tr>
+<td>BSS Transition/802.11r/FT</td>
+<td>""" + str(b19supportcount) + """</td>
+<td>interworking/802.11u</td>
+<td>""" + str(n80211usupport) + """</td>
+</tr>
+
+<tr>
+<td>support short Guard Interval 80mhz channel in 5ghz</td>
+<td>""" + str(ngi80mhzsupportcount) + """</td>
+<td>short Guard Interval 160mhz channel in 5ghz</td>
+<td>""" + str(ngi160mhzsupportcount) + """</td>
+</tr>
+
+<tr>
+<td>QOS map</td>
+<td>""" + str(qosmapsupport) + """</td>
+<td>wnm notification</td>
+<td>""" + str(wnmsupport) + """</td>
+</tr>
+
+<tr>
+<td>recive frames from mu-mino AP</td>
+<td>""" + str(wlanmgtvhtcapabilitiesmubeamformee) + """</td>
+<td>send frames to mu-mino AP</td>
+<td>""" + str(wlanmgtvhtcapabilitiesmubeamformer) + """</td>
+</tr>
+
+<tr>
+<td>recive frames from single user beamforming AP</td>
+<td>""" + str(wlanmgtvhtcapabilitiessubeamformee) + """</td>
+<td>send frames from single user beamforming AP</td>
+<td>""" + str(wlanmgtvhtcapabilitiessubeamformer) + """</td>
+</tr>
+
+<tr>
+<td>802.11h/dfs channels *only show on 5ghz clients</td>
+<td>""" + str(wlanmgtfixedcapabilitiesspecman) + """</td>
+<td>160hmz contiguous only</td>
+<td>""" + str(wlanmgtvhtcapabilitiessupportedchanwidthset1) + """</td>
+</tr>
+
+<tr>
+<td>160hmz contiguous and 80+80</td>
+<td>""" + str(wlanmgtvhtcapabilitiessupportedchanwidthset2) + """</td>
+<td>receive LDPC-encoded frames</td>
+<td>""" + str(wlanmgtvhtcapabilitiesrxldpc) + """</td>
+</tr>
+
+<tr>
+<td>Tansmission of STBC-coded frames</td>
+<td>""" + str(wlanmgtvhtcapabilitiestxstbc) + """</td>
+<td>On-demand beacon realted to 802.11p</td>
+<td>""" + str(wlanmgtextcapb1) + """</td>
+</tr>
+
+<tr>
+<td>Extended Channel Switching</td>
+<td>""" + str(wlanmgtextcapb2) + """</td>
+<td>WAVE indication this is 802.11p</td>
+<td>""" + str(wlanmgtextcapb3) + """</td>
+</tr>
+
+<tr>
+<td>PSMP Capability</td>
+<td>""" + str(wlanmgtextcapb4) + """</td>
+<td>Scheduled PSMP</td>
+<td>""" + str(wlanmgtextcapb6) + """</td>
+</tr>
+
+<tr>
+<td>Diagnostic Report</td>
+<td>""" + str(wlanmgtextcapb8) + """</td>
+<td>Multicast Diagnostics</td>
+<td>""" + str(wlanmgtextcapb9) + """</td>
+</tr>
+
+<tr>
+<td>Orthogonal Frequency-Division Multiplexing OFDM</td>
+<td>""" + str(radiotapchannelflagsofdm) + """</td>
+<td>Location Tracking</td>
+<td>""" + str(wlanmgtextcapb10) + """</td>
+</tr>
+
+<tr>
+<td>Flexible Multicast Service</td>
+<td>""" + str(wlanmgtextcapb11) + """</td>
+<td>Proxy ARP in 802.11-2012</td>
+<td>""" + str(wlanmgtextcapb12) + """</td>
+</tr>
+
+<tr>
+<td>Collocated Interference Reporting</td>
+<td>""" + str(wlanmgtextcapb13) + """</td>
+<td>Civic Location</td>
+<td>""" + str(wlanmgtextcapb14) + """</td>
+</tr>
+
+<tr>
+<td>Geospatial Location</td>
+<td>""" + str(wlanmgtextcapb15) + """</td>
+<td>TFS</td>
+<td>""" + str(wlanmgtextcapb16) + """</td>
+</tr>
+
+<tr>
+<td>WNM-Sleep Mode</td>
+<td>""" + str(wlanmgtextcapb17) + """</td>
+<td>TIM Broadcast</td>
+<td>""" + str(wlanmgtextcapb18) + """</td>
+</tr>
+
+<tr>
+<td>QoS Traffic Capability</td>
+<td>""" + str(wlanmgtextcapb20) + """</td>
+<td>AC Station Count</td>
+<td>""" + str(wlanmgtextcapb21) + """</td>
+</tr>
+
+<tr>
+<td>Multiple BSSID</td>
+<td>""" + str(wlanmgtextcapb22) + """</td>
+<td>Timing Measurement</td>
+<td>""" + str(wlanmgtextcapb23) + """</td>
+</tr>
+
+<tr>
+<td>Channel Usage</td>
+<td>""" + str(wlanmgtextcapb24) + """</td>
+<td>SSID List</td>
+<td>""" + str(wlanmgtextcapb25) + """</td>
+</tr>
+
+<tr>
+<td>DMS</td>
+<td>""" + str(wlanmgtextcapb26) + """</td>
+<td>UTC TSF Offset</td>
+<td>""" + str(wlanmgtextcapb27) + """</td>
+</tr>
+
+<tr>
+<td>Peer U-APSD Buffer STA Support</td>
+<td>""" + str(wlanmgtextcapb28) + """</td>
+<td>TDLS Peer PSM Support</td>
+<td>""" + str(wlanmgtextcapb29) + """</td>
+</tr>
+
+<tr>
+<td>TDLS channel switching</td>
+<td>""" + str(wlanmgtextcapb30) + """</td>
+<td>EBR</td>
+<td>""" + str(wlanmgtextcapb33) + """</td>
+</tr>
+
+<tr>
+<td>SSPN Interface</td>
+<td>""" + str(wlanmgtextcapb34) + """</td>
+
+
+
+
+</table>
+
+<table>
+<caption>Stats</caption>
+<tr>
+<th>Description</th>
+<th>Number</th>
+</tr>
+<tr>
+<td>number of clients found in the database</td>
+<td>""" + str(numberofclient) + """</td>
+
+</tr>
+<tr>
+<td>number of APs found in the database</td>
+<td>""" + str(numberofap) + """</td>
+
 </tr>
 </table>
 </p>
