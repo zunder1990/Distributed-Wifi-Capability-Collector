@@ -34,6 +34,8 @@ The follwing LEDs have been tested with Raspberry Pi 3. To use the status LEDs y
 ## Wiring LEDs on PI
 This will be updated at a later time.
 
+## Demo 
+https://server.zachunderwood.me/display.html
 
  ## Misc
  Used to pull the packets for one MAC
