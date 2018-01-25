@@ -12,6 +12,7 @@ import os.path
 from manuf import manuf
 import string
 import plotly
+import re
 
 #import plotly.plotly as py
 #import plotly.graph_objs as go
@@ -182,11 +183,11 @@ def charting():
 	wlanmgtvhtcapabilitiesmaxmpdulength=cursor.fetchall()
 	cursor.execute('SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccincoming GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 15;')
 	wlanmgtssid=cursor.fetchall()
-	cursor.execute('SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccap GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 20;')
+	cursor.execute('SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccap GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 15;')
 	wlanmgtssidap=cursor.fetchall()
-	cursor.execute('SELECT wlansaconverted, count(wlansaconverted) FROM dwccap GROUP BY wlansaconverted ORDER BY count(wlansaconverted) DESC limit 20;')
+	cursor.execute('SELECT wlansaconverted, count(wlansaconverted) FROM dwccap GROUP BY wlansaconverted ORDER BY count(wlansaconverted) DESC limit 15;')
 	apmaker=cursor.fetchall()
-	cursor.execute('SELECT wlanradiochannel, count(wlanradiochannel) FROM dwccap GROUP BY wlanradiochannel ORDER BY count(wlanradiochannel) DESC;')
+	cursor.execute('SELECT wlanradiochannel, count(wlanradiochannel) FROM dwccap GROUP BY wlanradiochannel ORDER BY count(wlanradiochannel) DESC limit 15;')
 	channelgroupap=cursor.fetchall()
 	cursor.execute('SELECT COUNT(*)FROM dwccincoming;')
 	numberofclient=cursor.fetchone()[0]
@@ -195,12 +196,7 @@ def charting():
 	print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
 	print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
 	print "Total number of clients found to support Sounding Dimensions of 3 = ", soundingdimensions3
-	print "power max = ", wlanmgtpowercapmax
-	print "power min = ", wlanmgtpowercapmin
-	print "Maximum MPDU Length in bytes = "  , wlanmgtvhtcapabilitiesmaxmpdulength
-	print "APs per ssid found (top20) = ", wlanmgtssidap
-	print "AP vendors (top20) =", apmaker
-	print "The channel the APs was found on = ", channelgroupap
+
 
 	labelswlanmgtpowercapmax = []
 	valueswlanmgtpowercapmax = []
@@ -241,71 +237,83 @@ def charting():
 		labelswlanmgtssid.append(str(i[0]))
 		valueswlanmgtssid.append(i[1])
 
-	fig = {
+	labelswlanmgtssidap = []
+	valueswlanmgtssidap = []
+	for i in wlanmgtssidap:
+		labelswlanmgtssidap.append(str(i[0]))
+		valueswlanmgtssidap.append(i[1])
+		
+	labelsapmaker = []
+	valuesapmaker= []
+	for i in apmaker:
+		labelsapmaker.append(str(i[0]))
+		valuesapmaker.append(i[1])
+		
+	labelschannelgroupap = []
+	valueschannelgroupap = []
+	for i in channelgroupap:
+		labelschannelgroupap.append(str(i[0]))
+		valueschannelgroupap.append(i[1])
+		
+	figclient = {
   "data": [
     {
       "values": valuesdevicemaker,
       "labels": labelsdevicemaker,
-      "domain":{'x': [0, .48],
+      "domain":{'x': [.2, .49],
               'y': [0, .32]},
       "textinfo": "value+percent",
       "hoverinfo":"label+percent",
-      "hole": .4,
       "type": "pie"
     },
     {
       "values": valueschannelgroup,
       "labels": labelschannelgroup,
       "textposition":"inside",
-      "domain": {'x': [0, .48],
+      "domain": {'x': [.2, .49],
              'y': [.33, .62]},
       "textinfo": "value+percent",
       "hoverinfo":"label+percent",
-      "hole": .4,
       "type": "pie"
     },
 	{
       "values": valueswlanmgtssid,
       "labels": labelswlanmgtssid,
       "textposition":"inside",
-      "domain": {'x': [0, .48],
+      "domain": {'x': [.2, .49],
                'y': [.63, 1]},
       "textinfo": "value+percent",
       "hoverinfo":"label+percent",
-      "hole": .4,
       "type": "pie"
     },
 	{
       "values": valueswlanmgtpowercapmax,
       "labels": labelswlanmgtpowercapmax,
       "textposition":"inside",
-      "domain": {'x': [.52, 1],
+      "domain": {'x': [.50, .98],
              'y': [0, .32]},
       "textinfo": "value+percent",
       "hoverinfo":"label+percent",
-      "hole": .4,
       "type": "pie"
     },
 	{
       "values": valueswlanmgtpowercapmin,
       "labels": labelswlanmgtpowercapmin,
       "textposition":"inside",
-      "domain": {'x': [.52, 1],
+      "domain": {'x': [.50, .98],
              'y': [.33, .62]},
       "textinfo": "value+percent",
       "hoverinfo":"label+percent",
-      "hole": .4,
       "type": "pie"
     },
 	{
       "values": valueswlanmgtvhtcapabilitiesmaxmpdulength,
       "labels": labelswlanmgtvhtcapabilitiesmaxmpdulength,
       "textposition":"inside",
-      "domain": {'x': [.52, 1],
+      "domain": {'x': [.50, .98],
              'y': [.63, 1]},
       "textinfo": "value+percent",
       "hoverinfo":"label+percent",
-      "hole": .4,
       "type": "pie"
     }],
 
@@ -370,8 +378,78 @@ def charting():
         ]
     }
 }
-	clientchart = plotly.offline.plot(fig, include_plotlyjs=False, output_type='div')
-	print 
+	clientchart = plotly.offline.plot(figclient, include_plotlyjs=False, output_type='div')
+
+	
+	figap = {
+  "data": [
+    {
+      "values": valueswlanmgtssidap,
+      "labels": labelswlanmgtssidap,
+      "domain":{'x': [.30, .60],
+              'y': [0, .49]},
+      "textinfo": "value+percent",
+      "hoverinfo":"label+percent",
+      "type": "pie"
+    },
+    {
+      "values": valuesapmaker,
+      "labels": labelsapmaker,
+      "textposition":"inside",
+      "domain": {'x': [0, .49],
+             'y': [.50, 1]},
+      "textinfo": "value+percent",
+      "hoverinfo":"label+percent",
+      "type": "pie"
+    },
+	{
+      "values": valueschannelgroupap,
+      "labels": labelschannelgroupap,
+      "textposition":"inside",
+      "domain": {'x': [.50, 1],
+               'y': [.50, 1]},
+      "textinfo": "value+percent",
+      "hoverinfo":"label+percent",
+      "type": "pie"
+    }],
+
+  "layout": {
+        "title":"AP info",
+		"showlegend": False,
+        "annotations": [
+            {
+                "font": {
+                    "size": 20
+                },
+                "showarrow": False,
+                "text": "MAC vendor AP (top15)",
+                "x": -0.009848484848484853,
+                "y": 0.7875766871165644
+            },
+            {
+                "font": {
+                    "size": 20
+                },
+                "showarrow": False,
+                "text": "Channel AP found on(top15)",
+                "x": 1.04469696969697,
+                "y": 0.80920245398773
+            },
+            {
+                "font": {
+                    "size": 20
+                },
+                "showarrow": False,
+                "text": "APs per SSID (top15)",
+                "x": 0.1803030303030304,
+                "y": 0.21702453987730075
+            }
+        ]
+    }
+}
+	apchart = plotly.offline.plot(figap, include_plotlyjs=False, output_type='div')
+	
+	
 	f = open('/var/www/html/display.html','w')
 	f.write("""
 <html>
@@ -582,6 +660,7 @@ def charting():
 </table>
 </p>
 """ + str(clientchart) + """
+""" + str(apchart) + """
 </body>
 </html>
 """)
@@ -598,6 +677,7 @@ def dbconverter():
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessupportedchanwidthset = '1' WHERE wlanmgtvhtcapabilitiessupportedchanwidthset  = '0x00000001';")
 	cursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessupportedchanwidthset = '2' WHERE wlanmgtvhtcapabilitiessupportedchanwidthset  = '0x00000002';")
 	cursor.execute("UPDATE dwccap SET wlansaconverted = 'vendornotfound' WHERE wlansaconverted  = 'None';")
+	cursor.execute("UPDATE dwccap SET wlanmgtssid = 'SSIDnotfound' WHERE wlanmgtssid is null or wlanmgtssid = '';")
 	conn.commit()
 
 #def mergecap():
@@ -612,6 +692,10 @@ def tsharker():
 	for fname in os.listdir(incomingpath):
 					if fname.endswith('.pcap'):
 						pcapfile = incomingpath +fname
+						regexhostname = re.compile(r'^[A-Za-z0-9_.]+')
+						hostnameonly = regexhostname.findall(fname)
+						regexyear = re.compile(r'([0-9]{4}\-[0-9]{2}\-[0-9]{2}\_[0-9]{2}\.[0-9]{2}\.[0-9]{2})')
+						timestamp = regexyear.findall(fname)
 						subprocess.call('tshark -r ' + pcapfile + '   -R "wlan.fc.type_subtype == 0x0 or wlan.fc.type_subtype == 0x2" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
 -e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
 -e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
@@ -629,7 +713,8 @@ def tsharker():
 -e wlan_mgt.vht.mcsset.txmcsmap.ss1 -e wlan_mgt.vht.mcsset.txmcsmap.ss2 -e wlan_mgt.vht.mcsset.txmcsmap.ss3 -e wlan_mgt.vht.mcsset.txmcsmap.ss4 -e wlan_mgt.ssid \
 -E separator=+ >> ' + tmppath + 'dwcc-clients.csv', shell=True)
 						subprocess.call('tshark -r ' + pcapfile + '   -R "wlan.fc.type_subtype == 0x8" -2 -T fields -e wlan_radio.channel -e wlan_mgt.ssid -e wlan.bssid -E separator=+ >> ' + tmppath + 'dwcc-ap.csv', shell=True)
-
+						subprocess.call("""tshark -r """ + pcapfile + """   -R "wlan.fc.type_subtype == 0x0 or wlan.fc.type_subtype == 0x2 or wlan.fc.type_subtype == 0x4" -2 -T fields -e wlan.sa -e wlan.bssid \
+-e wlan_radio.signal_dbm -E separator=+ | sed 's/$/+"""+ str(hostnameonly) + """+"""+ str(timestamp) +"""/' >> """+ tmppath + """dwcc-heatmap.csv""", shell=True)
 			#this below will move the pcap into the archive folder
 						os.rename(incomingpath +fname, archivepath +fname)
 						print "pcap found and tshark has ran"
@@ -731,7 +816,26 @@ wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsm
 		print "done with dbupdate for ap waiting for next run"
 	else:
 		print"csv ap not found will retry"
-
+		
+	csvheatmap = '/data/tmp/dwcc-heatmap.csv'
+	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
+	if os.path.isfile(csvheatmap) and os.access(csvheatmap, os.R_OK):
+		print "heatmap csv found adding to db"
+		subprocess.call("""cat /data/tmp/dwcc-heatmap.csv | awk '!seen[$0]++' | sed -e 's/ //g' -e 's/[<>"^()@#&!$.,]//g' -e "s/'//g" -e '/^$/d' -e 's/[][]//g' -e 's/[-_]//g' -e 's/...$/000/' >> /data/tmp/temp-dwcc-heatmap.csv """, shell=True)
+		os.remove("/data/tmp/dwcc-heatmap.csv")
+		os.rename("/data/tmp/temp-dwcc-heatmap.csv", "/data/tmp/dwcc-heatmap.csv")
+		csv_heatmap = csv.reader(file(csvheatmap), delimiter='+')
+		for rowheatmap in csv_heatmap:
+			conn.execute('INSERT INTO dwccheatmap (wlansa, wlanbssid, wlanradiosignaldbm, node, timestamp)' 'VALUES (?,?,?,?,?)', rowheatmap)
+		conn.commit()
+#This will remove the file after it is added to the db
+		os.remove(csvheatmap)
+		print "done with dbupdate for heatmap waiting for next run"
+	else:
+		print"csv heatmap not found will retry"
+		
+		
+		
 #This check for the database and if it is not found, it will make it.
 def dbmaker():
 	conn = sqlite3.connect(DB_FILE)
@@ -834,7 +938,14 @@ wlanbssid char(50),
 wlanradiochannel char(50),
 wlanmgtssid char(200),
 wlansaconverted char(200));''')
-
+	cursor.execute('''CREATE TABLE if not exists dwccheatmap
+(ID INTEGER PRIMARY KEY autoincrement NOT NULL,
+wlansa char(50),
+wlanbssid char(50),
+wlanradiosignaldbm char(200),
+node char(50),
+timestamp char(50),
+wlansaconverted char(200));''')
 	conn.commit()
 
 start()
