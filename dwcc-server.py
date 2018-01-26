@@ -48,6 +48,7 @@ def start():
 			macaddressconverterclient()
 			macaddressconverterap()
 			heatmapprep()
+			heatmapping()
 			time.sleep(300)#seconds
 		except KeyboardInterrupt: sys.exit()
 
@@ -842,9 +843,32 @@ def heatmapprep():
 	cursor.execute('''INSERT INTO dwccheatmapreporting (wlansa, timestamp, sigfromnode1)
 SELECT wlansa,  timestamp, avg(wlanradiosignaldbm) as sigfromnode1 
 FROM dwccheatmapincoming  
-where node = 'node1' 
+where node = 'node1' and addedtoreporting is null
 GROUP BY wlansa, timestamp ;''')
+	cursor.execute('''UPDATE dwccheatmapincoming SET addedtoreporting = '1' WHERE addedtoreporting is null;''')
 	conn.commit()
+	
+def heatmapping():
+	cursor.execute('''SELECT max (timestamp) FROM dwccheatmapreporting GROUP BY timestamp limit 1;''')
+	timestamptomap = cursor.fetchone()
+	timestamptomap = ''.join(c for c in timestamptomap if c not in string.punctuation)
+	cursor.execute("""select * from dwccheatmapreporting where timestamp = """+str(timestamptomap)+""";""")
+	clientstomap  = cursor.fetchall()
+	
+	clientstomapwlansa = []
+	clientstomapsigfromnode1 = []
+	clientstomapsigfromnode2 = []
+	clientstomapsigfromnode3 = []
+	clientstomapsigfromnode4 = []
+	clientstomapsigfromnode5 = []
+	for i in clientstomap:
+		clientstomapwlansa.append(str(i[1]))
+		clientstomapsigfromnode1.append(i[3])
+		clientstomapsigfromnode2.append(i[4])
+		clientstomapsigfromnode3.append(i[5])
+		clientstomapsigfromnode4.append(i[6])
+		clientstomapsigfromnode5.append(i[7])
+	print clientstomapwlansa, clientstomapsigfromnode1
 	
 
 
@@ -957,7 +981,8 @@ wlanbssid char(50),
 wlanradiosignaldbm char(200),
 node char(50),
 timestamp char(50),
-wlansaconverted char(200));''')
+wlansaconverted char(200),
+addedtoreporting char(50));''')
 	conn.commit()
 	
 	cursor.execute('''CREATE TABLE if not exists dwccheatmapreporting (
