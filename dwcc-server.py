@@ -47,6 +47,7 @@ def start():
 ##			mergecap()
 			macaddressconverterclient()
 			macaddressconverterap()
+			heatmapprep()
 			time.sleep(300)#seconds
 		except KeyboardInterrupt: sys.exit()
 
@@ -826,7 +827,7 @@ wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsm
 		os.rename("/data/tmp/temp-dwcc-heatmap.csv", "/data/tmp/dwcc-heatmap.csv")
 		csv_heatmap = csv.reader(file(csvheatmap), delimiter='+')
 		for rowheatmap in csv_heatmap:
-			conn.execute('INSERT INTO dwccheatmap (wlansa, wlanbssid, wlanradiosignaldbm, node, timestamp)' 'VALUES (?,?,?,?,?)', rowheatmap)
+			conn.execute('INSERT INTO dwccheatmapincoming (wlansa, wlanbssid, wlanradiosignaldbm, node, timestamp)' 'VALUES (?,?,?,?,?)', rowheatmap)
 		conn.commit()
 #This will remove the file after it is added to the db
 		os.remove(csvheatmap)
@@ -836,6 +837,17 @@ wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsm
 		
 		
 		
+		
+def heatmapprep():
+	conn = sqlite3.connect(DB_FILE)
+	cursor = conn.cursor()
+	cursor.execute('''INSERT INTO dwccheatmapreporting (wlansa, timestamp, sigfromnode1)
+SELECT wlansa,  timestamp, avg(wlanradiosignaldbm) as sigfromnode1 
+FROM dwccheatmapincoming  
+where node = 'node1' 
+GROUP BY wlansa, timestamp ;''')
+	conn.commit()
+	
 #This check for the database and if it is not found, it will make it.
 def dbmaker():
 	conn = sqlite3.connect(DB_FILE)
@@ -938,7 +950,7 @@ wlanbssid char(50),
 wlanradiochannel char(50),
 wlanmgtssid char(200),
 wlansaconverted char(200));''')
-	cursor.execute('''CREATE TABLE if not exists dwccheatmap
+	cursor.execute('''CREATE TABLE if not exists dwccheatmapincoming
 (ID INTEGER PRIMARY KEY autoincrement NOT NULL,
 wlansa char(50),
 wlanbssid char(50),
@@ -946,6 +958,22 @@ wlanradiosignaldbm char(200),
 node char(50),
 timestamp char(50),
 wlansaconverted char(200));''')
+	conn.commit()
+	
+	cursor.execute('''CREATE TABLE if not exists dwccheatmapreporting (
+	ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	wlansa char ( 50 ),
+	timestamp	char ( 50 ),
+	sigfromnode1	char ( 50 ),
+	sigfromnode2	char ( 50 ),
+	sigfromnode3	char ( 50 ),
+	sigfromnode4	char ( 50 ),
+	sigfromnode5	char ( 50 ),
+	sigfromnode6	char ( 50 ),
+	sigfromnode7	char ( 50 ),
+	sigfromnode8	char ( 50 ),
+	sigfromnode9	char ( 50 ),
+	sigfromnode10	char ( 50 ));''')
 	conn.commit()
 
 start()
