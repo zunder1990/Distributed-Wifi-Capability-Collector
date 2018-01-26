@@ -839,8 +839,6 @@ wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsm
 		
 		
 def heatmapprep():
-	conn = sqlite3.connect(DB_FILE)
-	cursor = conn.cursor()
 	cursor.execute('''INSERT INTO dwccheatmapreporting (wlansa, timestamp, sigfromnode1)
 SELECT wlansa,  timestamp, avg(wlanradiosignaldbm) as sigfromnode1 
 FROM dwccheatmapincoming  
@@ -848,6 +846,8 @@ where node = 'node1'
 GROUP BY wlansa, timestamp ;''')
 	conn.commit()
 	
+
+
 #This check for the database and if it is not found, it will make it.
 def dbmaker():
 	conn = sqlite3.connect(DB_FILE)
@@ -976,4 +976,13 @@ wlansaconverted char(200));''')
 	sigfromnode10	char ( 50 ));''')
 	conn.commit()
 
+	cursor.execute('''CREATE TABLE if not exists dwccheatmapnodes
+(nodename char(50) NOT NULL,
+xposition char(50),
+yposition char(50),
+PRIMARY KEY(`nodename`));''')
+	conn.commit()
+	
+	cursor.execute('''INSERT OR IGNORE INTO dwccheatmapnodes VALUES('node1', '.25', '.25' ),('node2', '.25', '.75' ),('node3', '.75', '.25' ),('node4', '.75', '.75' ),('node5', '.50', '.50' );''')
+	conn.commit()
 start()
