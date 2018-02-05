@@ -43,5 +43,9 @@ https://server.zachunderwood.me/display.html
  
  * iw reg get 
  * iw reg set US
+ * rename "s/\s+/-/g" *
+ * rename "s/\+/plus/g" *
+ * rename "s/\()//g" *
+
  
 

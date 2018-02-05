@@ -51,7 +51,7 @@ channels2 = [1, 6, 11] #use the linux command "iwlist channel" to get a list of 
 #channels1 = [6, 48, 1, 11, 36, 40, 44, 10 ] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 
 #info for sftp server
-sshhost = '192.168.1.144'  #can be hostname or ip
+sshhost = '192.168.15.3'  #can be hostname or ip
 sshuser = 'zach'           #make sure that key auth is working
 
 iamapi = '1' # set this to one if this hardware is a raspberrypi and you want to enable the status LEDs
@@ -154,9 +154,9 @@ def sniffer():
 		print "port 6 led on"
 		GPIO.output(6,GPIO.HIGH)
 	commands = [
-    'tcpdump -i '+ interface1 +' -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w '+incomingpath +''+ hostname +'-'+ interface1 +'-%Y-%m-%d_%H.%M.%S.pcap;',
-    'tcpdump -i '+ interface2 +' -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w '+incomingpath +''+ hostname +'-'+ interface2 +'-%Y-%m-%d_%H.%M.%S.pcap;',
-    'tcpdump -i '+ interface3 +' -G 600 --packet-buffered -W 144 -e -s 512 type mgt -w '+incomingpath +''+ hostname +'-'+ interface3 +'-%Y-%m-%d_%H.%M.%S.pcap;',
+    'tcpdump -i '+ interface1 +' -G 600 --packet-buffered -W 144 -e -s 1024 type mgt or type ctl -w '+incomingpath +''+ hostname +'-'+ interface1 +'-%Y-%m-%d_%H.%M.%S.pcap;',
+    'tcpdump -i '+ interface2 +' -G 600 --packet-buffered -W 144 -e -s 1024 type mgt or type ctl -w '+incomingpath +''+ hostname +'-'+ interface2 +'-%Y-%m-%d_%H.%M.%S.pcap;',
+    'tcpdump -i '+ interface3 +' -G 600 --packet-buffered -W 144 -e -s 1024 type mgt or type ctl -w '+incomingpath +''+ hostname +'-'+ interface3 +'-%Y-%m-%d_%H.%M.%S.pcap;',
 ]
 #
 # run in parallel
