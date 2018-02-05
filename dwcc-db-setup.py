@@ -1,6 +1,7 @@
 import logging
 import sqlite3
 
+DB_FILE = 'dwcc.db'
 #here is the setup info for the sqlite db
 conn = sqlite3.connect(DB_FILE)
 conn.text_factory = str
@@ -327,7 +328,8 @@ wlanmgtvhtmcssettxmcsmapss3 char(50),
 wlanmgtvhtmcssettxmcsmapss4 char(50),
 wlanmgtssid char(50),
 wlanmgthtmcssetrxbitmask char(50),
-wlanmgthtampduparam char(50));''')
+wlanmgthtampduparam char(50),
+vendormake char(100));''')
 	conn.commit()
 
 	cursor.execute('''CREATE TABLE if not exists taxonomyassreass
@@ -421,7 +423,8 @@ wlanmgtvhtmcssettxmcsmapss3 char(50),
 wlanmgtvhtmcssettxmcsmapss4 char(50),
 wlanmgtssid char(50),
 wlanmgthtmcssetrxbitmask char(50),
-wlanmgthtampduparam char(50));''')
+wlanmgthtampduparam char(50),
+vendormake char(100));''')
 	conn.commit()
 	
 	

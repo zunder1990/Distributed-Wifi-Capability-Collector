@@ -41,5 +41,9 @@ This will be updated at a later time.
  
  * iw reg get 
  * iw reg set US
+ * rename "s/\s+/-/g" *
+ * rename "s/\+/plus/g" *
+ * rename "s/\()//g" *
+
  
 

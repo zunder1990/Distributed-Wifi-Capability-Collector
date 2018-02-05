@@ -34,7 +34,6 @@ cursor = conn.cursor()
 #this is the main fuction
 def start():
 	preflightcheck()
-
 	while True:
 		try:
 			tsharker()
@@ -1452,10 +1451,4 @@ def heatmapping():
 		clientstomapsigfromnode5.append(i[7])
 	print clientstomapwlansa, clientstomapsigfromnode1
 	
-
-
-
-
 start()
-
-
