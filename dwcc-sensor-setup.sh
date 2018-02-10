@@ -1,5 +1,5 @@
 #!/bin/bash
-apt-get install python-dev
+apt-get install python-dev tcpdump
 apt-get install python3-dev
 apt-get install libffi-dev
 apt-get install libffi-dev libssl-dev
