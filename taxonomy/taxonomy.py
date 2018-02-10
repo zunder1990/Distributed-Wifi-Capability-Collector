@@ -13,7 +13,6 @@ import csv
 #This change the below to reflect your sysrem
 incomingpath = '/root/wifi_taxonomy/testdata/pcaps/' #This is the path where new pcaps will be placed
 archivepath = '/root/wifi_taxonomy/testdata/archive/' #This is the path where pcaps what already have been checked will be placed
-tmppath = '/data/tmp/' #this is the path for a tmp folder for dwcc to use
 
 DB_FILE = 'dwcc.db'
 #here is the setup info for the sqlite db
@@ -50,7 +49,7 @@ def tsharker():
 -e wlan_mgt.extcap.b44 -e wlan_mgt.extcap.b45 -e wlan_mgt.extcap.b47 -e wlan_mgt.extcap.b48 -e wlan_mgt.extcap.b61 -e wlan_mgt.extcap.b62 -e wlan_mgt.extcap.b63 -e wlan_mgt.vht.capabilities.rxstbc \
 -e wlan_mgt.vht.mcsset.rxmcsmap.ss1 -e wlan_mgt.vht.mcsset.rxmcsmap.ss2 -e wlan_mgt.vht.mcsset.rxmcsmap.ss3 -e wlan_mgt.vht.mcsset.rxmcsmap.ss4 \
 -e wlan_mgt.vht.mcsset.txmcsmap.ss1 -e wlan_mgt.vht.mcsset.txmcsmap.ss2 -e wlan_mgt.vht.mcsset.txmcsmap.ss3 -e wlan_mgt.vht.mcsset.txmcsmap.ss4 -e wlan_mgt.ssid -e wlan_mgt.ht.mcsset.rxbitmask -e wlan_mgt.ht.ampduparam \
--E separator=+ | sed 's/$/+"""+ str(vendormake) + """/' >> """+ tmppath + """dwcc-taxonomy-ass-reass.csv""", shell=True)
+-E separator=+ | sed 's/$/+"""+ str(vendormake) + """/' >> dwcc-taxonomy-ass-reass.csv""", shell=True)
 						subprocess.call("""tshark -r """ + pcapfile + """  -R "wlan.fc.type_subtype == 0x8" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan_mgt.extcap.b19 -e wlan.fc.protected \
 -e wlan_radio.channel -e wlan.fc.pwrmgt -e wlan_mgt.fixed.capabilities.radio_measurement -e wlan_mgt.ht.mcsset.txmaxss \
 -e radiotap.channel.flags.ofdm -e radiotap.channel.flags.5ghz -e radiotap.channel.flags.2ghz -e wlan_mgt.fixed.capabilities.spec_man \
@@ -66,20 +65,20 @@ def tsharker():
 -e wlan_mgt.extcap.b44 -e wlan_mgt.extcap.b45 -e wlan_mgt.extcap.b47 -e wlan_mgt.extcap.b48 -e wlan_mgt.extcap.b61 -e wlan_mgt.extcap.b62 -e wlan_mgt.extcap.b63 -e wlan_mgt.vht.capabilities.rxstbc \
 -e wlan_mgt.vht.mcsset.rxmcsmap.ss1 -e wlan_mgt.vht.mcsset.rxmcsmap.ss2 -e wlan_mgt.vht.mcsset.rxmcsmap.ss3 -e wlan_mgt.vht.mcsset.rxmcsmap.ss4 \
 -e wlan_mgt.vht.mcsset.txmcsmap.ss1 -e wlan_mgt.vht.mcsset.txmcsmap.ss2 -e wlan_mgt.vht.mcsset.txmcsmap.ss3 -e wlan_mgt.vht.mcsset.txmcsmap.ss4 -e wlan_mgt.ssid -e wlan_mgt.ht.mcsset.rxbitmask -e wlan_mgt.ht.ampduparam \
--E separator=+ | sed 's/$/+"""+ str(vendormake) + """/' >> """+ tmppath + """dwcc-taxonomy-probe.csv""", shell=True)
+-E separator=+ | sed 's/$/+"""+ str(vendormake) + """/' >> dwcc-taxonomy-probe.csv""", shell=True)
 
 						os.rename(incomingpath +fname, archivepath +fname)
 						print vendormake
 	print "tshark ran on all pcap found"
 
 def dbupdater():
-	csvfileprobe = '/data/tmp/dwcc-taxonomy-probe.csv'
+	csvfileprobe = 'dwcc-taxonomy-probe.csv'
 #	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
 	if os.path.isfile(csvfileprobe) and os.access(csvfileprobe, os.R_OK):
 		print "probe csv found adding to db"
-		subprocess.call("""awk '!seen[$0]++' /data/tmp/dwcc-taxonomy-probe.csv | sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.*]//g' -e "s/'//g" -e '/^$/d' -e 's/[][]//g' -e 's/[_]//g' >> /data/tmp/temp-dwcc-taxonomy-probe.csv""", shell=True)
-		os.remove("/data/tmp/dwcc-taxonomy-probe.csv")
-		os.rename("/data/tmp/temp-dwcc-taxonomy-probe.csv", "/data/tmp/dwcc-taxonomy-probe.csv")
+		subprocess.call("""cat dwcc-taxonomy-probe.csv | sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.*]//g' -e "s/'//g" -e '/^$/d' -e 's/[][]//g' -e 's/[_]//g' >> temp-dwcc-taxonomy-probe.csv""", shell=True)
+		os.remove("dwcc-taxonomy-probe.csv")
+		os.rename("temp-dwcc-taxonomy-probe.csv", "dwcc-taxonomy-probe.csv")
 		csv_probe = csv.reader(file(csvfileprobe), delimiter='+')
 		for rowprobe in csv_probe:
 			conn.execute('INSERT INTO taxonomyprobe (wlansa, wlanbssid, radiotapchannelfreq, wlanmgtextcapb19, wlanfcprotected, \
@@ -99,13 +98,13 @@ wlanmgtvhtmcssetrxmcsmapss1, wlanmgtvhtmcssetrxmcsmapss2, wlanmgtvhtmcssetrxmcsm
 wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsmapss2, wlanmgtvhtmcssettxmcsmapss3, wlanmgtvhtmcssettxmcsmapss4, wlanmgtssid, wlanmgthtmcssetrxbitmask, wlanmgthtampduparam, vendormake)' \
 'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', rowprobe)
 		conn.commit()
-	csvfileassreass = '/data/tmp/dwcc-taxonomy-ass-reass.csv'
+	csvfileassreass = 'dwcc-taxonomy-ass-reass.csv'
 #	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
 	if os.path.isfile(csvfileprobe) and os.access(csvfileprobe, os.R_OK):
 		print "assreass csv found adding to db"
-		subprocess.call("""awk '!seen[$0]++' /data/tmp/dwcc-taxonomy-ass-reass.csv | sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.*]//g' -e "s/'//g" -e '/^$/d' -e 's/[][]//g' -e 's/[_]//g' >> /data/tmp/temp-dwcc-taxonomy-ass-reass.csv""", shell=True)
-		os.remove("/data/tmp/dwcc-taxonomy-ass-reass.csv")
-		os.rename("/data/tmp/temp-dwcc-taxonomy-ass-reass.csv", "/data/tmp/dwcc-taxonomy-ass-reass.csv")
+		subprocess.call("""cat dwcc-taxonomy-ass-reass.csv | sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.*]//g' -e "s/'//g" -e '/^$/d' -e 's/[][]//g' -e 's/[_]//g' >> temp-dwcc-taxonomy-ass-reass.csv""", shell=True)
+		os.remove("dwcc-taxonomy-ass-reass.csv")
+		os.rename("temp-dwcc-taxonomy-ass-reass.csv", "dwcc-taxonomy-ass-reass.csv")
 		csv_assreass = csv.reader(file(csvfileassreass), delimiter='+')
 		for rowassreass in csv_assreass:
 			conn.execute('INSERT INTO taxonomyassreass(wlansa, wlanbssid, radiotapchannelfreq, wlanmgtextcapb19, wlanfcprotected, \

@@ -48,6 +48,7 @@ def start():
 			macaddressconverterclient()
 			macaddressconverterap()
 			macaddressconverterprobe()
+			taxonomyreporting()
 			time.sleep(30)#seconds
 		except KeyboardInterrupt: sys.exit()
 
@@ -1451,4 +1452,17 @@ def heatmapping():
 		clientstomapsigfromnode5.append(i[7])
 	print clientstomapwlansa, clientstomapsigfromnode1
 	
+def taxonomyreporting():
+#this is in testing
+	cursor.execute('''SELECT dwccincoming.wlansa, taxonomyassreass.vendormake
+FROM dwccincoming
+INNER JOIN taxonomyassreass ON  dwccincoming.wlanmgttagnumber =   taxonomyassreass.wlanmgttagnumber and dwccincoming.wlanmgttagoui = taxonomyassreass.wlanmgttagoui \
+and dwccincoming.radiotapchannelflags2ghz = taxonomyassreass.radiotapchannelflags2ghz and dwccincoming.radiotapchannelflags5ghz = taxonomyassreass.radiotapchannelflags5ghz \
+and dwccincoming.wlanmgtpowercapmax = taxonomyassreass.wlanmgtpowercapmax and dwccincoming.wlanmgtpowercapmin = taxonomyassreass.wlanmgtpowercapmin \
+and dwccincoming.wlanmgthtampduparam = taxonomyassreass.wlanmgthtampduparam and dwccincoming.wlanmgtvhtcapabilitiestxstbc = taxonomyassreass.wlanmgtvhtcapabilitiestxstbc \
+and dwccincoming.wlanmgtvhtcapabilitiesbeamformerants = taxonomyassreass.wlanmgtvhtcapabilitiesbeamformerants and dwccincoming.wlanmgtextcapb2 = taxonomyassreass.wlanmgtextcapb2 \
+and dwccincoming.wlanmgtrsncapabilitiesmfpc = taxonomyassreass.wlanmgtrsncapabilitiesmfpc and dwccincoming.wlanmgtextcapb46 = taxonomyassreass.wlanmgtextcapb46 \
+and dwccincoming.wlanmgtextcapb32 = taxonomyassreass.wlanmgtextcapb32 and dwccincoming.wlanmgtextcapb31 = taxonomyassreass.wlanmgtextcapb31 ;''')
+	taxonomymatch  = cursor.fetchall()
+	print taxonomymatch
 start()
