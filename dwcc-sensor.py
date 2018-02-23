@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #Need to cleanup the ones we are not using
 import sys
 import os
