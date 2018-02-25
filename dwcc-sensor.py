@@ -178,7 +178,7 @@ def uploader():
 							with pysftp.Connection(host=sshhost, username=sshuser, private_key='~/.ssh/id_rsa') as sftp:
 								with sftp.cd(incomingpath):
 									sftp.put(incomingpath +fname)
-							logging.info("moved", fname) 
+							logging.info("uploaded pcap") 
 						except pysftp.SSHException:
 							logging.info("Unable to establish SSH connection will retry in 5 min")
 							time.sleep(300) #seconds
