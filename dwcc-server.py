@@ -118,7 +118,7 @@ def tsharker():
 -e wlan.powercap.max -e wlan.powercap.min -e wlan.rsn.capabilities.mfpc -e wlan.extcap.b31 -e wlan.extcap.b32 -e wlan.extcap.b46 \
 -e wlan.tag.number -e wlan.vht.capabilities.maxmpdulength -e wlan.vht.capabilities.supportedchanwidthset -e wlan.vht.capabilities.rxldpc \
 -e wlan.vht.capabilities.short80 -e wlan.vht.capabilities.short160 -e wlan.vht.capabilities.txstbc -e wlan.vht.capabilities.subeamformer \
--e wlan.vht.capabilities.subeamformee -e wlan.vht.capabilities.beamformerants -e wlan.vht.capabilities.soundingdimensions -e wlan.vht.capabilities.mubeamformer \
+-e wlan.vht.capabilities.subeamformee -e wlan.vht.capabilities.soundingdimensions -e wlan.vht.capabilities.mubeamformer \
 -e wlan.vht.capabilities.mubeamformee -e wlan.tag.oui -e wlan.fixed.capabilities.ess -e radiotap.antenna \
 -e wlan.extcap.b4 -e wlan.extcap.b3 -e wlan.extcap.b2 -e wlan.extcap.b1 -e wlan.extcap.b6 -e wlan.extcap.b8 -e wlan.extcap.b9 -e wlan.extcap.b10 -e wlan.extcap.b11 \
 -e wlan.extcap.b12 -e wlan.extcap.b13 -e wlan.extcap.b14 -e wlan.extcap.b15 -e wlan.extcap.b16 -e wlan.extcap.b17 -e wlan.extcap.b18 -e wlan.extcap.b20 -e wlan.extcap.b21 \
@@ -137,7 +137,7 @@ def tsharker():
 -e wlan.powercap.max -e wlan.powercap.min -e wlan.rsn.capabilities.mfpc -e wlan.extcap.b31 -e wlan.extcap.b32 -e wlan.extcap.b46 \
 -e wlan.tag.number -e wlan.vht.capabilities.maxmpdulength -e wlan.vht.capabilities.supportedchanwidthset -e wlan.vht.capabilities.rxldpc \
 -e wlan.vht.capabilities.short80 -e wlan.vht.capabilities.short160 -e wlan.vht.capabilities.txstbc -e wlan.vht.capabilities.subeamformer \
--e wlan.vht.capabilities.subeamformee -e wlan.vht.capabilities.beamformerants -e wlan.vht.capabilities.soundingdimensions -e wlan.vht.capabilities.mubeamformer \
+-e wlan.vht.capabilities.subeamformee -e wlan.vht.capabilities.soundingdimensions -e wlan.vht.capabilities.mubeamformer \
 -e wlan.vht.capabilities.mubeamformee -e wlan.tag.oui -e wlan.fixed.capabilities.ess -e radiotap.antenna \
 -e wlan.extcap.b4 -e wlan.extcap.b3 -e wlan.extcap.b2 -e wlan.extcap.b1 -e wlan.extcap.b6 -e wlan.extcap.b8 -e wlan.extcap.b9 -e wlan.extcap.b10 -e wlan.extcap.b11 \
 -e wlan.extcap.b12 -e wlan.extcap.b13 -e wlan.extcap.b14 -e wlan.extcap.b15 -e wlan.extcap.b16 -e wlan.extcap.b17 -e wlan.extcap.b18 -e wlan.extcap.b20 -e wlan.extcap.b21 \
@@ -237,7 +237,7 @@ radiotapchannelflagsofdm, radiotapchannelflags5ghz, radiotapchannelflags2ghz, wl
 wlanmgtpowercapmax, wlanmgtpowercapmin, wlanmgtrsncapabilitiesmfpc, wlanmgtextcapb31, wlanmgtextcapb32, wlanmgtextcapb46, \
 wlanmgttagnumber, wlanmgtvhtcapabilitiesmaxmpdulength, wlanmgtvhtcapabilitiessupportedchanwidthset, wlanmgtvhtcapabilitiesrxldpc, \
 wlanmgtvhtcapabilitiesshort80, wlanmgtvhtcapabilitiesshort160, wlanmgtvhtcapabilitiestxstbc, wlanmgtvhtcapabilitiessubeamformer, \
-wlanmgtvhtcapabilitiessubeamformee, wlanmgtvhtcapabilitiesbeamformerants, wlanmgtvhtcapabilitiessoundingdimensions, wlanmgtvhtcapabilitiesmubeamformer, \
+wlanmgtvhtcapabilitiessubeamformee, wlanmgtvhtcapabilitiessoundingdimensions, wlanmgtvhtcapabilitiesmubeamformer, \
 wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui,  wlanmgtfixedcapabilitiesess, radiotapantenna, \
 wlanmgtextcapb4, wlanmgtextcapb3, wlanmgtextcapb2, wlanmgtextcapb1, wlanmgtextcapb6, wlanmgtextcapb8, wlanmgtextcapb9, wlanmgtextcapb10, wlanmgtextcapb11, wlanmgtextcapb12, \
 wlanmgtextcapb13, wlanmgtextcapb14, wlanmgtextcapb15, wlanmgtextcapb16, wlanmgtextcapb17, wlanmgtextcapb18, wlanmgtextcapb20, wlanmgtextcapb21, wlanmgtextcapb22, wlanmgtextcapb23, \
@@ -270,7 +270,7 @@ radiotapchannelflagsofdm, radiotapchannelflags5ghz, radiotapchannelflags2ghz, wl
 wlanmgtpowercapmax, wlanmgtpowercapmin, wlanmgtrsncapabilitiesmfpc, wlanmgtextcapb31, wlanmgtextcapb32, wlanmgtextcapb46, \
 wlanmgttagnumber, wlanmgtvhtcapabilitiesmaxmpdulength, wlanmgtvhtcapabilitiessupportedchanwidthset, wlanmgtvhtcapabilitiesrxldpc, \
 wlanmgtvhtcapabilitiesshort80, wlanmgtvhtcapabilitiesshort160, wlanmgtvhtcapabilitiestxstbc, wlanmgtvhtcapabilitiessubeamformer, \
-wlanmgtvhtcapabilitiessubeamformee, wlanmgtvhtcapabilitiesbeamformerants, wlanmgtvhtcapabilitiessoundingdimensions, wlanmgtvhtcapabilitiesmubeamformer, \
+wlanmgtvhtcapabilitiessubeamformee, wlanmgtvhtcapabilitiessoundingdimensions, wlanmgtvhtcapabilitiesmubeamformer, \
 wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui,  wlanmgtfixedcapabilitiesess, radiotapantenna, \
 wlanmgtextcapb4, wlanmgtextcapb3, wlanmgtextcapb2, wlanmgtextcapb1, wlanmgtextcapb6, wlanmgtextcapb8, wlanmgtextcapb9, wlanmgtextcapb10, wlanmgtextcapb11, wlanmgtextcapb12, \
 wlanmgtextcapb13, wlanmgtextcapb14, wlanmgtextcapb15, wlanmgtextcapb16, wlanmgtextcapb17, wlanmgtextcapb18, wlanmgtextcapb20, wlanmgtextcapb21, wlanmgtextcapb22, wlanmgtextcapb23, \
@@ -295,6 +295,9 @@ wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsm
 	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
 	if os.path.isfile(csvfileap) and os.access(csvfileap, os.R_OK):
 		print "ap csv found adding to db"
+		#awk '!seen[$0]++' will dedup without having to sort
+		#sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.,]//g' -e "s/'//g" -e '/^$/d' will special characters
+        #sed -n 's/$/+/' will add a + to end of each line to allow the csp to be imported into the db
 		subprocess.call("""cat /data/tmp/dwcc-ap.csv | awk '!seen[$0]++' | sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.,]//g' -e "s/'//g" -e '/^$/d' | awk 'BEGIN{FS=OFS="+"} NF==4 {$0=$1 OFS $2 $3 OFS $4} {print}' | sed -n 's/$/+/' >> /data/tmp/temp-dwcc-ap.csv """, shell=True)
 		os.remove("/data/tmp/dwcc-ap.csv")
 		os.rename("/data/tmp/temp-dwcc-ap.csv", "/data/tmp/dwcc-ap.csv")
@@ -380,7 +383,7 @@ INNER JOIN taxonomyassreass ON  dwccincoming.wlanmgttagnumber =   taxonomyassrea
 and dwccincoming.radiotapchannelflags2ghz = taxonomyassreass.radiotapchannelflags2ghz and dwccincoming.radiotapchannelflags5ghz = taxonomyassreass.radiotapchannelflags5ghz \
 and dwccincoming.wlanmgtpowercapmax = taxonomyassreass.wlanmgtpowercapmax and dwccincoming.wlanmgtpowercapmin = taxonomyassreass.wlanmgtpowercapmin \
 and dwccincoming.wlanmgthtampduparam = taxonomyassreass.wlanmgthtampduparam and dwccincoming.wlanmgtvhtcapabilitiestxstbc = taxonomyassreass.wlanmgtvhtcapabilitiestxstbc \
-and dwccincoming.wlanmgtvhtcapabilitiesbeamformerants = taxonomyassreass.wlanmgtvhtcapabilitiesbeamformerants and dwccincoming.wlanmgtextcapb2 = taxonomyassreass.wlanmgtextcapb2 \
+and dwccincoming.wlanmgtextcapb2 = taxonomyassreass.wlanmgtextcapb2 \
 and dwccincoming.wlanmgtrsncapabilitiesmfpc = taxonomyassreass.wlanmgtrsncapabilitiesmfpc and dwccincoming.wlanmgtextcapb46 = taxonomyassreass.wlanmgtextcapb46 \
 and dwccincoming.wlanmgtextcapb32 = taxonomyassreass.wlanmgtextcapb32 and dwccincoming.wlanmgtextcapb31 = taxonomyassreass.wlanmgtextcapb31 ;''')
 	taxonomymatch  = mycursor.fetchall()
