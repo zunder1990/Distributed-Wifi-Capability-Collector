@@ -14,13 +14,14 @@ from subprocess import Popen
 
 
 #1 is enabled, 0 is disabled
-interface3enable = '1'
-interface3 = 'wlan0mon'
-monitor_enable3  = 'ifconfig wlx00c0ca957c18 down; iw dev wlx00c0ca957c18 interface add wlan0mon type monitor; ifconfig wlan0mon down; iw dev wlan0mon set type monitor; ifconfig wlan0mon up'
-monitor_disable3 = 'iw dev wlan0mon del; ifconfig wlan0 up'
-change_channel3  = 'iw dev wlan0mon set channel %s'
-#channels3 = [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
-channels3 = [1, 6, 11] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
+interface0enable = '1'
+#Change the below to match your systems wifi interface name
+interface0 = 'wlx00c0ca957c18'
+monitor_enable0  = 'ifconfig ' + interface0 + ' down; iw dev ' + interface0 + ' interface add wlan0mon type monitor; ifconfig wlan0mon down; iw dev wlan0mon set type monitor; ifconfig wlan0mon up'
+monitor_disable0 = 'iw dev wlan0mon del; ifconfig ' + interface0 + ' up'
+change_channel0  = 'iw dev wlan0mon set channel %s'
+#channels0 = [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
+channels0 = [1, 6, 11] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 
 #At this more than interface has not been tested
 #1 is enabled, 0 is disabled
@@ -69,15 +70,15 @@ def start():
 	subprocess.call('iw reg set US', shell=True)
 	logging.basicConfig(filename='/root/Distributed-Wifi-Capability-Collector/dwcc.log', format='%(levelname)s:%(message)s', level=logging.INFO)
 
+	if interface0enable == '1':
+		os.system(monitor_enable0)
+		logging.info("starting wlan0")
 	if interface1enable == '1':
 		os.system(monitor_enable1)
 		logging.info("starting wlan1")
 	if interface2enable == '1':
 		os.system(monitor_enable2)
 		logging.info("starting wlan2")
-	if interface3enable == '1':
-		os.system(monitor_enable3)
-		logging.info("starting wlan3")
 	stop_rotating = rotator()
 	stop_uploading = uploader()
 	try:sniffer()
@@ -86,30 +87,30 @@ def start():
 		print "Please wait for everything to stop"
 		stop_rotating.set()
 		stop_uploading.set()
+		if interface0enable == '1':
+			os.system(monitor_disable0)
 		if interface1enable == '1':
 			os.system(monitor_disable1)
 		if interface2enable == '1':
 			os.system(monitor_disable2)
-		if interface3enable == '1':
-			os.system(monitor_disable3)
 
-#This will change the channels every 1 sec to scan all in the range. 
+#This will change the channels every 5 sec to scan all in the range.
 def rotator():
 	def rotate(stop):
 		while not stop.is_set():
 			try:
+				if interface0enable == '1': #This loop is for interface 0
+					channel1 = str(random.choice(channels0))
+					logging.info('Changing to channel for interface0 ' + channel0)
+					os.system(change_channel0 % channel0)
 				if interface1enable == '1': #This loop is for interface 1
-					channel1 = str(random.choice(channels1))
+					channel2 = str(random.choice(channels1))
 					logging.info('Changing to channel for interface1 ' + channel1)
 					os.system(change_channel1 % channel1)
 				if interface2enable == '1': #This loop is for interface 2
 					channel2 = str(random.choice(channels2))
 					logging.info('Changing to channel for interface2 ' + channel2)
 					os.system(change_channel2 % channel2)
-				if interface3enable == '1': #This loop is for interface 3
-					channel3 = str(random.choice(channels3))
-					logging.info('Changing to channel for interface3 ' + channel3)
-					os.system(change_channel3 % channel3)
 				time.sleep(5) # seconds
 			except KeyboardInterrupt: pass
 	stop = multiprocessing.Event()
@@ -118,11 +119,21 @@ def rotator():
 #this is the capture function, It will only capture the mgt frames.
 def sniffer():
 	logging.info("sniffer started")
-	commands = [
-    'tcpdump -i '+ interface1 +' -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w '+incomingpath +''+ hostname +'-'+ interface1 +'-%Y-%m-%d_%H.%M.%S.pcap;',
-    'tcpdump -i '+ interface2 +' -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w '+incomingpath +''+ hostname +'-'+ interface2 +'-%Y-%m-%d_%H.%M.%S.pcap;',
-    'tcpdump -i '+ interface3 +' -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w '+incomingpath +''+ hostname +'-'+ interface3 +'-%Y-%m-%d_%H.%M.%S.pcap;',
-]
+	if interface0enable == '1':  # This loop is for interface 0
+
+		commands = [
+   			 'tcpdump -i wlan3mon -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w '+incomingpath +''+ hostname +'-wlan0mon-%Y-%m-%d_%H.%M.%S.pcap;',
+		]
+	if interface1enable == '1':  # This loop is for interface 1
+
+		commands = [
+			'tcpdump -i wlan1mon -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w ' + incomingpath + '' + hostname + '-wlan1mon-%Y-%m-%d_%H.%M.%S.pcap;',
+		]
+	if interface2enable == '2':  # This loop is for interface 2
+
+			commands = [
+				'tcpdump -i wlan2mon -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w ' + incomingpath + '' + hostname + '-wlan2mon-%Y-%m-%d_%H.%M.%S.pcap;',
+			]
 # tcpdump -i wlan0mon  -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w - | tee /home/zach/somefile1.pcap | tshark -i -   -T fields -e wlan.sa -e radiotap.dbm_antsignal | awk 'NF==2'
 # run in parallel
 	processes = [Popen(cmd, shell=True) for cmd in commands]
