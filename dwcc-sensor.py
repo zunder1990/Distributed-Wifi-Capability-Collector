@@ -10,7 +10,8 @@ import subprocess
 import os.path
 import pysftp
 from subprocess import Popen
-
+import warnings
+warnings.filterwarnings(action='ignore',module='.*paramiko.*')
 
 
 #1 is enabled, 0 is disabled
@@ -20,8 +21,8 @@ interface0 = 'wlx00c0ca957c18'
 monitor_enable0  = 'ifconfig ' + interface0 + ' down; iw dev ' + interface0 + ' interface add wlan0mon type monitor; ifconfig wlan0mon down; iw dev wlan0mon set type monitor; ifconfig wlan0mon up'
 monitor_disable0 = 'iw dev wlan0mon del; ifconfig ' + interface0 + ' up'
 change_channel0  = 'iw dev wlan0mon set channel %s'
-#channels0 = [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
-channels0 = [1, 6, 11] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
+channels0 = [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
+#channels0 = [1, 6, 11] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 
 #At this more than interface has not been tested
 #1 is enabled, 0 is disabled
@@ -100,11 +101,11 @@ def rotator():
 		while not stop.is_set():
 			try:
 				if interface0enable == '1': #This loop is for interface 0
-					channel1 = str(random.choice(channels0))
+					channel0 = str(random.choice(channels0))
 					logging.info('Changing to channel for interface0 ' + channel0)
 					os.system(change_channel0 % channel0)
 				if interface1enable == '1': #This loop is for interface 1
-					channel2 = str(random.choice(channels1))
+					channel1 = str(random.choice(channels1))
 					logging.info('Changing to channel for interface1 ' + channel1)
 					os.system(change_channel1 % channel1)
 				if interface2enable == '1': #This loop is for interface 2
@@ -117,29 +118,21 @@ def rotator():
 	multiprocessing.Process(target=rotate, args=[stop]).start()
 	return stop
 #this is the capture function, It will only capture the mgt frames.
+
 def sniffer():
 	logging.info("sniffer started")
-	if interface0enable == '1':  # This loop is for interface 0
-
-		commands = [
-   			 'tcpdump -i wlan3mon -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w '+incomingpath +''+ hostname +'-wlan0mon-%Y-%m-%d_%H.%M.%S.pcap;',
+	commands = [
+   		    'tcpdump -i wlan0mon -G 300 --packet-buffered -W 1 -e -s 1024 type mgt or type ctl -w /tmp/'+ hostname +'-wlan0mon-%Y-%m-%d_%H.%M.%S.pcap && mv /tmp/'+ hostname +'-wlan0mon-* ' + incomingpath + ' ;',
+			'tcpdump -i wlan1mon -G 300 --packet-buffered -W 1 -e -s 1024 type mgt or type ctl -w ' + incomingpath + '' + hostname + '-wlan0mon-%Y-%m-%d_%H.%M.%S.pcap;',
+			'tcpdump -i wlan2mon -G 300 --packet-buffered -W 1 -e -s 1024 type mgt or type ctl -w ' + incomingpath + '' + hostname + '-wlan0mon-%Y-%m-%d_%H.%M.%S.pcap;',
 		]
-	if interface1enable == '1':  # This loop is for interface 1
-
-		commands = [
-			'tcpdump -i wlan1mon -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w ' + incomingpath + '' + hostname + '-wlan1mon-%Y-%m-%d_%H.%M.%S.pcap;',
-		]
-	if interface2enable == '2':  # This loop is for interface 2
-
-			commands = [
-				'tcpdump -i wlan2mon -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w ' + incomingpath + '' + hostname + '-wlan2mon-%Y-%m-%d_%H.%M.%S.pcap;',
-			]
 # tcpdump -i wlan0mon  -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w - | tee /home/zach/somefile1.pcap | tshark -i -   -T fields -e wlan.sa -e radiotap.dbm_antsignal | awk 'NF==2'
-# run in parallel
+ #run in parallel
 	processes = [Popen(cmd, shell=True) for cmd in commands]
 
 	# wait for completion
 	for p in processes: p.wait()
+	sniffer()
 
 #the above will rotate the pcap every  5  mins and keeps 24 hours worth
 def uploader():
@@ -154,8 +147,8 @@ def uploader():
 									sftp.put(incomingpath +fname)
 							logging.info("uploaded pcap") 
 						except pysftp.SSHException:
-							logging.info("Unable to establish SSH connection will retry in 5 min")
-							time.sleep(300) #seconds
+							logging.info("Unable to establish SSH connection will retry in 2 min")
+							time.sleep(120) #seconds
 					os.remove(incomingpath +fname)
 				else:
 					logging.info("no pcap found, will try again in 5 min")
