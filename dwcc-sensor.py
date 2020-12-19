@@ -1,42 +1,39 @@
 #!/usr/bin/env python
-#Need to cleanup the ones we are not using
 import sys
 import os
 import logging
-import traceback
 import random
 import time
-import datetime
 import multiprocessing
-import Queue
 import socket
 import subprocess
 import os.path
 import pysftp
 from subprocess import Popen
-import RPi.GPIO as GPIO
+
 
 
 #1 is enabled, 0 is disabled
 interface3enable = '1'
 interface3 = 'wlan0mon'
-monitor_enable3  = 'ifconfig wlan0 down; iw dev wlan0 interface add wlan0mon type monitor; ifconfig wlan0mon down; iw dev wlan0mon set type monitor; ifconfig wlan0mon up'
+monitor_enable3  = 'ifconfig wlx00c0ca957c18 down; iw dev wlx00c0ca957c18 interface add wlan0mon type monitor; ifconfig wlan0mon down; iw dev wlan0mon set type monitor; ifconfig wlan0mon up'
 monitor_disable3 = 'iw dev wlan0mon del; ifconfig wlan0 up'
 change_channel3  = 'iw dev wlan0mon set channel %s'
-channels3 = [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
+#channels3 = [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
+channels3 = [1, 6, 11] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 
 #At this more than interface has not been tested
 #1 is enabled, 0 is disabled
-interface1enable = '1'
+interface1enable = '0'
 interface1 = 'wlan1mon'
 monitor_enable1  = 'ifconfig wlan1 down; iw dev wlan1 interface add wlan1mon type monitor; ifconfig wlan1mon down; iw dev wlan1mon set type monitor; ifconfig wlan1mon up'
 monitor_disable1 = 'iw dev wlan1mon del; ifconfig wlan1 up'
 change_channel1  = 'iw dev wlan1mon set channel %s'
 channels1 = [120, 124, 128, 132, 136, 140, 149, 153, 157, 161, 165] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 
-#At this more than interface has not been tested
+#At this point only 3 interfaces have been tested
 #1 is enabled, 0 is disabled
-interface2enable = '1'
+interface2enable = '0'
 interface2 = 'wlan2mon'
 monitor_enable2 = 'ifconfig wlan2 down; iw dev wlan2 interface add wlan2mon type monitor; ifconfig wlan2mon down; iw dev wlan2mon set type monitor; ifconfig wlan2mon up'
 monitor_disable2 = 'iw dev wlan2mon del; ifconfig wlan2 up'
@@ -52,10 +49,10 @@ channels2 = [1, 6, 11] #use the linux command "iwlist channel" to get a list of 
 #channels1 = [6, 48, 1, 11, 36, 40, 44, 10 ] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 
 #info for sftp server
-sshhost = '192.168.15.3'  #can be hostname or ip
+sshhost = '10.1.0.7'  #can be hostname or ip
 sshuser = 'zach'           #make sure that key auth is working
 
-iamapi = '1' # set this to one if this hardware is a raspberrypi and you want to enable the status LEDs
+
 
 hostname = socket.gethostname()
 
@@ -66,14 +63,12 @@ incomingpath = '/data/incoming/' #This is the path where new pcaps will be place
 #This is the main function
 def start():
 	try:
-    		os.remove("/root/Distributed-Wifi-Capability-Collector/dwcc.log")
+		os.remove("/root/Distributed-Wifi-Capability-Collector/dwcc.log")
 	except OSError:
-    		pass
+		pass
 	subprocess.call('iw reg set US', shell=True)
 	logging.basicConfig(filename='/root/Distributed-Wifi-Capability-Collector/dwcc.log', format='%(levelname)s:%(message)s', level=logging.INFO)
-	if iamapi == '1':
-		gpinsetup()
-		stop_networkchecker = networkchecker()
+
 	if interface1enable == '1':
 		os.system(monitor_enable1)
 		logging.info("starting wlan1")
@@ -89,10 +84,6 @@ def start():
 	except KeyboardInterrupt: sys.exit()
 	finally:
 		print "Please wait for everything to stop"
-		if iamapi == '1':
-			stop_networkchecker.set()
-			GPIO.output(6,GPIO.LOW)
-			GPIO.output(13,GPIO.LOW)
 		stop_rotating.set()
 		stop_uploading.set()
 		if interface1enable == '1':
@@ -101,32 +92,7 @@ def start():
 			os.system(monitor_disable2)
 		if interface3enable == '1':
 			os.system(monitor_disable3)
-def gpinsetup():
-#settings up things for the led
-	GPIO.setmode(GPIO.BCM)
-	GPIO.setwarnings(False)
-	GPIO.setup(13,GPIO.OUT)
-	GPIO.setup(6,GPIO.OUT)
 
-def networkchecker():
-	def networkcheck(stop):
-		while not stop.is_set():
-			try:
-				response = os.system("ping -c 2 google.com")
-				if response == 0:
-					logging.info('network is up!')
-					logging.info ("port 13 LED on")
-					GPIO.output(13,GPIO.HIGH)
-				else:
-					logging.info('network is down!')
-					logging.info ("port 13 LED off")
-					GPIO.output(13,GPIO.LOW)
-				logging.info ("retesting in 5 min")
-				time.sleep(300) # seconds
-			except KeyboardInterrupt: pass
-	stop = multiprocessing.Event()
-	multiprocessing.Process(target=networkcheck, args=[stop]).start()
-	return stop
 #This will change the channels every 1 sec to scan all in the range. 
 def rotator():
 	def rotate(stop):
@@ -149,25 +115,22 @@ def rotator():
 	stop = multiprocessing.Event()
 	multiprocessing.Process(target=rotate, args=[stop]).start()
 	return stop
-#this is the caputre fuction, It will only caputre the mgt frames.
+#this is the capture function, It will only capture the mgt frames.
 def sniffer():
 	logging.info("sniffer started")
-	if iamapi == '1':
-		logging.info("port 6 led on")
-		GPIO.output(6,GPIO.HIGH)
 	commands = [
     'tcpdump -i '+ interface1 +' -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w '+incomingpath +''+ hostname +'-'+ interface1 +'-%Y-%m-%d_%H.%M.%S.pcap;',
     'tcpdump -i '+ interface2 +' -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w '+incomingpath +''+ hostname +'-'+ interface2 +'-%Y-%m-%d_%H.%M.%S.pcap;',
     'tcpdump -i '+ interface3 +' -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w '+incomingpath +''+ hostname +'-'+ interface3 +'-%Y-%m-%d_%H.%M.%S.pcap;',
 ]
-#
+# tcpdump -i wlan0mon  -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w - | tee /home/zach/somefile1.pcap | tshark -i -   -T fields -e wlan.sa -e radiotap.dbm_antsignal | awk 'NF==2'
 # run in parallel
 	processes = [Popen(cmd, shell=True) for cmd in commands]
 
 	# wait for completion
 	for p in processes: p.wait()
 
-#the above will rotate the pcap every 10 mins and keeps 24 hours worth
+#the above will rotate the pcap every  5  mins and keeps 24 hours worth
 def uploader():
 	def upload(stop):
 		while not stop.is_set():
