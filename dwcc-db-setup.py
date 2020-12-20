@@ -65,7 +65,6 @@ wlanmgttagoui char(50),
 wlanmgtfixedcapabilitiesess char(50),
 radiotapantenna char(50),
 wlanmgtssid char(200),
-wlansaconverted char(200),
 wlanmgtextcapb4 char(50),
 wlanmgtextcapb3 char(50),
 wlanmgtextcapb2 char(50),
@@ -119,7 +118,8 @@ wlanmgtvhtmcssettxmcsmapss2 char(50),
 wlanmgtvhtmcssettxmcsmapss3 char(50),
 wlanmgtvhtmcssettxmcsmapss4 char(50),
 wlanmgthtmcssetrxbitmask char(50),
-wlanmgthtampduparam char(50));''')
+wlanmgthtampduparam char(50),
+wlansaconverted char(200));''')
 
 	
 	mycursor.execute('''CREATE TABLE if not exists dwccincomingprobe
@@ -152,7 +152,6 @@ wlanmgtvhtcapabilitiesshort160 char(50),
 wlanmgtvhtcapabilitiestxstbc char(50),
 wlanmgtvhtcapabilitiessubeamformer char(50),
 wlanmgtvhtcapabilitiessubeamformee char(50),
-
 wlanmgtvhtcapabilitiessoundingdimensions char(50),
 wlanmgtvhtcapabilitiesmubeamformer char(50),
 wlanmgtvhtcapabilitiesmubeamformee char(50),
@@ -160,7 +159,6 @@ wlanmgttagoui char(50),
 wlanmgtfixedcapabilitiesess char(50),
 radiotapantenna char(50),
 wlanmgtssid char(200),
-wlansaconverted char(200),
 wlanmgtextcapb4 char(50),
 wlanmgtextcapb3 char(50),
 wlanmgtextcapb2 char(50),
@@ -214,7 +212,8 @@ wlanmgtvhtmcssettxmcsmapss2 char(50),
 wlanmgtvhtmcssettxmcsmapss3 char(50),
 wlanmgtvhtmcssettxmcsmapss4 char(50),
 wlanmgthtmcssetrxbitmask char(50),
-wlanmgthtampduparam char(50));''')
+wlanmgthtampduparam char(50),
+wlansaconverted char(200));''')
 
 
 	mycursor.execute('''CREATE TABLE if not exists dwccap

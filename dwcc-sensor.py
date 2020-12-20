@@ -21,7 +21,7 @@ interface0 = 'wlx00c0ca957c18'
 monitor_enable0  = 'ifconfig ' + interface0 + ' down; iw dev ' + interface0 + ' interface add wlan0mon type monitor; ifconfig wlan0mon down; iw dev wlan0mon set type monitor; ifconfig wlan0mon up'
 monitor_disable0 = 'iw dev wlan0mon del; ifconfig ' + interface0 + ' up'
 change_channel0  = 'iw dev wlan0mon set channel %s'
-channels0 = [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
+channels0 = [1, 6, 11, 48, 64] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 #channels0 = [1, 6, 11] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 
 #At this more than interface has not been tested
