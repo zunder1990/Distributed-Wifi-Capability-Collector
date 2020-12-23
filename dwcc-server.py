@@ -49,8 +49,8 @@ def start():
 #			heatmapping()
 ##			mergecap()
 			macaddressconverterclient()
-#			macaddressconverterap()
-#			macaddressconverterprobe()
+			macaddressconverterap()
+			macaddressconverterprobe()
 #			taxonomyreporting()
 			time.sleep(30)#seconds
 		except KeyboardInterrupt: sys.exit()
@@ -147,7 +147,7 @@ def tsharker():
 -e wlan.extcap.b44 -e wlan.extcap.b45 -e wlan.extcap.b47 -e wlan.extcap.b48 -e wlan.extcap.b61 -e wlan.extcap.b62 -e wlan.extcap.b63 -e wlan.vht.capabilities.rxstbc \
 -e wlan.vht.mcsset.rxmcsmap.ss1 -e wlan.vht.mcsset.rxmcsmap.ss2 -e wlan.vht.mcsset.rxmcsmap.ss3 -e wlan.vht.mcsset.rxmcsmap.ss4 \
 -e wlan.vht.mcsset.txmcsmap.ss1 -e wlan.vht.mcsset.txmcsmap.ss2 -e wlan.vht.mcsset.txmcsmap.ss3 -e wlan.vht.mcsset.txmcsmap.ss4 -e wlan.ht.mcsset.rxbitmask -e wlan.ht.ampduparam \
--E separator=+ >> ' + tmppath + 'dwcc-probe.csv', shell=True)
+-e wlan.ssid -E separator=+ >> ' + tmppath + 'dwcc-probe.csv', shell=True)
 			#this below will move the pcap into the archive folder
 					os.rename(incomingpath +fname, archivepath +fname)
 					print "pcap found and tshark has ran"
@@ -301,8 +301,8 @@ wlanmgtextcapb13, wlanmgtextcapb14, wlanmgtextcapb15, wlanmgtextcapb16, wlanmgte
 wlanmgtextcapb24, wlanmgtextcapb25, wlanmgtextcapb26, wlanmgtextcapb27, wlanmgtextcapb28, wlanmgtextcapb29, wlanmgtextcapb30, wlanmgtextcapb33, wlanmgtextcapb34, wlanmgtextcapb35, \
 wlanmgtextcapb36, wlanmgtextcapb37, wlanmgtextcapb38, wlanmgtextcapb39, wlanmgtextcapb40, wlanmgtextcapservintgranularity, wlanmgtextcapb44, wlanmgtextcapb45, wlanmgtextcapb47, \
 wlanmgtextcapb48, wlanmgtextcapb61, wlanmgtextcapb62, wlanmgtextcapb63, wlanmgtvhtcapabilitiesrxstbc, wlanmgtvhtmcssetrxmcsmapss1, wlanmgtvhtmcssetrxmcsmapss2, wlanmgtvhtmcssetrxmcsmapss3, \
-wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsmapss2, wlanmgtvhtmcssettxmcsmapss3, wlanmgtvhtmcssettxmcsmapss4, wlanmgthtmcssetrxbitmask, wlanmgthtampduparam)' 
-'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', rowprobe)
+wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsmapss2, wlanmgtvhtmcssettxmcsmapss3, wlanmgtvhtmcssettxmcsmapss4, wlanmgthtmcssetrxbitmask, wlanmgthtampduparam, wlanmgtssid)' 
+'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', rowprobe)
 
 
 

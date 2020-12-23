@@ -1,11 +1,6 @@
 import logging
-#import sqlite3
+
 import mysql.connector
-#DB_FILE = 'dwcc.db'
-#here is the setup info for the sqlite db
-#conn = sqlite3.connect(DB_FILE)
-#conn.text_factory = str
-#cursor = conn.cursor()
 import config
 
 
@@ -212,6 +207,7 @@ wlanmgtvhtmcssettxmcsmapss3 char(50),
 wlanmgtvhtmcssettxmcsmapss4 char(50),
 wlanmgthtmcssetrxbitmask char(50),
 wlanmgthtampduparam char(50),
+wlanmgtssid char(200),
 wlansaconverted char(200));''')
 
 

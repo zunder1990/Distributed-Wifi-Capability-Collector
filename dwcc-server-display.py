@@ -1,8 +1,10 @@
 #!/usr/bin/python
 import sys
-import sqlite3
+
 import time
 import plotly
+import mysql.connector
+import config
 
 
 
@@ -10,14 +12,17 @@ import plotly
 incomingpath = '/data/incoming/' #This is the path where new pcaps will be placed
 archivepath = '/data/archive/' #This is the path where pcaps what already have been checked will be placed
 tmppath = '/data/tmp/' #this is the path for a tmp folder for dwcc to use
-DB_FILE = 'dwcc.db'
-#you may change the path but please dont change the filename
-csvfile = '/data/tmp/dwcc-clients.csv'
 
-#here is the setup info for the sqlite db
-conn = sqlite3.connect(DB_FILE)
-conn.text_factory = str
-cursor = conn.cursor()
+
+mydb = mysql.connector.connect(
+  host="10.1.0.7",
+  user= config.username,
+  password= config.password,
+  database="dwcc",
+  autocommit=True
+)
+
+mycursor = mydb.cursor()
 
 
 def start():
@@ -30,130 +35,130 @@ def start():
 
 
 def probecharting():
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb19 = 1;')
-    b19supportcount = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiesshort80 = 1;')
-    ngi80mhzsupportcount = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiesshort160 = 1;')
-    ngi160mhzsupportcount = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE radiotapchannelflags5ghz = 1;')
-    n5ghzclientcount = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE radiotapchannelflags2ghz = 1;')
-    n2ghzclientcount = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtrsncapabilitiesmfpc = 1;')
-    n80211wsupport = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb31 = 1;')
-    n80211usupport = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb32 = 1;')
-    qosmapsupport = cursor.fetchone()[0]
-    cursor.execute(
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb19 = 1;')
+    b19supportcount = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiesshort80 = 1;')
+    ngi80mhzsupportcount = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiesshort160 = 1;')
+    ngi160mhzsupportcount = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE radiotapchannelflags5ghz = 1;')
+    n5ghzclientcount = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE radiotapchannelflags2ghz = 1;')
+    n2ghzclientcount = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtrsncapabilitiesmfpc = 1;')
+    n80211wsupport = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb31 = 1;')
+    n80211usupport = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb32 = 1;')
+    qosmapsupport = mycursor.fetchone()[0]
+    mycursor.execute(
         'SELECT wlansaconverted, count(wlansaconverted) FROM dwccincomingprobe GROUP BY wlansaconverted ORDER BY count(wlansaconverted) DESC limit 10;')
-    devicemaker = cursor.fetchall()
-    cursor.execute(
+    devicemaker = mycursor.fetchall()
+    mycursor.execute(
         'SELECT wlanradiochannel, count(wlanradiochannel) FROM dwccincomingprobe GROUP BY wlanradiochannel ORDER BY count(wlanradiochannel) DESC limit 10;')
-    channelgroup = cursor.fetchall()
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb46 = 1;')
-    wnmsupport = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessoundingdimensions = 0;')
-    soundingdimensions0 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessoundingdimensions = 1;')
-    soundingdimensions1 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessoundingdimensions = 3;')
-    soundingdimensions3 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiesmubeamformee = 1;')
-    wlanmgtvhtcapabilitiesmubeamformee = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiesmubeamformer = 1;')
-    wlanmgtvhtcapabilitiesmubeamformer = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessubeamformee = 1;')
-    wlanmgtvhtcapabilitiessubeamformee = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessubeamformer = 1;')
-    wlanmgtvhtcapabilitiessubeamformer = cursor.fetchone()[0]
-    cursor.execute(
+    channelgroup = mycursor.fetchall()
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb46 = 1;')
+    wnmsupport = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessoundingdimensions = 0;')
+    soundingdimensions0 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessoundingdimensions = 1;')
+    soundingdimensions1 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessoundingdimensions = 3;')
+    soundingdimensions3 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiesmubeamformee = 1;')
+    wlanmgtvhtcapabilitiesmubeamformee = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiesmubeamformer = 1;')
+    wlanmgtvhtcapabilitiesmubeamformer = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessubeamformee = 1;')
+    wlanmgtvhtcapabilitiessubeamformee = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessubeamformer = 1;')
+    wlanmgtvhtcapabilitiessubeamformer = mycursor.fetchone()[0]
+    mycursor.execute(
         'SELECT wlanmgtpowercapmax, count(wlanmgtpowercapmax) FROM dwccincomingprobe GROUP BY wlanmgtpowercapmax ORDER BY count(wlanmgtpowercapmax) DESC limit 5;')
-    wlanmgtpowercapmax = cursor.fetchall()
-    cursor.execute(
+    wlanmgtpowercapmax = mycursor.fetchall()
+    mycursor.execute(
         'SELECT wlanmgtpowercapmin, count(wlanmgtpowercapmin) FROM dwccincomingprobe GROUP BY wlanmgtpowercapmin ORDER BY count(wlanmgtpowercapmin) DESC limit 5;')
-    wlanmgtpowercapmin = cursor.fetchall()
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtfixedcapabilitiesspecman = 1;')
-    wlanmgtfixedcapabilitiesspecman = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtfixedcapabilitiesradiomeasurement = 1;')
-    wlanmgtfixedcapabilitiesradiomeasurement = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessupportedchanwidthset = 1;')
-    wlanmgtvhtcapabilitiessupportedchanwidthset1 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessupportedchanwidthset = 2;')
-    wlanmgtvhtcapabilitiessupportedchanwidthset2 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiesrxldpc = 1;')
-    wlanmgtvhtcapabilitiesrxldpc = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiestxstbc = 1;')
-    wlanmgtvhtcapabilitiestxstbc = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb1 = 1;')
-    wlanmgtextcapb1 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb2 = 1;')
-    wlanmgtextcapb2 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb3 = 1;')
-    wlanmgtextcapb3 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb4 = 1;')
-    wlanmgtextcapb4 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb6 = 1;')
-    wlanmgtextcapb6 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb8 = 1;')
-    wlanmgtextcapb8 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb9 = 1;')
-    wlanmgtextcapb9 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb10 = 1;')
-    wlanmgtextcapb10 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb11 = 1;')
-    wlanmgtextcapb11 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb12 = 1;')
-    wlanmgtextcapb12 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb13 = 1;')
-    wlanmgtextcapb13 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb14 = 1;')
-    wlanmgtextcapb14 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb15 = 1;')
-    wlanmgtextcapb15 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb16 = 1;')
-    wlanmgtextcapb16 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb17 = 1;')
-    wlanmgtextcapb17 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb18 = 1;')
-    wlanmgtextcapb18 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb20 = 1;')
-    wlanmgtextcapb20 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb21 = 1;')
-    wlanmgtextcapb21 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb22 = 1;')
-    wlanmgtextcapb22 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb23 = 1;')
-    wlanmgtextcapb23 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb24 = 1;')
-    wlanmgtextcapb24 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb25 = 1;')
-    wlanmgtextcapb25 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb26 = 1;')
-    wlanmgtextcapb26 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb27 = 1;')
-    wlanmgtextcapb27 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb28 = 1;')
-    wlanmgtextcapb28 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb29 = 1;')
-    wlanmgtextcapb29 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb30 = 1;')
-    wlanmgtextcapb30 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb33 = 1;')
-    wlanmgtextcapb33 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb34 = 1;')
-    wlanmgtextcapb34 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE radiotapchannelflagsofdm = 1;')
-    radiotapchannelflagsofdm = cursor.fetchone()[0]
-    cursor.execute(
+    wlanmgtpowercapmin = mycursor.fetchall()
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtfixedcapabilitiesspecman = 1;')
+    wlanmgtfixedcapabilitiesspecman = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtfixedcapabilitiesradiomeasurement = 1;')
+    wlanmgtfixedcapabilitiesradiomeasurement = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessupportedchanwidthset = 1;')
+    wlanmgtvhtcapabilitiessupportedchanwidthset1 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiessupportedchanwidthset = 2;')
+    wlanmgtvhtcapabilitiessupportedchanwidthset2 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiesrxldpc = 1;')
+    wlanmgtvhtcapabilitiesrxldpc = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtvhtcapabilitiestxstbc = 1;')
+    wlanmgtvhtcapabilitiestxstbc = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb1 = 1;')
+    wlanmgtextcapb1 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb2 = 1;')
+    wlanmgtextcapb2 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb3 = 1;')
+    wlanmgtextcapb3 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb4 = 1;')
+    wlanmgtextcapb4 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb6 = 1;')
+    wlanmgtextcapb6 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb8 = 1;')
+    wlanmgtextcapb8 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb9 = 1;')
+    wlanmgtextcapb9 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb10 = 1;')
+    wlanmgtextcapb10 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb11 = 1;')
+    wlanmgtextcapb11 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb12 = 1;')
+    wlanmgtextcapb12 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb13 = 1;')
+    wlanmgtextcapb13 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb14 = 1;')
+    wlanmgtextcapb14 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb15 = 1;')
+    wlanmgtextcapb15 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb16 = 1;')
+    wlanmgtextcapb16 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb17 = 1;')
+    wlanmgtextcapb17 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb18 = 1;')
+    wlanmgtextcapb18 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb20 = 1;')
+    wlanmgtextcapb20 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb21 = 1;')
+    wlanmgtextcapb21 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb22 = 1;')
+    wlanmgtextcapb22 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb23 = 1;')
+    wlanmgtextcapb23 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb24 = 1;')
+    wlanmgtextcapb24 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb25 = 1;')
+    wlanmgtextcapb25 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb26 = 1;')
+    wlanmgtextcapb26 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb27 = 1;')
+    wlanmgtextcapb27 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb28 = 1;')
+    wlanmgtextcapb28 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb29 = 1;')
+    wlanmgtextcapb29 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb30 = 1;')
+    wlanmgtextcapb30 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb33 = 1;')
+    wlanmgtextcapb33 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE wlanmgtextcapb34 = 1;')
+    wlanmgtextcapb34 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincomingprobe WHERE radiotapchannelflagsofdm = 1;')
+    radiotapchannelflagsofdm = mycursor.fetchone()[0]
+    mycursor.execute(
         'SELECT wlanmgtvhtcapabilitiesmaxmpdulength, count(wlanmgtvhtcapabilitiesmaxmpdulength) FROM dwccincomingprobe GROUP BY wlanmgtvhtcapabilitiesmaxmpdulength ORDER BY count(wlanmgtvhtcapabilitiesmaxmpdulength) DESC;')
-    wlanmgtvhtcapabilitiesmaxmpdulength = cursor.fetchall()
-    cursor.execute(
+    wlanmgtvhtcapabilitiesmaxmpdulength = mycursor.fetchall()
+    mycursor.execute(
         'SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccincomingprobe GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 15;')
-    wlanmgtssid = cursor.fetchall()
-    cursor.execute('SELECT COUNT(*)FROM dwccincomingprobe;')
-    numberofclient = cursor.fetchone()[0]
+    wlanmgtssid = mycursor.fetchall()
+    mycursor.execute('SELECT COUNT(*)FROM dwccincomingprobe;')
+    numberofclient = mycursor.fetchone()[0]
     print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
     print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
     print "Total number of clients found to support Sounding Dimensions of 3 = ", soundingdimensions3
@@ -527,141 +532,141 @@ def probecharting():
 
 
 def charting():
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb19 = 1;')
-    b19supportcount = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesshort80 = 1;')
-    ngi80mhzsupportcount = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesshort160 = 1;')
-    ngi160mhzsupportcount = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE radiotapchannelflags5ghz = 1;')
-    n5ghzclientcount = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE radiotapchannelflags2ghz = 1;')
-    n2ghzclientcount = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtrsncapabilitiesmfpc = 1;')
-    n80211wsupport = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb31 = 1;')
-    n80211usupport = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb32 = 1;')
-    qosmapsupport = cursor.fetchone()[0]
-    cursor.execute(
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb19 = 1;')
+    b19supportcount = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesshort80 = 1;')
+    ngi80mhzsupportcount = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesshort160 = 1;')
+    ngi160mhzsupportcount = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE radiotapchannelflags5ghz = 1;')
+    n5ghzclientcount = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE radiotapchannelflags2ghz = 1;')
+    n2ghzclientcount = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtrsncapabilitiesmfpc = 1;')
+    n80211wsupport = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb31 = 1;')
+    n80211usupport = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb32 = 1;')
+    qosmapsupport = mycursor.fetchone()[0]
+    mycursor.execute(
         'SELECT wlansaconverted, count(wlansaconverted) FROM dwccincoming GROUP BY wlansaconverted ORDER BY count(wlansaconverted) DESC limit 10;')
-    devicemaker = cursor.fetchall()
-    cursor.execute(
+    devicemaker = mycursor.fetchall()
+    mycursor.execute(
         'SELECT wlanradiochannel, count(wlanradiochannel) FROM dwccincoming GROUP BY wlanradiochannel ORDER BY count(wlanradiochannel) DESC limit 10;')
-    channelgroup = cursor.fetchall()
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb46 = 1;')
-    wnmsupport = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 0;')
-    soundingdimensions0 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 1;')
-    soundingdimensions1 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 3;')
-    soundingdimensions3 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesmubeamformee = 1;')
-    wlanmgtvhtcapabilitiesmubeamformee = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesmubeamformer = 1;')
-    wlanmgtvhtcapabilitiesmubeamformer = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessubeamformee = 1;')
-    wlanmgtvhtcapabilitiessubeamformee = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessubeamformer = 1;')
-    wlanmgtvhtcapabilitiessubeamformer = cursor.fetchone()[0]
-    cursor.execute(
+    channelgroup = mycursor.fetchall()
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb46 = 1;')
+    wnmsupport = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 0;')
+    soundingdimensions0 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 1;')
+    soundingdimensions1 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessoundingdimensions = 3;')
+    soundingdimensions3 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesmubeamformee = 1;')
+    wlanmgtvhtcapabilitiesmubeamformee = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesmubeamformer = 1;')
+    wlanmgtvhtcapabilitiesmubeamformer = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessubeamformee = 1;')
+    wlanmgtvhtcapabilitiessubeamformee = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessubeamformer = 1;')
+    wlanmgtvhtcapabilitiessubeamformer = mycursor.fetchone()[0]
+    mycursor.execute(
         'SELECT wlanmgtpowercapmax, count(wlanmgtpowercapmax) FROM dwccincoming GROUP BY wlanmgtpowercapmax ORDER BY count(wlanmgtpowercapmax) DESC limit 5;')
-    wlanmgtpowercapmax = cursor.fetchall()
-    cursor.execute(
+    wlanmgtpowercapmax = mycursor.fetchall()
+    mycursor.execute(
         'SELECT wlanmgtpowercapmin, count(wlanmgtpowercapmin) FROM dwccincoming GROUP BY wlanmgtpowercapmin ORDER BY count(wlanmgtpowercapmin) DESC limit 5;')
-    wlanmgtpowercapmin = cursor.fetchall()
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtfixedcapabilitiesspecman = 1;')
-    wlanmgtfixedcapabilitiesspecman = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtfixedcapabilitiesradiomeasurement = 1;')
-    wlanmgtfixedcapabilitiesradiomeasurement = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessupportedchanwidthset = 1;')
-    wlanmgtvhtcapabilitiessupportedchanwidthset1 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessupportedchanwidthset = 2;')
-    wlanmgtvhtcapabilitiessupportedchanwidthset2 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesrxldpc = 1;')
-    wlanmgtvhtcapabilitiesrxldpc = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiestxstbc = 1;')
-    wlanmgtvhtcapabilitiestxstbc = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb1 = 1;')
-    wlanmgtextcapb1 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb2 = 1;')
-    wlanmgtextcapb2 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb3 = 1;')
-    wlanmgtextcapb3 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb4 = 1;')
-    wlanmgtextcapb4 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb6 = 1;')
-    wlanmgtextcapb6 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb8 = 1;')
-    wlanmgtextcapb8 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb9 = 1;')
-    wlanmgtextcapb9 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb10 = 1;')
-    wlanmgtextcapb10 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb11 = 1;')
-    wlanmgtextcapb11 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb12 = 1;')
-    wlanmgtextcapb12 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb13 = 1;')
-    wlanmgtextcapb13 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb14 = 1;')
-    wlanmgtextcapb14 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb15 = 1;')
-    wlanmgtextcapb15 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb16 = 1;')
-    wlanmgtextcapb16 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb17 = 1;')
-    wlanmgtextcapb17 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb18 = 1;')
-    wlanmgtextcapb18 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb20 = 1;')
-    wlanmgtextcapb20 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb21 = 1;')
-    wlanmgtextcapb21 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb22 = 1;')
-    wlanmgtextcapb22 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb23 = 1;')
-    wlanmgtextcapb23 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb24 = 1;')
-    wlanmgtextcapb24 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb25 = 1;')
-    wlanmgtextcapb25 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb26 = 1;')
-    wlanmgtextcapb26 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb27 = 1;')
-    wlanmgtextcapb27 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb28 = 1;')
-    wlanmgtextcapb28 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb29 = 1;')
-    wlanmgtextcapb29 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb30 = 1;')
-    wlanmgtextcapb30 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb33 = 1;')
-    wlanmgtextcapb33 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb34 = 1;')
-    wlanmgtextcapb34 = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE radiotapchannelflagsofdm = 1;')
-    radiotapchannelflagsofdm = cursor.fetchone()[0]
-    cursor.execute(
+    wlanmgtpowercapmin = mycursor.fetchall()
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtfixedcapabilitiesspecman = 1;')
+    wlanmgtfixedcapabilitiesspecman = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtfixedcapabilitiesradiomeasurement = 1;')
+    wlanmgtfixedcapabilitiesradiomeasurement = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessupportedchanwidthset = 1;')
+    wlanmgtvhtcapabilitiessupportedchanwidthset1 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiessupportedchanwidthset = 2;')
+    wlanmgtvhtcapabilitiessupportedchanwidthset2 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiesrxldpc = 1;')
+    wlanmgtvhtcapabilitiesrxldpc = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtvhtcapabilitiestxstbc = 1;')
+    wlanmgtvhtcapabilitiestxstbc = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb1 = 1;')
+    wlanmgtextcapb1 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb2 = 1;')
+    wlanmgtextcapb2 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb3 = 1;')
+    wlanmgtextcapb3 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb4 = 1;')
+    wlanmgtextcapb4 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb6 = 1;')
+    wlanmgtextcapb6 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb8 = 1;')
+    wlanmgtextcapb8 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb9 = 1;')
+    wlanmgtextcapb9 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb10 = 1;')
+    wlanmgtextcapb10 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb11 = 1;')
+    wlanmgtextcapb11 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb12 = 1;')
+    wlanmgtextcapb12 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb13 = 1;')
+    wlanmgtextcapb13 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb14 = 1;')
+    wlanmgtextcapb14 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb15 = 1;')
+    wlanmgtextcapb15 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb16 = 1;')
+    wlanmgtextcapb16 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb17 = 1;')
+    wlanmgtextcapb17 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb18 = 1;')
+    wlanmgtextcapb18 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb20 = 1;')
+    wlanmgtextcapb20 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb21 = 1;')
+    wlanmgtextcapb21 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb22 = 1;')
+    wlanmgtextcapb22 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb23 = 1;')
+    wlanmgtextcapb23 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb24 = 1;')
+    wlanmgtextcapb24 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb25 = 1;')
+    wlanmgtextcapb25 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb26 = 1;')
+    wlanmgtextcapb26 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb27 = 1;')
+    wlanmgtextcapb27 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb28 = 1;')
+    wlanmgtextcapb28 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb29 = 1;')
+    wlanmgtextcapb29 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb30 = 1;')
+    wlanmgtextcapb30 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb33 = 1;')
+    wlanmgtextcapb33 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE wlanmgtextcapb34 = 1;')
+    wlanmgtextcapb34 = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*) FROM dwccincoming WHERE radiotapchannelflagsofdm = 1;')
+    radiotapchannelflagsofdm = mycursor.fetchone()[0]
+    mycursor.execute(
         'SELECT wlanmgtvhtcapabilitiesmaxmpdulength, count(wlanmgtvhtcapabilitiesmaxmpdulength) FROM dwccincoming GROUP BY wlanmgtvhtcapabilitiesmaxmpdulength ORDER BY count(wlanmgtvhtcapabilitiesmaxmpdulength) DESC;')
-    wlanmgtvhtcapabilitiesmaxmpdulength = cursor.fetchall()
-    cursor.execute(
+    wlanmgtvhtcapabilitiesmaxmpdulength = mycursor.fetchall()
+    mycursor.execute(
         'SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccincoming GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 15;')
-    wlanmgtssid = cursor.fetchall()
-    cursor.execute(
+    wlanmgtssid = mycursor.fetchall()
+    mycursor.execute(
         'SELECT wlanmgtssid, count(wlanmgtssid) FROM dwccap GROUP BY wlanmgtssid ORDER BY count(wlanmgtssid) DESC limit 15;')
-    wlanmgtssidap = cursor.fetchall()
-    cursor.execute(
+    wlanmgtssidap = mycursor.fetchall()
+    mycursor.execute(
         'SELECT wlansaconverted, count(wlansaconverted) FROM dwccap GROUP BY wlansaconverted ORDER BY count(wlansaconverted) DESC limit 15;')
-    apmaker = cursor.fetchall()
-    cursor.execute(
+    apmaker = mycursor.fetchall()
+    mycursor.execute(
         'SELECT wlanradiochannel, count(wlanradiochannel) FROM dwccap GROUP BY wlanradiochannel ORDER BY count(wlanradiochannel) DESC limit 15;')
-    channelgroupap = cursor.fetchall()
-    cursor.execute('SELECT COUNT(*)FROM dwccincoming;')
-    numberofclient = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*)FROM dwccap;')
-    numberofap = cursor.fetchone()[0]
+    channelgroupap = mycursor.fetchall()
+    mycursor.execute('SELECT COUNT(*)FROM dwccincoming;')
+    numberofclient = mycursor.fetchone()[0]
+    mycursor.execute('SELECT COUNT(*)FROM dwccap;')
+    numberofap = mycursor.fetchone()[0]
     print "Total number of clients found to support Sounding Dimensions of 1 = ", soundingdimensions0
     print "Total number of clients found to support Sounding Dimensions of 0 = ", soundingdimensions1
     print "Total number of clients found to support Sounding Dimensions of 3 = ", soundingdimensions3
