@@ -28,7 +28,8 @@ mydb = mysql.connector.connect(
   host="10.1.0.7",
   user= config.username,
   password= config.password,
-  database="dwcc"
+  database="dwcc",
+  autocommit=True
 )
 
 mycursor = mydb.cursor()
@@ -43,11 +44,11 @@ def start():
 			tsharker()
 			dbupdater()
 #			dedup()
-#			dbconverter()
+			dbconverter()
 #			heatmapprep()
 #			heatmapping()
 ##			mergecap()
-#			macaddressconverterclient()
+			macaddressconverterclient()
 #			macaddressconverterap()
 #			macaddressconverterprobe()
 #			taxonomyreporting()
@@ -71,7 +72,7 @@ def dedup():
 	print "finish dedup"
 """
 
-"""
+
 def dbconverter():
 	mycursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '1' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000001';")
 	mycursor.execute("UPDATE dwccincoming SET wlanmgtvhtcapabilitiessoundingdimensions = '0' WHERE wlanmgtvhtcapabilitiessoundingdimensions  = '0x00000000';")
@@ -95,7 +96,7 @@ def dbconverter():
 	mycursor.execute("UPDATE dwccincomingprobe SET wlanmgtvhtcapabilitiessupportedchanwidthset = '0' WHERE wlanmgtvhtcapabilitiessupportedchanwidthset  = '0x00000000';")
 	mycursor.execute("UPDATE dwccincomingprobe SET wlanmgtvhtcapabilitiessupportedchanwidthset = '1' WHERE wlanmgtvhtcapabilitiessupportedchanwidthset  = '0x00000001';")
 	mycursor.execute("UPDATE dwccincomingprobe SET wlanmgtvhtcapabilitiessupportedchanwidthset = '2' WHERE wlanmgtvhtcapabilitiessupportedchanwidthset  = '0x00000002';")
-"""
+
 #def mergecap():
 #	subprocess.call('mergecap -w /nfs/$HOSTNAME/bigpcap.pcap /nfs/$HOSTNAME/archive/*.pcap', shell=True)
 #	subprocess.call('rm -f /nfs/$HOSTNAME/archive/*.pcap', shell=True)
@@ -119,16 +120,16 @@ def tsharker():
 -e wlan.tag.number -e wlan.vht.capabilities.maxmpdulength -e wlan.vht.capabilities.supportedchanwidthset -e wlan.vht.capabilities.rxldpc \
 -e wlan.vht.capabilities.short80 -e wlan.vht.capabilities.short160 -e wlan.vht.capabilities.txstbc -e wlan.vht.capabilities.subeamformer \
 -e wlan.vht.capabilities.subeamformee -e wlan.vht.capabilities.soundingdimensions -e wlan.vht.capabilities.mubeamformer \
--e wlan.vht.capabilities.mubeamformee -e wlan.tag.oui -e wlan.fixed.capabilities.ess -e radiotap.antenna \
+-e wlan.vht.capabilities.mubeamformee -e wlan.tag.oui -e wlan.fixed.capabilities.ess -e radiotap.antenna -e wlan.ssid \
 -e wlan.extcap.b4 -e wlan.extcap.b3 -e wlan.extcap.b2 -e wlan.extcap.b1 -e wlan.extcap.b6 -e wlan.extcap.b8 -e wlan.extcap.b9 -e wlan.extcap.b10 -e wlan.extcap.b11 \
 -e wlan.extcap.b12 -e wlan.extcap.b13 -e wlan.extcap.b14 -e wlan.extcap.b15 -e wlan.extcap.b16 -e wlan.extcap.b17 -e wlan.extcap.b18 -e wlan.extcap.b20 -e wlan.extcap.b21 \
 -e wlan.extcap.b22 -e wlan.extcap.b23 -e wlan.extcap.b24 -e wlan.extcap.b25 -e wlan.extcap.b26 -e wlan.extcap.b27 -e wlan.extcap.b28 -e wlan.extcap.b29 -e wlan.extcap.b30 \
 -e wlan.extcap.b33 -e wlan.extcap.b34 -e wlan.extcap.b35 -e wlan.extcap.b36 -e wlan.extcap.b37 -e wlan.extcap.b38 -e wlan.extcap.b39 -e wlan.extcap.b40 -e wlan.extcap.serv_int_granularity \
 -e wlan.extcap.b44 -e wlan.extcap.b45 -e wlan.extcap.b47 -e wlan.extcap.b48 -e wlan.extcap.b61 -e wlan.extcap.b62 -e wlan.extcap.b63 -e wlan.vht.capabilities.rxstbc \
 -e wlan.vht.mcsset.rxmcsmap.ss1 -e wlan.vht.mcsset.rxmcsmap.ss2 -e wlan.vht.mcsset.rxmcsmap.ss3 -e wlan.vht.mcsset.rxmcsmap.ss4 \
--e wlan.vht.mcsset.txmcsmap.ss1 -e wlan.vht.mcsset.txmcsmap.ss2 -e wlan.vht.mcsset.txmcsmap.ss3 -e wlan.vht.mcsset.txmcsmap.ss4 -e wlan.ssid -e wlan.ht.mcsset.rxbitmask -e wlan.ht.ampduparam \
+-e wlan.vht.mcsset.txmcsmap.ss1 -e wlan.vht.mcsset.txmcsmap.ss2 -e wlan.vht.mcsset.txmcsmap.ss3 -e wlan.vht.mcsset.txmcsmap.ss4 -e wlan.ht.mcsset.rxbitmask -e wlan.ht.ampduparam \
 -E separator=+ >> ' + tmppath + 'dwcc-clients.csv', shell=True)
-					subprocess.call('tshark -r ' + pcapfile + '   -R "wlan.fc.type_subtype == 0x8" -2 -T fields -e wlan_radio.channel -e wlan.ssid -e wlan.bssid -E separator=+ >> ' + tmppath + 'dwcc-ap.csv', shell=True)
+					subprocess.call('tshark -r ' + pcapfile + '   -R "wlan.fc.type_subtype == 0x8" -2 -T fields -e wlan.bssid -e wlan_radio.channel -e wlan.ssid  -E separator=+ >> ' + tmppath + 'dwcc-ap.csv', shell=True)
 					subprocess.call("""tshark -r """ + pcapfile + """   -R "wlan.fc.type_subtype == 0x0 or wlan.fc.type_subtype == 0x2 or wlan.fc.type_subtype == 0x4" -2 -T fields -e wlan.sa -e wlan.bssid \
 -e wlan_radio.signal_dbm -E separator=+ | sed 's/$/+"""+ str(hostnameonly) + """+"""+ str(timestamp) +"""/' >> """+ tmppath + """dwcc-heatmap.csv""", shell=True)
 					subprocess.call('tshark -r ' + pcapfile + '   -R "wlan.fc.type_subtype == 0x4" -2 -T fields -e wlan.sa -e wlan.bssid -e radiotap.channel.freq -e wlan.extcap.b19 -e wlan.fc.protected \
@@ -222,11 +223,34 @@ def macaddressconverterprobe():
 
 #This will take the CSV and place it into the db
 def dbupdater():
+	csvfileap = '/data/tmp/dwcc-ap.csv'
+	# this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
+	if os.path.isfile(csvfileap) and os.access(csvfileap, os.R_OK):
+		print "ap csv found adding to db"
+		# awk '!seen[$0]++' will dedup without having to sort
+		# sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.,]//g' -e "s/'//g" -e '/^$/d' will special characters
+		# sed 's/$/+/' will add a + to end of each line to allow the csp to be imported into the db
+		subprocess.call(
+			"""cat /data/tmp/dwcc-ap.csv | awk '!seen[$0]++' | sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.,]//g' -e "s/'//g" -e '/^$/d' | awk 'BEGIN{FS=OFS="+"} NF==4 {$0=$1 OFS $2 $3 OFS $4} {print}'  >> /data/tmp/temp-dwcc-ap.csv """,
+			shell=True)
+		os.remove("/data/tmp/dwcc-ap.csv")
+		os.rename("/data/tmp/temp-dwcc-ap.csv", "/data/tmp/dwcc-ap.csv")
+		csv_dataap = csv.reader(file(csvfileap), delimiter='+')
+		for rowap in csv_dataap:
+			mycursor.execute('INSERT INTO dwccap (wlanbssid, wlanradiochannel, wlanmgtssid)' 'VALUES (%s,%s,%s)', rowap)
+
+		# This will remove the file after it is added to the db
+		os.remove(csvfileap)
+		print "done with dbupdate for ap waiting for next run"
+	else:
+		print"csv ap not found will retry"
+
 	csvfileclient = '/data/tmp/dwcc-clients.csv'
 #	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
 	if os.path.isfile(csvfileclient) and os.access(csvfileclient, os.R_OK):
 		print "csv found adding to db"
-		subprocess.call("""awk '!seen[$0]++' /data/tmp/dwcc-clients.csv | sed -n 's/$/+/' >> /data/tmp/temp-dwcc-clients.csv""", shell=True)
+		subprocess.call("""awk '!seen[$0]++' /data/tmp/dwcc-clients.csv   >> /data/tmp/temp-dwcc-clients.csv""", shell=True)
+		#| sed 's/^/+/' | sed 's/$/+/'
 		os.remove("/data/tmp/dwcc-clients.csv")
 		os.rename("/data/tmp/temp-dwcc-clients.csv", "/data/tmp/dwcc-clients.csv")
 		csv_data = csv.reader(file(csvfileclient), delimiter='+')
@@ -242,13 +266,13 @@ wlanmgtvhtcapabilitiesmubeamformee, wlanmgttagoui,  wlanmgtfixedcapabilitiesess,
 wlanmgtextcapb4, wlanmgtextcapb3, wlanmgtextcapb2, wlanmgtextcapb1, wlanmgtextcapb6, wlanmgtextcapb8, wlanmgtextcapb9, wlanmgtextcapb10, wlanmgtextcapb11, wlanmgtextcapb12, \
 wlanmgtextcapb13, wlanmgtextcapb14, wlanmgtextcapb15, wlanmgtextcapb16, wlanmgtextcapb17, wlanmgtextcapb18, wlanmgtextcapb20, wlanmgtextcapb21, wlanmgtextcapb22, wlanmgtextcapb23, \
 wlanmgtextcapb24, wlanmgtextcapb25, wlanmgtextcapb26, wlanmgtextcapb27, wlanmgtextcapb28, wlanmgtextcapb29, wlanmgtextcapb30, wlanmgtextcapb33, wlanmgtextcapb34, wlanmgtextcapb35, \
-wlanmgtextcapb36, wlanmgtextcapb37, wlanmgtextcapb38, wlanmgtextcapb39, wlanmgtextcapb40, wlanmgtextcapservintgranularity, wlanmgtextcapb44, wlanmgtextcapb45, wlanmgtextcapb47, \
+wlanmgtextcapb36, wlanmgtextcapb37, wlanmgtextcapb38, wlanmgtextcapb39, `wlanmgtextcapb40`, wlanmgtextcapservintgranularity, wlanmgtextcapb44, wlanmgtextcapb45, wlanmgtextcapb47, \
 wlanmgtextcapb48, wlanmgtextcapb61, wlanmgtextcapb62, wlanmgtextcapb63, wlanmgtvhtcapabilitiesrxstbc, wlanmgtvhtmcssetrxmcsmapss1, wlanmgtvhtmcssetrxmcsmapss2, wlanmgtvhtmcssetrxmcsmapss3, \
-wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsmapss2, wlanmgtvhtmcssettxmcsmapss3, wlanmgtvhtmcssettxmcsmapss4, wlanmgthtmcssetrxbitmask, wlanmgthtampduparam, wlansaconverted)' 
-'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', row)
+wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsmapss2, wlanmgtvhtmcssettxmcsmapss3, wlanmgtvhtmcssettxmcsmapss4, wlanmgthtmcssetrxbitmask, wlanmgthtampduparam)'\
+'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', row)
 
 #This will remove the file after it is added to the db
-		#os.remove(csvfileclient)
+		os.remove(csvfileclient)
 		print "done with dbupdate for client waiting for next run"
 	else:
 		print"csv client not found will retry"
@@ -259,7 +283,7 @@ wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsm
 #	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
 	if os.path.isfile(csvfileprobe) and os.access(csvfileprobe, os.R_OK):
 		print "probe csv found adding to db"
-		subprocess.call("""awk '!seen[$0]++' /data/tmp/dwcc-probe.csv | sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.*]//g' -e "s/'//g" -e '/^$/d' -e 's/[][]//g' -e 's/[-_]//g' | sed -n 's/$/+/' >> /data/tmp/temp-dwcc-probe.csv""", shell=True)
+		subprocess.call("""awk '!seen[$0]++' /data/tmp/dwcc-probe.csv | sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.*]//g' -e "s/'//g" -e '/^$/d' -e 's/[][]//g' -e 's/[-_]//g'  >> /data/tmp/temp-dwcc-probe.csv""", shell=True)
 		os.remove("/data/tmp/dwcc-probe.csv")
 		os.rename("/data/tmp/temp-dwcc-probe.csv", "/data/tmp/dwcc-probe.csv")
 		csv_probe = csv.reader(file(csvfileprobe), delimiter='+')
@@ -278,12 +302,12 @@ wlanmgtextcapb24, wlanmgtextcapb25, wlanmgtextcapb26, wlanmgtextcapb27, wlanmgte
 wlanmgtextcapb36, wlanmgtextcapb37, wlanmgtextcapb38, wlanmgtextcapb39, wlanmgtextcapb40, wlanmgtextcapservintgranularity, wlanmgtextcapb44, wlanmgtextcapb45, wlanmgtextcapb47, \
 wlanmgtextcapb48, wlanmgtextcapb61, wlanmgtextcapb62, wlanmgtextcapb63, wlanmgtvhtcapabilitiesrxstbc, wlanmgtvhtmcssetrxmcsmapss1, wlanmgtvhtmcssetrxmcsmapss2, wlanmgtvhtmcssetrxmcsmapss3, \
 wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsmapss2, wlanmgtvhtmcssettxmcsmapss3, wlanmgtvhtmcssettxmcsmapss4, wlanmgthtmcssetrxbitmask, wlanmgthtampduparam)' 
-'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', rowprobe)
+'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', rowprobe)
 
 
 
 #This will remove the file after it is added to the db
-		#os.remove(csvfileprobe)
+		os.remove(csvfileprobe)
 		print "done with dbupdate for probe waiting for next run"
 	else:
 		print"csv probe not found will retry"
@@ -291,44 +315,24 @@ wlanmgtvhtmcssetrxmcsmapss4, wlanmgtvhtmcssettxmcsmapss1, wlanmgtvhtmcssettxmcsm
 		
 
 		
-	csvfileap = '/data/tmp/dwcc-ap.csv'
-	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
-	if os.path.isfile(csvfileap) and os.access(csvfileap, os.R_OK):
-		print "ap csv found adding to db"
-		#awk '!seen[$0]++' will dedup without having to sort
-		#sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.,]//g' -e "s/'//g" -e '/^$/d' will special characters
-        #sed -n 's/$/+/' will add a + to end of each line to allow the csp to be imported into the db
-		subprocess.call("""cat /data/tmp/dwcc-ap.csv | awk '!seen[$0]++' | sed -e 's/ /-/g' -e 's/[<>"^()@#&!$.,]//g' -e "s/'//g" -e '/^$/d' | awk 'BEGIN{FS=OFS="+"} NF==4 {$0=$1 OFS $2 $3 OFS $4} {print}' | sed -n 's/$/+/' >> /data/tmp/temp-dwcc-ap.csv """, shell=True)
-		os.remove("/data/tmp/dwcc-ap.csv")
-		os.rename("/data/tmp/temp-dwcc-ap.csv", "/data/tmp/dwcc-ap.csv")
-		csv_dataap = csv.reader(file(csvfileap), delimiter='+')
-		for rowap in csv_dataap:
-			mycursor.execute('INSERT INTO dwccap (wlanradiochannel, wlanmgtssid, wlanbssid)' 'VALUES (?,?,?)', rowap)
 
-
-
-#This will remove the file after it is added to the db
-		#os.remove(csvfileap)
-		print "done with dbupdate for ap waiting for next run"
-	else:
-		print"csv ap not found will retry"
 
 
 	csvheatmap = '/data/tmp/dwcc-heatmap.csv'
 	#this will check for the CSV file, If it is found then import it into the database. If no CSV is found then it move on
 	if os.path.isfile(csvheatmap) and os.access(csvheatmap, os.R_OK):
 		print "heatmap csv found adding to db"
-		subprocess.call("""cat /data/tmp/dwcc-heatmap.csv | awk '!seen[$0]++' | sed -e 's/ //g' -e 's/[<>"^()@#&!$.,]//g' -e "s/'//g" -e '/^$/d' -e 's/[][]//g' -e 's/[-_]//g' -e 's/...$/000/' | sed -n 's/$/++/' >> /data/tmp/temp-dwcc-heatmap.csv """, shell=True)
+		subprocess.call("""cat /data/tmp/dwcc-heatmap.csv | awk '!seen[$0]++' | sed -e 's/ //g' -e 's/[<>"^()@#&!$.,]//g' -e "s/'//g" -e '/^$/d' -e 's/[][]//g' -e 's/[-_]//g' -e 's/...$/000/'  >> /data/tmp/temp-dwcc-heatmap.csv """, shell=True)
 		os.remove("/data/tmp/dwcc-heatmap.csv")
 		os.rename("/data/tmp/temp-dwcc-heatmap.csv", "/data/tmp/dwcc-heatmap.csv")
 		csv_heatmap = csv.reader(file(csvheatmap), delimiter='+')
 		for rowheatmap in csv_heatmap:
-			mycursor.execute('INSERT INTO dwccheatmapincoming (wlansa, wlanbssid, wlanradiosignaldbm, node, timestamp)' 'VALUES (?,?,?,?,?)', rowheatmap)
+			mycursor.execute('INSERT INTO dwccheatmapincoming (wlansa, wlanbssid, wlanradiosignaldbm, node, timestamp)' 'VALUES (%s,%s,%s,%s,%s)', rowheatmap)
 
 
 
 #This will remove the file after it is added to the db
-		#os.remove(csvheatmap)
+		os.remove(csvheatmap)
 		print "done with dbupdate for heatmap waiting for next run"
 	else:
 		print"csv heatmap not found will retry"
