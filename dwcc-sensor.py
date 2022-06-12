@@ -17,30 +17,30 @@ warnings.filterwarnings(action='ignore',module='.*paramiko.*')
 #1 is enabled, 0 is disabled
 interface0enable = '1'
 #Change the below to match your systems wifi interface name
-interface0 = 'wlx00c0ca957c18'
-monitor_enable0  = 'ifconfig ' + interface0 + ' down; iw dev ' + interface0 + ' interface add wlan0mon type monitor; ifconfig wlan0mon down; iw dev wlan0mon set type monitor; ifconfig wlan0mon up'
-monitor_disable0 = 'iw dev wlan0mon del; ifconfig ' + interface0 + ' up'
-change_channel0  = 'iw dev wlan0mon set channel %s'
-channels0 = [1, 6, 11, 48, 64] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
+interface0 = 'wlan1mon'
+monitor_enable0  = 'ifconfig wlan1 down; iw dev wlan1 interface add wlan1mon type monitor; ifconfig wlan1mon down; iw dev wlan1mon set type monitor; ifconfig wlan1mon up'
+monitor_disable0 = 'iw dev wlan1mon del; ifconfig wlan1 up'
+change_channel0  = 'iw dev wlan1mon set channel %s'
+channels0 = [1, 6, 11] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 #channels0 = [1, 6, 11] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 
 #At this more than interface has not been tested
 #1 is enabled, 0 is disabled
-interface1enable = '0'
-interface1 = 'wlan1mon'
-monitor_enable1  = 'ifconfig wlan1 down; iw dev wlan1 interface add wlan1mon type monitor; ifconfig wlan1mon down; iw dev wlan1mon set type monitor; ifconfig wlan1mon up'
-monitor_disable1 = 'iw dev wlan1mon del; ifconfig wlan1 up'
-change_channel1  = 'iw dev wlan1mon set channel %s'
-channels1 = [120, 124, 128, 132, 136, 140, 149, 153, 157, 161, 165] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
+interface1enable = '1'
+interface1 = 'wlan2mon'
+monitor_enable1  = 'ifconfig wlan2 down; iw dev wlan2 interface add wlan2mon type monitor; ifconfig wlan2mon down; iw dev wlan2mon set type monitor; ifconfig wlan2mon up'
+monitor_disable1 = 'iw dev wlan2mon del; ifconfig wlan2 up'
+change_channel1  = 'iw dev wlan2mon set channel %s'
+channels1 = [56, 36, 52, 6] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 
 #At this point only 3 interfaces have been tested
 #1 is enabled, 0 is disabled
-interface2enable = '0'
-interface2 = 'wlan2mon'
-monitor_enable2 = 'ifconfig wlan2 down; iw dev wlan2 interface add wlan2mon type monitor; ifconfig wlan2mon down; iw dev wlan2mon set type monitor; ifconfig wlan2mon up'
-monitor_disable2 = 'iw dev wlan2mon del; ifconfig wlan2 up'
-change_channel2  = 'iw dev wlan2mon set channel %s'
-channels2 = [1, 6, 11] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
+interface2enable = '1'
+interface2 = 'wlan3mon'
+monitor_enable2 = 'ifconfig wlan3 down; iw dev wlan3 interface add wlan3mon type monitor; ifconfig wlan3mon down; iw dev wlan3mon set type monitor; ifconfig wlan3mon up'
+monitor_disable2 = 'iw dev wlan3mon del; ifconfig wlan3 up'
+change_channel2  = 'iw dev wlan3mon set channel %s'
+channels2 = [100, 116, 1, 11] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 
 #1 is enabled, 0 is disabled
 #interface3enable = '1'
@@ -51,7 +51,7 @@ channels2 = [1, 6, 11] #use the linux command "iwlist channel" to get a list of 
 #channels1 = [6, 48, 1, 11, 36, 40, 44, 10 ] #use the linux command "iwlist channel" to get a list of every channel your devices supports)
 
 #info for sftp server
-sshhost = '10.1.0.7'  #can be hostname or ip
+sshhost = '10.1.0.29'  #can be hostname or ip
 sshuser = 'zach'           #make sure that key auth is working
 
 
@@ -73,13 +73,13 @@ def start():
 
 	if interface0enable == '1':
 		os.system(monitor_enable0)
-		logging.info("starting wlan0")
+		logging.info("starting wlan1")
 	if interface1enable == '1':
 		os.system(monitor_enable1)
-		logging.info("starting wlan1")
+		logging.info("starting wlan2")
 	if interface2enable == '1':
 		os.system(monitor_enable2)
-		logging.info("starting wlan2")
+		logging.info("starting wlan3")
 	stop_rotating = rotator()
 	stop_uploading = uploader()
 	try:sniffer()
@@ -122,9 +122,9 @@ def rotator():
 def sniffer():
 	logging.info("sniffer started")
 	commands = [
-   		    'tcpdump -i wlan0mon -G 300 --packet-buffered -W 1 -e -s 1024 type mgt or type ctl -w /tmp/'+ hostname +'-wlan0mon-%Y-%m-%d_%H.%M.%S.pcap && mv /tmp/'+ hostname +'-wlan0mon-* ' + incomingpath + ' ;',
-			'tcpdump -i wlan1mon -G 300 --packet-buffered -W 1 -e -s 1024 type mgt or type ctl -w ' + incomingpath + '' + hostname + '-wlan0mon-%Y-%m-%d_%H.%M.%S.pcap;',
-			'tcpdump -i wlan2mon -G 300 --packet-buffered -W 1 -e -s 1024 type mgt or type ctl -w ' + incomingpath + '' + hostname + '-wlan0mon-%Y-%m-%d_%H.%M.%S.pcap;',
+   		    'tcpdump -i wlan1mon -G 300 --packet-buffered -W 1 -e -s 1024 type mgt or type ctl -w /tmp/'+ hostname +'-wlan1mon-%Y-%m-%d_%H.%M.%S.pcap && mv /tmp/'+ hostname +'-wlan1mon-* ' + incomingpath + ' ;',
+		    'tcpdump -i wlan2mon -G 300 --packet-buffered -W 1 -e -s 1024 type mgt or type ctl -w /tmp/'+ hostname +'-wlan2mon-%Y-%m-%d_%H.%M.%S.pcap && mv /tmp/'+ hostname +'-wlan2mon-* ' + incomingpath + ' ;',
+	  	    'tcpdump -i wlan3mon -G 300 --packet-buffered -W 1 -e -s 1024 type mgt or type ctl -w /tmp/'+ hostname +'-wlan3mon-%Y-%m-%d_%H.%M.%S.pcap && mv /tmp/'+ hostname +'-wlan3mon-* ' + incomingpath + ' ;',
 		]
 # tcpdump -i wlan0mon  -G 600 --packet-buffered -W 300 -e -s 1024 type mgt or type ctl -w - | tee /home/zach/somefile1.pcap | tshark -i -   -T fields -e wlan.sa -e radiotap.dbm_antsignal | awk 'NF==2'
  #run in parallel
